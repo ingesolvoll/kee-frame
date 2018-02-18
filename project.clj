@@ -1,4 +1,4 @@
-(defproject kee-frame "0.1.0"
+(defproject kee-frame "0.1.0-SNAPSHOT"
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojurescript "1.9.946"]
                  [reagent "0.8.0-alpha2"]
