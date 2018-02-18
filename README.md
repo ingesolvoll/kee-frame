@@ -1,4 +1,4 @@
-# re-frain
+# kee-frame
 
 > refrain (verb): Stop oneself from doing something.
 
@@ -9,7 +9,7 @@ Working with re-frame is a very productive and satisfying experience. The minima
 
 I'm very intrigued by the idea of the URL as the "single source of truth". When you are able to recreate the application state by only using the URL, some  
 
-re-frain tries to bring some of these ideas into re-frame, hopefully getting some of the benefits in the process.
+kee-frame tries to bring some of these ideas into re-frame, hopefully getting some of the benefits in the process.
 
 ## Features
 * No changes to the way you use reagent and re-frame
@@ -20,17 +20,17 @@ re-frain tries to bring some of these ideas into re-frame, hopefully getting som
 ## Installation
 Add the following dependency to your `project.clj` file:
 ```
-[re-frain "0.0.1"]
+[kee-frame "0.0.1"]
 ```
 
 ## Getting started
-The `re-frain.core` namespace contains the public API
+The `kee-frame.core` namespace contains the public API
 ```clojure
-(require '[re-frain.core :refer [reg-controller reg-view dispatch-view]])
+(require '[kee-frame.core :refer [reg-controller reg-view dispatch-view]])
 ```
 
 ## Controllers
-re-frain introduces a couple of new concepts in re-frame, but tries to stay close to the original API.
+kee-frame introduces a couple of new concepts in re-frame, but tries to stay close to the original API.
 
 ```clojure      
 (reg-controller :main
@@ -60,7 +60,7 @@ This rules of controller states are stolen entirely from Keechma. They are:
 * When both previous and current are not nil, but different, call `stop`, then `start`.
 
 ## Routes
-Any data-centric router lib is a good fit for re-frain. The Keechma router was chosen because it is simple and because I wanted to promote the high quality libraries of Keechma. The routes are nothing but patterns to be matched agains the URL. Here's an example:
+Any data-centric router lib is a good fit for kee-frame. The Keechma router was chosen because it is simple and because I wanted to promote the high quality libraries of Keechma. The routes are nothing but patterns to be matched agains the URL. Here's an example:
 
 ```clojure
 (def routes ["/todos/:todo-id"
