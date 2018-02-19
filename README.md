@@ -41,7 +41,13 @@ Here's an example, using an example from the bidi docs
 ```
 
 ## Controllers
-kee-frame introduces a couple of new concepts in re-frame, but tries to stay close to the original API.
+A controller is a map with two required keys (`params` and `start`), and one optional (`stop`). 
+
+The `params` function receives the route data on every navigation event from the router. Its only job is to return the part of the route that it's interested in. This value combined with the previous value decides the next state of the controller. I'll come back to that in more detail.
+
+The `start` function takes as parameters the value returned from `params` and the full re-frame context. It should return nil or an event vector to be dispatched.
+
+The `stop` function receives the re-frame context and also returns nil or an event vector.
 
 ```clojure      
 (reg-controller :main
@@ -55,13 +61,14 @@ kee-frame introduces a couple of new concepts in re-frame, but tries to stay clo
                            [:load-todo-from-server todo-id])})
 ```
 
-A controller is a map with two required keys (`params` and `start`), and one optional (`stop`). 
+For `start` and `stop` it's very common to ignore the parameters and just return an event vector, and for that you can use a vector instead of a function:
 
-The `params` function receives the route data on every navigation event from the router. Its only job is to return the part of the route that it's interested in. This value combined with the previous value decides the next state of the controller. I'll come back to that in more detail.
-
-The `start` function takes as parameters the value returned from `params` and the full re-frame context. It should return nil or an event vector to be dispatched.
-
-The `stop` function receives the re-frame context and also returns nil or an event vector.
+```clojure      
+(reg-controller :main
+                {:params (fn [route] (-> route :page (= "todos"))
+                 :start  [:all-todos-poll/start]
+                 :stop   [:all-todos-poll/stop]})
+```
 
 ## Controller state transitions
 This rules of controller states are stolen entirely from Keechma. They are:
