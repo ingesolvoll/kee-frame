@@ -42,18 +42,6 @@
             controllers)
        (into {})))
 
-(defn legacy-nav-handler [path]
-  (if-let [{:keys [handler route-params]} (bidi/match-route @state/routes path)]
-    (let [current-page (-> handler namespace keyword)
-          secondary-page (-> handler name keyword)
-          route {:current-page   current-page
-                 :secondary-page secondary-page
-                 :route-params   route-params}]
-      (rf/dispatch [:route route])
-      (rf/dispatch [:route-changed route]))
-    (do (println "No match found for path " path)
-        (cljs.pprint/pprint @state/routes))))
-
 (defn nav-handler [path]
   (if-let [route (bidi/match-route @state/routes path)]
     (rf/dispatch [:route-changed route])
@@ -67,7 +55,7 @@
     (reset! state/routes routes)
     (when-not initialized?
       (accountant/configure-navigation!
-        {:nav-handler  #(legacy-nav-handler %)
+        {:nav-handler  #(nav-handler %)
          :path-exists? #(boolean (bidi/match-route @state/routes %))}))
     (accountant/dispatch-current!)))
 
