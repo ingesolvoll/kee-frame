@@ -24,7 +24,7 @@ Add the following dependency to your `project.clj` file:
 ## Getting started
 The `kee-frame.core` namespace contains the public API
 ```clojure
-(require '[kee-frame.core :refer [reg-controller reg-view dispatch-view]])
+(require '[kee-frame.core :as kee-frame :refer [reg-controller reg-view dispatch-view]])
 ```
 
 ## Routes
