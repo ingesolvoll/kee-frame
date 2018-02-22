@@ -5,34 +5,40 @@
             [bidi.bidi :as bidi]
             [kee-frame.state :as state]))
 
+(defn url [& params]
+  (apply bidi/path-for @state/routes params))
+
+(defn goto [route & params]
+  (accountant/navigate! (apply url route params)))
+
 (defn process-params [params route]
   (cond
     (vector? params) (get-in route params)
     (ifn? params) (params route)))
 
-(defn do-dispatch [ctx dispatch]
-  (cond
-    (vector? dispatch) (rf/dispatch dispatch)
-    (ifn? dispatch) (some-> ctx dispatch rf/dispatch)))
-
-(defn do-start [id ctx start]
+(defn do-start [id ctx start params]
   (when start
-    (rf/console :log "Starting controller " id)
-    (do-dispatch ctx start)))
+    (rf/console :log "Starting controller " id " with params " params)
+    (cond
+      (vector? start) (rf/dispatch (conj start params))
+      (ifn? start) (when-let [start-dispatch (start ctx params)]
+                     (rf/dispatch start-dispatch)))))
 
 (defn do-stop [id ctx stop]
   (when stop
     (rf/console :log "Stopping controller " id)
-    (do-dispatch ctx stop)))
+    (cond
+      (vector? stop) (rf/dispatch stop)
+      (ifn? stop) (some-> ctx stop rf/dispatch))))
 
 (defn process-controller [id {:keys [last-params params start stop]} ctx route]
   (let [current-params (process-params params route)]
     (match [last-params current-params (= last-params current-params)]
            [_ _ true] nil
-           [nil _ false] (do-start id ctx start)
+           [nil _ false] (do-start id ctx start current-params)
            [_ nil false] (do-stop id ctx stop)
            [_ _ false] (do (do-stop id ctx stop)
-                           (do-start id ctx start)))
+                           (do-start id ctx start current-params)))
     current-params))
 
 (defn apply-route [controllers ctx route]
@@ -59,8 +65,10 @@
          :path-exists? #(boolean (bidi/match-route @state/routes %))}))
     (accountant/dispatch-current!)))
 
-(rf/reg-event-db :route-changed
+(rf/reg-event-fx :route-changed
                  [rf/debug]
                  (fn [{:keys [db] :as ctx} [_ route]]
                    (swap! state/controllers apply-route ctx route)
-                   (assoc db :route route)))
+                   {:db (assoc db :route route)}))
+
+(rf/reg-fx :navigate-to #(apply goto %))

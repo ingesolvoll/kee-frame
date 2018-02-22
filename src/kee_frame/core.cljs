@@ -19,4 +19,6 @@
   (let [route (rf/subscribe [:route])
         component (get @state/components id)]
     (fn [_]
-      [component @route])))
+      (if-not component
+        [:div "Missing view for dispatch point " id]
+        [component @route]))))
