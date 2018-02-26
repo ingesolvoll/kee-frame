@@ -32,7 +32,7 @@ Add the following dependency to your `project.clj` file:
 ```
 
 ## Getting started
-kee-frame can be introduced into your re-frame app without affecting any existing code.
+kee-frame can be introduced into your re-frame app without affecting any existing code. You wire up your views, events and subscriptions as you normally do, and sprinkle a bit of kee-frame on top of that.
 
 The `kee-frame.core` namespace contains the public API
 ```clojure
