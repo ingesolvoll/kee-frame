@@ -1,19 +1,23 @@
 # kee-frame
 
-Micro framework building the core concepts of Keechma on top of Re-frame.
+Micro framework on top of [re-frame](https://github.com/Day8/re-frame). Heavily inspired by ideas from the [Keechma](https://keechma.com/) framework.
 
 ## Rationale
-Working with re-frame is a very productive and satisfying experience. The minimal structure enforced by the framework is very well thought out, everything just fits. However, it does not provide a complete solution for everything a modern SPA needs. Setting up bookmarkable and back-button friendly routes is a challenge, as well as finding a clean way of loading data from the server at the right times. core.async loops for polling the server can be challenging in combination with navigation and figwheel code reloading.
+Working with re-frame is a very productive and satisfying experience. The minimal structure enforced by the framework is very well thought out, everything just fits. However, it does not provide a complete solution for everything a modern SPA needs. I always spend a good chunk of time setting up the missing bits, copy-pasting from previous projects. For me it's routine, for a beginner it's probably frustrating, difficult and time consuming.
 
-I'm very intrigued by the idea of the URL as the "single source of truth". When you are able to recreate the application state by only using the URL, some  
-
-kee-frame tries to bring some of these ideas into re-frame, hopefully getting some major benefits with minimal effort.
+The first version of kee-frame tries to solve this problem, delivering an out-of-the-box solution for routing and data lifecycle.
 
 ## Features
-* Automatic route setup
+* Automatic router configuration
 * URL as the single source of truth
-* Controllers for setup/teardown independent from view rendering.
-* Pluggable dispatch components, for selecting view based on route.
+* Route controllers for data setup and teardown.
+* Figwheel-friendly. No duplicated events, no loops gone wild.
+
+## Benefits of chosen architecture
+* Back/forward and all browser history in general just works
+* Bookmarkable URLs all the way. Same URL, same view.
+* When figwheel reloads the code, you keep your state and stay on the same page.
+* No need for `component-did-mount` to trigger data loading from your view components means stronger decoupling.
 
 ## Installation
 Add the following dependency to your `project.clj` file:
