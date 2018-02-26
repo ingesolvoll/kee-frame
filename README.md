@@ -5,7 +5,7 @@ Micro framework on top of [re-frame](https://github.com/Day8/re-frame). Heavily 
 ## Rationale
 Everyone loves re-frame. Very little boilerplate, just enough structure for your app, intuitive. So what's to improve? Nothing really. It does what it does perfectly well, I wouldn't want to change a thing. But it still has the same weakness as every focused Clojure lib out there:
 
-* There are missing parts. Important parts.
+* It's not a complete solution. There are missing parts. Important parts.
 * The other parts are also small focused libs.
 
 To me, the most obvious parts missing are routing and a higher level approach to data loading. Users, particularly beginners, don't need the abundance of options in client side routing, they need a setup that just works. And they need clean and simple solutions to common patterns in SPAs. Solutions that don't involve `component-did-mount` and other low level constructs. kee-frame provides a tiny bit of architecture, and some library glue to get you started quickly.
@@ -22,27 +22,29 @@ To me, the most obvious parts missing are routing and a higher level approach to
 * When figwheel reloads the code, you keep your state and stay on the same page.
 * No need for `component-did-mount` to trigger data loading from your view components means stronger decoupling.
 
+## Demo application
+I made an [example app](https://github.com/ingesolvoll/kee-frame-sample) for displaying soccer results, using data from https://www.football-data.org/. Clone it and use figwheel to play around with it! I might deploy it to heroku in the future.
+
 ## Installation
 Add the following dependency to your `project.clj` file:
 ```
-[kee-frame "0.1.0-SNAPSHOT"]
+[kee-frame "0.0.1-SNAPSHOT"]
 ```
 
 ## Getting started
+kee-frame can be introduced into your re-frame app without affecting any existing code.
+
 The `kee-frame.core` namespace contains the public API
 ```clojure
-(require '[kee-frame.core :as kee-frame :refer [reg-controller reg-view dispatch-view]])
+(require '[kee-frame.core :as kee-frame :refer [reg-controller]])
 ```
 
 ## Routes
-Any data-centric router lib is a good fit for kee-frame. Bidi was chosen as the default format to use, support for additional routing lbs might come in the near future.
-
-Here's an example, using an example from the bidi docs
+Any data-centric router lib is a good fit for kee-frame, [bidi](https://github.com/juxt/bidi) was chosen out of familiarity.
 
 ```clojure
-(def my-routes ["/" {"" :index
-                     "/" {"todos" :todos
-                          ":id" :article}}])
+(def my-routes ["" {"/"                       :index
+                    ["/league/" :id "/" :tab] :league}])
 
 (kee-frame/start! my-routes)
 ```
