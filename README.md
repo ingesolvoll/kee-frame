@@ -3,15 +3,18 @@
 Micro framework on top of [re-frame](https://github.com/Day8/re-frame). Heavily inspired by ideas from the [Keechma](https://keechma.com/) framework.
 
 ## Rationale
-Working with re-frame is a very productive and satisfying experience. The minimal structure enforced by the framework is very well thought out, everything just fits. However, it does not provide a complete solution for everything a modern SPA needs. I always spend a good chunk of time setting up the missing bits, copy-pasting from previous projects. For me it's routine, for a beginner it's probably frustrating, difficult and time consuming.
+Everyone loves re-frame. Very little boilerplate, just enough structure for your app, intuitive. So what's to improve? Nothing really. It does what it does perfectly well, I wouldn't want to change a thing. But it still has the same weakness as every focused Clojure lib out there:
 
-The first version of kee-frame tries to solve this problem, delivering an out-of-the-box solution for routing and data lifecycle.
+* There are missing parts. Important parts.
+* The other parts are also small focused libs.
+
+To me, the most obvious parts missing are routing and a higher level approach to data loading. Users, particularly beginners, don't need the abundance of options in client side routing, they need a setup that just works. And they need clean and simple solutions to common patterns in SPAs. Solutions that don't involve `component-did-mount` and other low level constructs. kee-frame provides a tiny bit of architecture, and some library glue to get you started quickly.
 
 ## Features
 * Automatic router configuration
 * URL as the single source of truth
 * Route controllers for data setup and teardown.
-* Figwheel-friendly. No duplicated events, no loops gone wild.
+* Figwheel-friendly.
 
 ## Benefits of chosen architecture
 * Back/forward and all browser history in general just works
