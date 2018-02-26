@@ -50,7 +50,7 @@
 
 (defn nav-handler [path]
   (if-let [route (bidi/match-route @state/routes path)]
-    (rf/dispatch [:route-changed route])
+    (rf/dispatch [::route-changed route])
     (do (rf/console :group "No route match found")
         (rf/console :error "No match found for path " path)
         (rf/console :log "Available routes: " @state/routes)
@@ -65,7 +65,7 @@
          :path-exists? #(boolean (bidi/match-route @state/routes %))}))
     (accountant/dispatch-current!)))
 
-(rf/reg-event-fx :route-changed
+(rf/reg-event-fx ::route-changed
                  [rf/debug]
                  (fn [{:keys [db] :as ctx} [_ route]]
                    (swap! state/controllers apply-route ctx route)
