@@ -1,4 +1,8 @@
 (defproject kee-frame "0.0.1-SNAPSHOT"
+  :description "A micro-framework on top of re-frame"
+  :license {:name "Eclipse Public License"
+            :url  "http://www.eclipse.org/legal/epl-v10.html"}
+  :url "https://github.com/ingesolvoll/kee-frame"
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojurescript "1.9.946"]
                  [reagent "0.8.0-alpha2"]
