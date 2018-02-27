@@ -8,7 +8,6 @@
                  [reagent "0.8.0-alpha2"]
                  [re-frame "0.10.3-alpha1" :exclusions [reagent]]
                  [bidi "2.0.16"]
-                 [keechma/router "0.1.0"]
                  [venantius/accountant "0.1.9"]
                  [org.clojure/core.match "0.3.0-alpha5"]]
 
