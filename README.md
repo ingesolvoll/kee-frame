@@ -1,41 +1,50 @@
 # kee-frame
 
-Micro framework building the core concepts of Keechma on top of Re-frame.
+Micro framework on top of [re-frame](https://github.com/Day8/re-frame). Heavily inspired by ideas from the [Keechma](https://keechma.com/) framework.
 
 ## Rationale
-Working with re-frame is a very productive and satisfying experience. The minimal structure enforced by the framework is very well thought out, everything just fits. However, it does not provide a complete solution for everything a modern SPA needs. Setting up bookmarkable and back-button friendly routes is a challenge, as well as finding a clean way of loading data from the server at the right times. core.async loops for polling the server can be challenging in combination with navigation and figwheel code reloading.
+Everyone loves re-frame. Very little boilerplate, just enough structure for your app, intuitive. So what's to improve? Nothing really. It does what it does perfectly well, I wouldn't want to change a thing. But it still has the same weakness as every focused Clojure lib out there:
 
-I'm very intrigued by the idea of the URL as the "single source of truth". When you are able to recreate the application state by only using the URL, some  
+* It's not a complete solution. There are missing parts. Important parts.
+* The other parts are also small focused libs.
 
-kee-frame tries to bring some of these ideas into re-frame, hopefully getting some major benefits with minimal effort.
+To me, the most obvious parts missing are routing and a higher level approach to data loading. Users, particularly beginners, don't need the abundance of options in client side routing, they need a setup that just works. And they need clean and simple solutions to common patterns in SPAs. Solutions that don't involve `component-did-mount` and other low level constructs. kee-frame provides a tiny bit of architecture, and some library glue to get you started quickly.
 
 ## Features
-* Automatic route setup
+* Automatic router configuration
 * URL as the single source of truth
-* Controllers for setup/teardown independent from view rendering.
-* Pluggable dispatch components, for selecting view based on route.
+* Route controllers for data setup and teardown.
+* Figwheel-friendly.
+
+## Benefits of chosen architecture
+* Back/forward and all browser history in general just works
+* Bookmarkable URLs all the way. Same URL, same view.
+* When figwheel reloads the code, you keep your state and stay on the same page.
+* No need for `component-did-mount` to trigger data loading from your view components means stronger decoupling.
+
+## Demo application
+I made an [example app](https://github.com/ingesolvoll/kee-frame-sample) for displaying soccer results, using data from https://www.football-data.org/. Clone it and use figwheel to play around with it! I might deploy it to heroku in the future.
 
 ## Installation
 Add the following dependency to your `project.clj` file:
 ```
-[kee-frame "0.1.0-SNAPSHOT"]
+[kee-frame "0.0.1-SNAPSHOT"]
 ```
 
 ## Getting started
+kee-frame can be introduced into your re-frame app without affecting any existing code. You wire up your views, events and subscriptions as you normally do, and sprinkle a bit of kee-frame on top of that.
+
 The `kee-frame.core` namespace contains the public API
 ```clojure
-(require '[kee-frame.core :as kee-frame :refer [reg-controller reg-view dispatch-view]])
+(require '[kee-frame.core :as kee-frame :refer [reg-controller]])
 ```
 
 ## Routes
-Any data-centric router lib is a good fit for kee-frame. Bidi was chosen as the default format to use, support for additional routing lbs might come in the near future.
-
-Here's an example, using an example from the bidi docs
+Any data-centric router lib is a good fit for kee-frame, [bidi](https://github.com/juxt/bidi) was chosen out of familiarity.
 
 ```clojure
-(def my-routes ["/" {"" :index
-                     "/" {"todos" :todos
-                          ":id" :article}}])
+(def my-routes ["" {"/"                       :index
+                    ["/league/" :id "/" :tab] :league}])
 
 (kee-frame/start! my-routes)
 ```
