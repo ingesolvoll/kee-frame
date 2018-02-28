@@ -11,7 +11,6 @@
                  [venantius/accountant "0.1.9"]
                  [org.clojure/core.match "0.3.0-alpha5"]]
 
-  :deploy-repositories [["releases" {:sign-releases false :url "https://clojars.org/repo"}]
-                        ["snapshots" {:sign-releases false :url "https://clojars.org/repo"}]]
+  :deploy-repositories [["clojars" {:sign-releases false :url "https://clojars.org/repo"}]]
 
   :source-paths ["src"])
