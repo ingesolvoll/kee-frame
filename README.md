@@ -23,7 +23,13 @@ To me, the most obvious parts missing are routing and a higher level approach to
 * No need for `component-did-mount` to trigger data loading from your view components means stronger decoupling.
 
 ## Demo application
-I made an [example app](https://github.com/ingesolvoll/kee-frame-sample) for displaying soccer results, using data from https://www.football-data.org/. Clone it and use figwheel to play around with it! I might deploy it to heroku in the future.
+I made an example app that shows historical and real-time soccer results. I believe it shows very well the strengths of the framework.
+
+[Online demo app](http://kee-frame-sample.herokuapp.com/) 
+
+[Demo app source](https://github.com/ingesolvoll/kee-frame-sample)
+
+Feel free to clone the demo app and do some figwheelin' with it!
 
 ## Installation
 Add the following dependency to your `project.clj` file:
