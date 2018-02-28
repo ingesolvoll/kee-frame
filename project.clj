@@ -1,4 +1,4 @@
-(defproject kee-frame "0.0.1"
+(defproject kee-frame "0.0.1-SNAPSHOT"
   :description "A micro-framework on top of re-frame"
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
@@ -10,5 +10,17 @@
                  [bidi "2.0.16"]
                  [venantius/accountant "0.1.9"]
                  [org.clojure/core.match "0.3.0-alpha5"]]
+
+  :deploy-repositories [["releases" {:sign-releases false :url "https://clojars.org/repo"}]
+                        ["snapshots" {:sign-releases false :url "https://clojars.org/repo"}]]
+
+  :release-tasks [["vcs" "assert-committed"]
+                  ["change" "version" "leiningen.release/bump-version" "release"]
+                  ["vcs" "commit"]
+                  ["vcs" "tag" "v" "--no-sign"]
+                  ["deploy"]
+                  ["change" "version" "leiningen.release/bump-version"]
+                  ["vcs" "commit"]
+                  ["vcs" "push"]]
 
   :source-paths ["src"])
