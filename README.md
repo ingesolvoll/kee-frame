@@ -34,7 +34,7 @@ Feel free to clone the demo app and do some figwheelin' with it!
 ## Installation
 Add the following dependency to your `project.clj` file:
 ```
-[kee-frame "0.0.1-SNAPSHOT"]
+[kee-frame "0.1.0"]
 ```
 
 ## Getting started
