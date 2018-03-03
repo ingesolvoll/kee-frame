@@ -11,14 +11,3 @@
 
 (defn reg-controller [id controller]
   (swap! state/controllers assoc id controller))
-
-(defn reg-view [id component]
-  (swap! state/components assoc id component))
-
-(defn dispatch-view [id]
-  (let [route (rf/subscribe [:route])
-        component (get @state/components id)]
-    (fn [_]
-      (if-not component
-        [:div "Missing view for dispatch point " id]
-        [component @route]))))
