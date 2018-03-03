@@ -63,7 +63,9 @@
     `(fn [~db [_# & ~params]] ~(rewrite-db-handler ctx db params nil data))))
 
 (defn make-step [id counter [type data]]
-  (let [event-id (step-id id counter)
+  (let [event-id (if (= 0 counter)
+                   id
+                   (step-id id counter))
         next-id (step-id id (inc counter))]
     (case type
       :db `(do (rf/console :log "Adding chain step DB handler " ~event-id)
