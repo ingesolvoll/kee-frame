@@ -36,7 +36,7 @@
 
 (defn rewrite-fx-handler [ctx db params next-id data]
   (->> data
-       (walk-placeholders ctx db params next-id)))
+       (walk-placeholders ctx db  params next-id)))
 
 
 (defn pointer->assoc [pointer]
@@ -76,7 +76,7 @@
                     (rf/reg-event-fx ~event-id (fn []))))))
 
 
-(defmacro reg-event-chain [id & steps]
+(defmacro reg-chain [id & steps]
   (loop [step (first steps)
          next-steps (next steps)
          instructions []
