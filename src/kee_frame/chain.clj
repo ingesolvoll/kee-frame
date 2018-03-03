@@ -19,7 +19,10 @@
 (defn db? [x]
   (is? x :kee-frame.core/db))
 
-(defn walk-placeholders [ctx db params data]
+(defn next? [x]
+  (= x :kee-frame.core/next))
+
+(defn walk-placeholders [ctx db params next-id data]
   (walk/postwalk
     (fn [x]
       (cond (param? x) `(nth ~params ~(second x))
@@ -27,12 +30,13 @@
                        `(get-in ~ctx ~path))
             (db? x) (let [path (vec (next x))]
                       `(get-in ~db ~path))
+            (and next-id (next? x)) next-id
             :pass-through x))
     data))
 
-(defn rewrite-fx-handler [ctx db params data]
+(defn rewrite-fx-handler [ctx db params next-id data]
   (->> data
-       (walk-placeholders ctx db params)))
+       (walk-placeholders ctx db params next-id)))
 
 
 (defn pointer->assoc [pointer]
@@ -40,9 +44,9 @@
         value (last pointer)]
     `(assoc-in ~path ~value)))
 
-(defn rewrite-db-handler [ctx db params data]
+(defn rewrite-db-handler [ctx db params next-id data]
   (->> data
-       (walk-placeholders ctx db params)
+       (walk-placeholders ctx db params next-id)
        (map pointer->assoc)
        (concat `(-> ~db))))
 
@@ -50,13 +54,13 @@
   (let [ctx (gensym "ctx")
         db (gensym "db")
         params (gensym "params")]
-    `(fn [{:keys [~db] :as ~ctx} [_# & ~params]] ~(rewrite-fx-handler ctx db params data))))
+    `(fn [{:keys [~db] :as ~ctx} [_# & ~params]] ~(rewrite-fx-handler ctx db params next-id data))))
 
 (defn make-db-event [data]
   (let [ctx (gensym "ctx")
         db (gensym "db")
         params (gensym "params")]
-    `(fn [~db [_# & ~params]] ~(rewrite-db-handler ctx db params data))))
+    `(fn [~db [_# & ~params]] ~(rewrite-db-handler ctx db params nil data))))
 
 (defn make-step [id counter [type data]]
   (let [event-id (step-id id counter)
