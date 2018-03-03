@@ -6,38 +6,62 @@
   (keyword
     (str (namespace namespaced-keyword) "/" (name namespaced-keyword) "-" counter)))
 
-(defn param? [x]
+(defn is? [x k]
   (and (vector? x)
-       (= :kee-frame.core/params (first x))))
+       (= k (first x))))
 
-(defn rewrite-db-handler [data db params]
+(defn param? [x]
+  (is? x :kee-frame.core/params))
+
+(defn ctx? [x]
+  (is? x :kee-frame.core/ctx))
+
+(defn db? [x]
+  (is? x :kee-frame.core/db))
+
+(defn walk-placeholders [ctx db params data]
+  (walk/postwalk
+    (fn [x]
+      (cond (param? x) `(nth ~params ~(second x))
+            (ctx? x) (let [path (vec (next x))]
+                       `(get-in ~ctx ~path))
+            (db? x) (let [path (vec (next x))]
+                      `(get-in ~db ~path))
+            :pass-through x))
+    data))
+
+(defn rewrite-fx-handler [ctx db params data]
   (->> data
-       (walk/postwalk
-         (fn [x]
-           (if (param? x)
-             `(nth ~params ~(second x))
-             x)))
-       (map (fn [pointer]
-              (let [path (vec (butlast pointer))
-                    value (last pointer)]
-                `(assoc-in ~path ~value))))
+       (walk-placeholders ctx db params)))
+
+
+(defn pointer->assoc [pointer]
+  (let [path (vec (butlast pointer))
+        value (last pointer)]
+    `(assoc-in ~path ~value)))
+
+(defn rewrite-db-handler [ctx db params data]
+  (->> data
+       (walk-placeholders ctx db params)
+       (map pointer->assoc)
        (concat `(-> ~db))))
 
 (defn make-fx-event [data next-id]
-  (let [db (gensym "db")
+  (let [ctx (gensym "ctx")
+        db (gensym "db")
         params (gensym "params")]
-    `(fn [{:keys [~db]} [_# & ~params]] {:dispatch [~next-id]})))
+    `(fn [{:keys [~db] :as ~ctx} [_# & ~params]] ~(rewrite-fx-handler ctx db params data))))
 
 (defn make-db-event [data]
-  (let [db (gensym "db")
+  (let [ctx (gensym "ctx")
+        db (gensym "db")
         params (gensym "params")]
-    `(fn [~db [_# & ~params]] ~(rewrite-db-handler data db params))))
+    `(fn [~db [_# & ~params]] ~(rewrite-db-handler ctx db params data))))
 
 (defn make-step [id counter [type data]]
   (let [event-id (step-id id counter)
         next-id (step-id id (inc counter))]
     (case type
-
       :db `(do (rf/console :log "Adding chain step DB handler " ~event-id)
                (rf/reg-event-db ~event-id [rf/debug] ~(make-db-event data)))
       :fx `(do (rf/console :log "Adding chain step FX handler " ~event-id)
