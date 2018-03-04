@@ -46,8 +46,16 @@
                          (map pointer->assoc)
                          (concat `(-> ~db)))))
 
+(defn update-http [next-id data]
+  (if-not (get-in data [:http-xhrio :on-success])
+    (if next-id
+      (update data :http-xhrio assoc :on-success [:kee-frame.core/next])
+      (throw (ex-info "HTTP success needs a next step in chain" {:got :nothing})))
+    data))
+
 (defn rewrite-fx-handler [ctx db params {:keys [data next-id]}]
   (cond->> data
+           (:http-xhrio data) (update-http next-id)
            true (walk-placeholders ctx db params next-id)
            (:db data) (update-db db)))
 
