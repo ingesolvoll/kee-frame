@@ -59,7 +59,9 @@
   (let [ctx (gensym "ctx")
         db (gensym "db")
         params (gensym "params")]
-    `(fn [{:keys [~db] :as ~ctx} [_# & ~params]] ~(rewrite-fx-handler ctx db params next-id data))))
+    `(fn [~ctx [_# & ~params]]
+       (let [~db (:db ~ctx)]
+         ~(rewrite-fx-handler ctx db params next-id data)))))
 
 (defn make-db-event [data]
   (let [ctx (gensym "ctx")
