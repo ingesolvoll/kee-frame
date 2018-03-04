@@ -72,3 +72,5 @@
                    {:db (assoc db :route route)}))
 
 (rf/reg-fx :navigate-to #(apply goto %))
+
+(rf/reg-sub :route :route)
