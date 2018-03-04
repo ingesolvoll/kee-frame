@@ -2,9 +2,11 @@
   (:require [re-frame.core :as rf]
             [clojure.walk :as walk]))
 
-(defn step-id [namespaced-keyword counter]
-  (keyword
-    (str (namespace namespaced-keyword) "/" (name namespaced-keyword) "-" counter)))
+(defn step-id [event-id counter]
+  (if (= 0 counter)
+    event-id
+    (keyword
+      (str (namespace event-id) "/" (name event-id) "-" counter))))
 
 (defn is? [x k]
   (and (vector? x)
@@ -44,50 +46,54 @@
                          (map pointer->assoc)
                          (concat `(-> ~db)))))
 
-(defn rewrite-fx-handler [ctx db params next-id data]
+(defn rewrite-fx-handler [ctx db params {:keys [data next-id]}]
   (cond->> data
            true (walk-placeholders ctx db params next-id)
            (:db data) (update-db db)))
 
-(defn rewrite-db-handler [ctx db params next-id data]
+(defn rewrite-db-handler [ctx db params data]
   (->> data
-       (walk-placeholders ctx db params next-id)
+       (walk-placeholders ctx db params nil)
        (map pointer->assoc)
        (concat `(-> ~db))))
 
-(defn make-fx-event [data next-id]
+(defn make-fx-event [step]
   (let [ctx (gensym "ctx")
         db (gensym "db")
         params (gensym "params")]
     `(fn [~ctx [_# & ~params]]
        (let [~db (:db ~ctx)]
-         ~(rewrite-fx-handler ctx db params next-id data)))))
+         ~(rewrite-fx-handler ctx db params step)))))
 
 (defn make-db-event [data]
   (let [ctx (gensym "ctx")
         db (gensym "db")
         params (gensym "params")]
-    `(fn [~db [_# & ~params]] ~(rewrite-db-handler ctx db params nil data))))
+    `(fn [~db [_# & ~params]] ~(rewrite-db-handler ctx db params data))))
 
-(defn make-step [id counter [type data]]
-  (let [event-id (if (= 0 counter)
-                   id
-                   (step-id id counter))
-        next-id (step-id id (inc counter))]
-    (case type
-      :db `(do (rf/console :log "Adding chain step DB handler " ~event-id)
-               (rf/reg-event-db ~event-id [rf/debug] ~(make-db-event data)))
-      :fx `(do (rf/console :log "Adding chain step FX handler " ~event-id)
-               (rf/reg-event-fx ~event-id [rf/debug] ~(make-fx-event data next-id))) ;; TODO Add failure id as param
-      :failure `(do (rf/console :log "Adding chain step failure handler " ~event-id)
-                    (rf/reg-event-fx ~event-id (fn []))))))
+(defn make-step [{:keys [id type data]
+                  :as   step}]
+  (case type
+    :db `(do (rf/console :log "Adding chain step DB handler " ~id)
+             (rf/reg-event-db ~id [rf/debug] ~(make-db-event data)))
+    :fx `(do (rf/console :log "Adding chain step FX handler " ~id)
+             (rf/reg-event-fx ~id [rf/debug] ~(make-fx-event step))) ;; TODO Add failure id as param
+    :failure `(do (rf/console :log "Adding chain step failure handler " ~id)
+                  (rf/reg-event-fx ~id (fn [])))))
 
 (defmacro reg-chain [id & steps]
   (loop [step (first steps)
          next-steps (next steps)
          instructions []
          counter 0]
-    (let [instructions (conj instructions (make-step id counter step))]
+    (let [[type data] step
+          next-id (when next-steps (step-id id (inc counter)))
+          instruction (make-step {:id      (step-id id counter)
+                                  :counter counter
+                                  :type    type
+                                  :data    data
+                                  :next-id next-id})
+          instructions (conj instructions instruction)]
       (if-not next-steps
         `(do ~@instructions)
         (recur (first next-steps)
