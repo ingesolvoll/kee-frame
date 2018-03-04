@@ -69,8 +69,8 @@
                  [rf/debug]
                  (fn [{:keys [db] :as ctx} [_ route]]
                    (swap! state/controllers apply-route ctx route)
-                   {:db (assoc db :route route)}))
+                   {:db (assoc db :kee-frame/route route)}))
 
 (rf/reg-fx :navigate-to #(apply goto %))
 
-(rf/reg-sub :route :route)
+(rf/reg-sub :kee-frame/route :kee-frame/route)
