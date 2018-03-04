@@ -34,15 +34,20 @@
             :pass-through x))
     data))
 
-(defn rewrite-fx-handler [ctx db params next-id data]
-  (->> data
-       (walk-placeholders ctx db  params next-id)))
-
-
 (defn pointer->assoc [pointer]
   (let [path (vec (butlast pointer))
         value (last pointer)]
     `(assoc-in ~path ~value)))
+
+(defn update-db [db data]
+  (update data :db #(->> %
+                         (map pointer->assoc)
+                         (concat `(-> ~db)))))
+
+(defn rewrite-fx-handler [ctx db params next-id data]
+  (cond->> data
+           true (walk-placeholders ctx db params next-id)
+           (:db data) (update-db db)))
 
 (defn rewrite-db-handler [ctx db params next-id data]
   (->> data
@@ -74,7 +79,6 @@
                (rf/reg-event-fx ~event-id [rf/debug] ~(make-fx-event data next-id))) ;; TODO Add failure id as param
       :failure `(do (rf/console :log "Adding chain step failure handler " ~event-id)
                     (rf/reg-event-fx ~event-id (fn []))))))
-
 
 (defmacro reg-chain [id & steps]
   (loop [step (first steps)
