@@ -79,15 +79,21 @@
         params (gensym "params")]
     `(fn [~db [_# & ~params]] ~(rewrite-db-handler ctx db params data))))
 
+(defn make-assoc-in-event [data]
+  `(fn [db# [_# response#]] (assoc-in db# ~data response#)))
+
 (defn make-step [{:keys [id type data]
                   :as   step}]
   (case type
+    :assoc-in `(do (rf/console :log "Adding chain step INTO DB handler " ~id)
+                   (rf/reg-event-db ~id [rf/debug] ~(make-assoc-in-event data)))
     :db `(do (rf/console :log "Adding chain step DB handler " ~id)
              (rf/reg-event-db ~id [rf/debug] ~(make-db-event data)))
     :fx `(do (rf/console :log "Adding chain step FX handler " ~id)
              (rf/reg-event-fx ~id [rf/debug] ~(make-fx-event step))) ;; TODO Add failure id as param
     :failure `(do (rf/console :log "Adding chain step failure handler " ~id)
-                  (rf/reg-event-fx ~id (fn [])))))
+                  (rf/reg-event-fx ~id (fn [])))
+    (throw (ex-info (str "Unknown event type " type) {}))))
 
 (defmacro reg-chain [id & steps]
   (loop [step (first steps)
