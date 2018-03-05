@@ -1,9 +1,11 @@
 # kee-frame
 
-Micro framework on top of [re-frame](https://github.com/Day8/re-frame). Heavily inspired by ideas from the [Keechma](https://keechma.com/) framework.
+Micro framework on top of [re-frame](https://github.com/Day8/re-frame). Inspired by ideas from the [Keechma](https://keechma.com/) framework.
 
 ## Rationale
-Everyone loves re-frame. Very little boilerplate, just enough structure for your app, intuitive. So what's to improve? Nothing really. It does what it does perfectly well, I wouldn't want to change a thing. But it still has the same weakness as every focused Clojure lib out there:
+I love re-frame. Compared to 
+
+Everyone loves re-frame. Very little boilerplate, just enough structure for your app. So what's to improve? Nothing really. It does what it does perfectly well. But it still has the same weakness as every focused Clojure lib out there:
 
 * It's not a complete solution. There are missing parts. Important parts.
 * The other parts are also small focused libs.
@@ -14,6 +16,7 @@ To me, the most obvious parts missing are routing and a higher level approach to
 * Automatic router configuration
 * URL as the single source of truth
 * Route controllers for data setup and teardown.
+* Chained event handlers with shorthand syntax
 * Figwheel-friendly.
 
 ## Benefits of chosen architecture
