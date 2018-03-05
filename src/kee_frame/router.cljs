@@ -1,6 +1,7 @@
 (ns kee-frame.router
   (:require [re-frame.core :as rf]
             [kee-frame.state :as state]
+            [kee-frame.controller :as controller]
             [accountant.core :as accountant]
             [bidi.bidi :as bidi]))
 

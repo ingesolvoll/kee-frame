@@ -39,6 +39,5 @@
 (defn apply-route [controllers ctx route]
   (->> controllers
        (map (fn [[id controller]]
-              [id (assoc controller :last-params (process-controller id controller ctx route))])
-            controllers)
+              [id (assoc controller :last-params (process-controller id controller ctx route))]))
        (into {})))
