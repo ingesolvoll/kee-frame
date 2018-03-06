@@ -10,7 +10,8 @@
                  [venantius/accountant "0.1.9"]
                  [org.clojure/core.match "0.3.0-alpha5"]]
 
-  :plugins [[com.jakemccrary/lein-test-refresh "0.20.0"]]
+  :plugins [[com.jakemccrary/lein-test-refresh "0.20.0"]
+            [venantius/ultra "0.5.2"]]
   :deploy-repositories [["clojars" {:sign-releases false :url "https://clojars.org/repo"}]]
 
   :source-paths ["src"])
