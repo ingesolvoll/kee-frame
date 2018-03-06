@@ -1,1 +1,5 @@
 language: clojure
+
+cache:
+  directories:
+  - $HOME/.m2
