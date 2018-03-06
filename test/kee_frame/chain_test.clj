@@ -22,4 +22,10 @@
   (testing "HTTP without next in chain throws"
     (is (thrown? ExceptionInfo
                  (chain/make-fx-event {:data {:http-xhrio {:method :get
-                                                           :uri    "site.com"}}})))))
+                                                           :uri    "site.com"}}}))))
+  (testing "Automatically inserted next"
+    (let [handler (eval (chain/make-fx-event {:next-id :next/step
+                                              :data    {:http-xhrio {:method :get
+                                                                     :uri    "site.com"}}}))
+          effect (handler {:db {}} [:event "noop"])]
+      (is (= [:next/step] (-> effect :http-xhrio :on-success))))))
