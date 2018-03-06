@@ -23,4 +23,14 @@
             (c/apply-route {} {:handler :some-page})
             (c/apply-route {} {:handler :other-page})
             (c/apply-route {} {:handler :third-page}))
-        (is (= [[:start/even true]] @events))))))
+        (is (= [[:start/event true]] @events))))))
+
+(deftest fn-syntax
+  (testing "Can start and stop"
+    (let [events (atom [])]
+      (with-redefs [rf/dispatch #(swap! events conj %)]
+        (-> {:my-controller {:params (constantly true)
+                             :start  (fn [ctx params]
+                                       [:start/event])}}
+            (c/apply-route {} {:handler :some-page}))
+        (is (= [[:start/event]] @events))))))
