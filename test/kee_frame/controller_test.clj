@@ -23,4 +23,4 @@
             (c/apply-route {} {:handler :some-page})
             (c/apply-route {} {:handler :other-page})
             (c/apply-route {} {:handler :third-page}))
-        (is (= [[:start/event true]] @events))))))
+        (is (= [[:start/even true]] @events))))))
