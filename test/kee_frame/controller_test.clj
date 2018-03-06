@@ -10,8 +10,8 @@
 (deftest hey
   (let [events (atom [])]
     (with-redefs [rf/dispatch #(swap! events conj %)]
-      (let [controllers-after-first-route (c/apply-route controllers {} {:handler :some-page})]
-        (is (= [[:start/event true]] @events))
-        (c/apply-route controllers-after-first-route {} {:handler :other-page})
-        (is (= [[:start/event true]
-                [:stop/event]] @events))))))
+      (-> controllers
+          (c/apply-route {} {:handler :some-page})
+          (c/apply-route {} {:handler :other-page}))
+      (is (= [[:start/event true]
+              [:stop/event]] @events)))))
