@@ -19,9 +19,12 @@
         (rf/console :log "Available routes: " @state/routes)
         (rf/console :groupEnd))))
 
-(defn start! [routes]
+(rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
+
+(defn start! [routes initial-db]
   (let [initialized? (boolean @state/routes)]
     (reset! state/routes routes)
+    (rf/dispatch-sync [:init initial-db])
     (when-not initialized?
       (accountant/configure-navigation!
         {:nav-handler  #(nav-handler %)
