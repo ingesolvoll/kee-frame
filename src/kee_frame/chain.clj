@@ -27,7 +27,10 @@
 (defn walk-placeholders [ctx db params next-id data]
   (walk/postwalk
     (fn [x]
-      (cond (param? x) `(nth ~params ~(second x))
+      (cond (param? x) (let [[_ index updater] x]
+                         (if updater
+                           `(~updater (nth ~params ~index))
+                           `(nth ~params ~index)))
             (ctx? x) (let [path (vec (next x))]
                        `(get-in ~ctx ~path))
             (db? x) (let [path (vec (next x))]

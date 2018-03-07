@@ -1,6 +1,7 @@
 (ns kee-frame.chain-test
   (:require [clojure.test :refer :all]
-            [kee-frame.chain :as chain])
+            [kee-frame.chain :as chain]
+            [clojure.string :as str])
   (:import (clojure.lang ExceptionInfo)))
 
 (deftest can-translate-instruction-to-event-function
@@ -13,11 +14,12 @@
 
 (deftest fx-event
   (testing "DB as side effect in FX handler"
-    (let [handler (eval (chain/make-fx-event {:data {:db [[:property :x]
-                                                          [:property2 [:kee-frame.core/params 0]]]}}))
+    (let [handler (eval (chain/make-fx-event {:data `{:db [[:property [:kee-frame.core/params 0]]
+                                                           [:property-transformed [:kee-frame.core/params 0 str/capitalize]]]}}))
           effect (handler {:db {}} [:event "badaboom"])]
-      (is (= effect {:db {:property  :x
-                          :property2 "badaboom"}}))))
+      (is (= {:db {:property             "badaboom"
+                   :property-transformed "Badaboom"}}
+             effect))))
 
   (testing "HTTP without next in chain throws"
     (is (thrown? ExceptionInfo
