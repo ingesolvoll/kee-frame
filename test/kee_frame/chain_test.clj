@@ -27,5 +27,5 @@
     (let [handler (eval (chain/make-fx-event {:next-id :next/step
                                               :data    {:http-xhrio {:method :get
                                                                      :uri    "site.com"}}}))
-          effect (handler {:db {}} [:event "noop"])]
+          effect (handler {:db {}} [:some-event])]
       (is (= [:next/step] (-> effect :http-xhrio :on-success))))))
