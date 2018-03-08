@@ -25,9 +25,15 @@
     (is (thrown? ExceptionInfo
                  (chain/make-fx-event {:data {:http-xhrio {:method :get
                                                            :uri    "site.com"}}}))))
-  (testing "Automatically inserted next"
+  (testing "Automatically inserted next on HTTP"
     (let [handler (eval (chain/make-fx-event {:next-id :next/step
                                               :data    {:http-xhrio {:method :get
                                                                      :uri    "site.com"}}}))
           effect (handler {:db {}} [:some-event])]
-      (is (= [:next/step] (-> effect :http-xhrio :on-success))))))
+      (is (= [:next/step] (-> effect :http-xhrio :on-success)))))
+
+  (testing "Automatically inserted next on dispatch"
+    (let [handler (eval (chain/make-fx-event {:next-id :next/step
+                                              :data    {:db {:something "something"}}}))
+          effect (handler {:db {}} [:some-event])]
+      (is (= [:next/step] (-> effect :dispatch))))))

@@ -56,11 +56,27 @@
       (throw (ex-info "HTTP success needs a next step in chain" {:got :nothing})))
     data))
 
+(defn insert-dispatch [next-id {:keys [http-xhrio dispatch] :as data}]
+  (let [skip? (or http-xhrio dispatch)]
+    (cond
+      skip? data
+      next-id (assoc data :dispatch [next-id])
+      :else data)))
+
 (defn rewrite-fx-handler [ctx db params {:keys [data next-id]}]
   (cond->> data
-           (:http-xhrio data) (update-http next-id)
-           true (walk-placeholders ctx db params next-id)
-           (:db data) (update-db db)))
+
+           (:http-xhrio data)
+           (update-http next-id)
+
+           true
+           (walk-placeholders ctx db params next-id)
+
+           (:db data)
+           (update-db db)
+
+           true
+           (insert-dispatch next-id)))
 
 (defn rewrite-db-handler [ctx db params data]
   (->> data
