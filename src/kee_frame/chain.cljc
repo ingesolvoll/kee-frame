@@ -1,6 +1,10 @@
 (ns kee-frame.chain
   (:require [re-frame.core :as rf]
-            [clojure.walk :as walk]))
+            [clojure.walk :as walk]
+    #?(:cljs
+       [cljs.spec.alpha :as s])
+    #?(:clj
+            [clojure.spec.alpha :as s])))
 
 (defn step-id [event-id counter]
   (if (= 0 counter)
@@ -108,3 +112,7 @@
                (next next-steps)
                instructions
                (inc counter))))))
+
+(s/fdef reg-chain
+        :args (s/cat :id keyword?
+                     :steps (s/* identity)))
