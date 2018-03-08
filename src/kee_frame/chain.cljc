@@ -113,6 +113,7 @@
                instructions
                (inc counter))))))
 
+(s/def ::step map?)
 (s/fdef reg-chain
         :args (s/cat :id keyword?
-                     :steps (s/* identity)))
+                     :steps (s/* ::step)))
