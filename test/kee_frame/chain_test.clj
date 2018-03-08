@@ -1,7 +1,8 @@
 (ns kee-frame.chain-test
   (:require [clojure.test :refer :all]
             [kee-frame.chain :as chain]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [re-frame.core :as rf])
   (:import (clojure.lang ExceptionInfo)))
 
 (deftest can-translate-instruction-to-event-function
@@ -36,3 +37,26 @@
                                               :data    {:db {:something "something"}}}))
           effect (handler {:db {}} [:some-event])]
       (is (= [:next/step] (-> effect :dispatch))))))
+
+(deftest outer-api
+  (testing "Can produce simple fx event"
+    (let [handler (atom nil)]
+      (with-redefs [rf/reg-event-fx (fn [_ _ h] (reset! handler h))]
+        (chain/reg-chain :some-chain {:db [[:prop 0]]})
+        (is (= {:db {:prop 0}} (@handler {} [:some-event :not-relevant]))))))
+
+  (testing "Will pass on params from first event to rest of steps"
+    (let [handlers (atom [])]
+      (with-redefs [rf/reg-event-fx (fn [_ _ h] (swap! handlers conj h))]
+        (chain/reg-chain :some/chain
+                         {:db [[:prop [:kee-frame.core/params 0]]]}
+                         {:http-xhrio {:uri (str "http://wg.no/" (name [:kee-frame.core/params 1]))}}
+                         {:db [[:prop2 [:kee-frame.core/params 1]]]})
+
+        (is (= {:db       {:prop :first-param}
+                :dispatch [:some/chain-1 :first-param :second-param]}
+               ((first @handlers) {} [:some-event :first-param :second-param])))
+
+        (is (= {:http-xhrio {:on-success [:some/chain-2 :first-param :second-param]
+                             :uri        "http://wg.no/second-param"}}
+               ((second @handlers) {} [:some-event :first-param :second-param])))))))

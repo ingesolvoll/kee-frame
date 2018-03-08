@@ -49,25 +49,25 @@
                          (map pointer->assoc)
                          (concat `(-> ~db)))))
 
-(defn update-http [next-id data]
+(defn update-http [next-id params data]
   (if-not (get-in data [:http-xhrio :on-success])
     (if next-id
-      (update data :http-xhrio assoc :on-success [:kee-frame.core/next])
+      (update data :http-xhrio assoc :on-success `(concat [:kee-frame.core/next] ~params))
       (throw (ex-info "HTTP success needs a next step in chain" {:got :nothing})))
     data))
 
-(defn insert-dispatch [next-id {:keys [http-xhrio dispatch] :as data}]
+(defn insert-dispatch [next-id params {:keys [http-xhrio dispatch] :as data}]
   (let [skip? (or http-xhrio dispatch)]
     (cond
       skip? data
-      next-id (assoc data :dispatch [next-id])
+      next-id (assoc data :dispatch `(concat [~next-id] ~params))
       :else data)))
 
 (defn rewrite-fx-handler [ctx db params {:keys [data next-id]}]
   (cond->> data
 
            (:http-xhrio data)
-           (update-http next-id)
+           (update-http next-id params)
 
            true
            (walk-placeholders ctx db params next-id)
@@ -76,7 +76,7 @@
            (update-db db)
 
            true
-           (insert-dispatch next-id)))
+           (insert-dispatch next-id params)))
 
 (defn make-fx-event [step]
   (let [ctx (gensym "ctx")
