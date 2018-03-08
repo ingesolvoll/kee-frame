@@ -78,12 +78,6 @@
            true
            (insert-dispatch next-id)))
 
-(defn rewrite-db-handler [ctx db params data]
-  (->> data
-       (walk-placeholders ctx db params nil)
-       (map pointer->assoc)
-       (concat `(-> ~db))))
-
 (defn make-fx-event [step]
   (let [ctx (gensym "ctx")
         db (gensym "db")
@@ -92,38 +86,19 @@
        (let [~db (:db ~ctx)]
          ~(rewrite-fx-handler ctx db params step)))))
 
-(defn make-db-event [data]
-  (let [ctx (gensym "ctx")
-        db (gensym "db")
-        params (gensym "params")]
-    `(fn [~db [_# & ~params]] ~(rewrite-db-handler ctx db params data))))
-
-(defn make-assoc-in-event [data]
-  `(fn [db# [_# response#]] (assoc-in db# ~data response#)))
-
-(defn make-step [{:keys [id type data]
+(defn make-step [{:keys [id]
                   :as   step}]
-  (case type
-    :assoc-in `(do (rf/console :log "Adding chain step INTO DB handler " ~id)
-                   (rf/reg-event-db ~id [rf/debug] ~(make-assoc-in-event data)))
-    :db `(do (rf/console :log "Adding chain step DB handler " ~id)
-             (rf/reg-event-db ~id [rf/debug] ~(make-db-event data)))
-    :fx `(do (rf/console :log "Adding chain step FX handler " ~id)
-             (rf/reg-event-fx ~id [rf/debug] ~(make-fx-event step))) ;; TODO Add failure id as param
-    :failure `(do (rf/console :log "Adding chain step failure handler " ~id)
-                  (rf/reg-event-fx ~id (fn [])))
-    (throw (ex-info (str "Unknown event type " type) {}))))
+  `(do (rf/console :log "Adding chain step FX handler " ~id)
+       (rf/reg-event-fx ~id [rf/debug] ~(make-fx-event step))))
 
 (defmacro reg-chain [id & steps]
-  (loop [step (first steps)
+  (loop [data (first steps)
          next-steps (next steps)
          instructions []
          counter 0]
-    (let [[type data] step
-          next-id (when next-steps (step-id id (inc counter)))
+    (let [next-id (when next-steps (step-id id (inc counter)))
           instruction (make-step {:id      (step-id id counter)
                                   :counter counter
-                                  :type    type
                                   :data    data
                                   :next-id next-id})
           instructions (conj instructions instruction)]

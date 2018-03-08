@@ -6,11 +6,10 @@
 
 (deftest can-translate-instruction-to-event-function
   (let [[do-fn [log-fn] [reg-fn]] (chain/make-step {:id   :event-id
-                                                    :type :db
-                                                    :data [[:path :to 0]]})]
+                                                    :data {:db [[:path :to 0]]}})]
     (is (= 'do do-fn))
     (is (= 're-frame.core/console log-fn))
-    (is (= 're-frame.core/reg-event-db reg-fn))))
+    (is (= 're-frame.core/reg-event-fx reg-fn))))
 
 (deftest fx-event
   (testing "DB as side effect in FX handler"
