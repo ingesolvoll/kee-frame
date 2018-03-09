@@ -11,23 +11,29 @@
 (defn goto [route & params]
   (accountant/navigate! (apply url route params)))
 
-(defn nav-handler [path]
-  (if-let [route (bidi/match-route @state/routes path)]
-    (rf/dispatch [::route-changed route])
-    (do (rf/console :group "No route match found")
-        (rf/console :error "No match found for path " path)
-        (rf/console :log "Available routes: " @state/routes)
-        (rf/console :groupEnd))))
+(defn nav-handler [postprocess-route]
+  (fn [path]
+    (if-let [route (->> path
+                        (bidi/match-route @state/routes)
+                        postprocess-route)]
+      (rf/dispatch [::route-changed route])
+      (do (rf/console :group "No route match found")
+          (rf/console :error "No match found for path " path)
+          (rf/console :log "Available routes: " @state/routes)
+          (rf/console :groupEnd)))))
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
-(defn start! [routes initial-db]
+(defn start! [{:keys [routes initial-db postprocess-route app-db-spec]
+               :or   {postprocess-route identity
+                      app-db-spec       map?
+                      initial-db        {}}}]
   (let [initialized? (boolean @state/routes)]
     (reset! state/routes routes)
     (rf/dispatch-sync [:init initial-db])
     (when-not initialized?
       (accountant/configure-navigation!
-        {:nav-handler  #(nav-handler %)
+        {:nav-handler  (nav-handler postprocess-route)
          :path-exists? #(boolean (bidi/match-route @state/routes %))}))
     (accountant/dispatch-current!)))
 
