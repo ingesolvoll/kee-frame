@@ -181,11 +181,9 @@
 
 (defn effect-postprocessor [next-event-id]
   (fn [ctx]
-    (->> ctx
-         :effects
-         (link-effects next-event-id links)
-         (replace-pointers next-event-id)
-         (assoc ctx :effects))))
+    (update ctx :effects #(->> %
+                               (link-effects next-event-id links)
+                               (replace-pointers next-event-id)))))
 
 (defn chain-interceptor [current-event-id next-event-id]
   (rf/->interceptor

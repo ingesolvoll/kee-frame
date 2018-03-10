@@ -88,4 +88,8 @@
             :http-xhrio {:get        "cnn.com"
                          :on-success [:next-event]}}
            (chain/link-effects :next-event chain/links {:dispatch   [:break-out-of-here]
-                                                        :http-xhrio {:get "cnn.com"}})))))
+                                                        :http-xhrio {:get "cnn.com"}}))))
+
+  (comment (testing "Will pass its parameters on to next in chain"
+             (is (= {:dispatch [:next-event 1 2]}
+                    (chain/link-effects :next-event chain/links {}))))))
