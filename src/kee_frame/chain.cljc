@@ -157,6 +157,12 @@
        count
        (= 1)))
 
+(defn single-valid-next [next-event-id specified-links]
+  (->> specified-links
+       (filter (fn [[_ value]]
+                 (= next-event-id (first value))))
+       ffirst))
+
 (defn dispatch-empty-or-next [effects next-event-id]
   (or (not (:dispatch effects))
       (-> effects
@@ -168,7 +174,7 @@
   (let [potential (potential-links links effects)
         specified (specified-links links effects)]
     (cond
-      (next-already-valid? next-event-id specified) nil
+      (next-already-valid? next-event-id specified) (single-valid-next next-event-id specified)
       (one-valid-link? potential specified) (first potential)
       (dispatch-empty-or-next effects next-event-id) [:dispatch]
       :else (throw
