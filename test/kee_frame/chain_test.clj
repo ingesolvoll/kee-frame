@@ -60,3 +60,32 @@
         (is (= {:http-xhrio {:on-success [:some/chain-2 :first-param :second-param]
                              :uri        "http://wg.no/second-param"}}
                ((second @handlers) {} [:some-event :first-param :second-param])))))))
+
+(deftest interceptors
+  (testing "Inserts dispatch to next"
+    (is (= {:dispatch [:next]}
+           (chain/link-effects :next chain/links {}))))
+
+  (testing "Throws when only one potential link and it's taken"
+    (is (thrown? ExceptionInfo
+                 (chain/link-effects :next chain/links {:dispatch [:something-bad]}))))
+
+  (testing "Inserts on-success on http"
+    (is (= [:next]
+           (-> (chain/link-effects :next chain/links {:http-xhrio {}})
+               (get-in [:http-xhrio :on-success])))))
+
+  (testing "Can use special pointer to next action when explicit params are needed"
+    (is (= {:dispatch [:next-event :a :b :c]}
+           (chain/replace-pointers :next-event {:dispatch [:kee-frame.core/next :a :b :c]}))))
+
+  (testing "Reports error when on-success or dispatch are specified and none of them point to correct next event"
+    (is (thrown? ExceptionInfo
+                 (chain/link-effects :next-event chain/links {:dispatch   [:something]
+                                                              :http-xhrio {:on-success [:something-else]}}))))
+  (testing "Exactly one event dispatches to next in chain."
+    (is (= {:dispatch   [:break-out-of-here]
+            :http-xhrio {:get        "cnn.com"
+                         :on-success [:next-event]}}
+           (chain/link-effects :next-event chain/links {:dispatch   [:break-out-of-here]
+                                                        :http-xhrio {:get "cnn.com"}})))))

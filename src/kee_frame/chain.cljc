@@ -117,3 +117,98 @@
 (s/fdef reg-chain
         :args (s/cat :id keyword?
                      :steps (s/* ::step)))
+
+(defn replace-pointers [next-event effects]
+  (walk/postwalk
+    (fn [x]
+      (if (next? x)
+        next-event                                          ;; (throw (ex-info "Found next pointer, but no next step" {:token x}))
+        x))
+    effects))
+
+(def links {:http-xhrio :on-success})
+
+(defn one-valid-link? [potential specified]
+  (and (= 1 (count potential))
+       (->> specified
+            (filter (fn [[path]] (= path (first potential))))
+            count
+            (= 0))))
+
+(defn cleanup-link [link] (filter identity link))
+
+(defn specified-links [links effects]
+  (->> links
+       (map (fn [link]
+              [(cleanup-link link) (get-in effects (cleanup-link link))]))
+       (filter (comp identity second))))
+
+(defn potential-links [links effects]
+  (->> links
+       (filter (fn [[path]]
+                 (or (nil? path) (path effects))))
+       (map (fn [link]
+              (cleanup-link link)))))
+
+(defn next-already-valid? [next-event-id specified-links]
+  (->> specified-links
+       (filter (fn [[_ value]]
+                 (#{:kee-frame.core/next next-event-id} (first value))))
+       count
+       (= 1)))
+
+(defn select-link [next-event-id links effects]
+  (let [potential (potential-links links effects)
+        specified (specified-links links effects)]
+    (cond
+      (next-already-valid? next-event-id specified) nil
+      (one-valid-link? potential specified) (first potential)
+      (not (:dispatch effects)) [:dispatch]
+      :else (throw
+              (ex-info "Not possible to select next in chain"
+                       {:next-id         next-event-id
+                        :dispatch        (:dispatch effects)
+                        :potential-links potential
+                        :specified-links specified})))))
+
+
+(defn link-effects [next-event-id links effects]
+  (if next-event-id
+    (if-let [selected-link (select-link next-event-id links effects)]
+      (assoc-in effects selected-link [next-event-id])
+      effects)
+    effects))
+
+(defn effect-postprocessor [next-event-id]
+  (fn [ctx]
+    (->> ctx
+         :effects
+         (link-effects next-event-id links)
+         (replace-pointers next-event-id)
+         (assoc ctx :effects))))
+
+(defn chain-interceptor [current-event-id next-event-id]
+  (rf/->interceptor
+    :id current-event-id
+    :after (effect-postprocessor next-event-id)))
+
+(defn collect-event-instructions [id step-fns]
+  (loop [[step-fn & next-step-fns] step-fns
+         instruction-maps []
+         counter 0]
+    (let [current-id (step-id id counter)
+          next-id (when (seq next-step-fns) (step-id id (inc counter)))
+          instructions (conj instruction-maps {:id            current-id
+                                               :event-handler step-fn
+                                               :interceptor   (chain-interceptor current-id next-id)})]
+      (if-not (seq next-step-fns)
+        instructions
+        (recur next-step-fns
+               instructions
+               (inc counter))))))
+
+(defn reg-chain-2 [id & step-fns]
+  (let [instructions (collect-event-instructions id step-fns)]
+    (doseq [{:keys [id event-handler interceptor]} instructions]
+      (rf/console :log "Registering chain handler fn " id)
+      (rf/reg-event-fx id [interceptor rf/debug] event-handler))))
