@@ -94,4 +94,10 @@
     (is (= {:dispatch [:next-event 1 2]}
            (-> {:coeffects {:event [:this-event 1 2]}}
                ((chain/effect-postprocessor :next-event))
+               :effects)))
+
+    (is (= {:dispatch [:next-event 1 2 3 4]}
+           (-> {:coeffects {:event [:previous-event 1 2]}
+                :effects {:dispatch [:kee-frame.core/next 3 4]}}
+               ((chain/effect-postprocessor :next-event))
                :effects)))))

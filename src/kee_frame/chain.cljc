@@ -157,13 +157,20 @@
        count
        (= 1)))
 
+(defn dispatch-empty-or-next [effects next-event-id]
+  (or (not (:dispatch effects))
+      (-> effects
+          :dispatch
+          first
+          (= next-event-id))))
+
 (defn select-link [next-event-id links effects]
   (let [potential (potential-links links effects)
         specified (specified-links links effects)]
     (cond
       (next-already-valid? next-event-id specified) nil
       (one-valid-link? potential specified) (first potential)
-      (not (:dispatch effects)) [:dispatch]
+      (dispatch-empty-or-next effects next-event-id) [:dispatch]
       :else (throw
               (ex-info "Not possible to select next in chain"
                        {:next-id         next-event-id
@@ -171,11 +178,13 @@
                         :potential-links potential
                         :specified-links specified})))))
 
+(defn make-event [next-event-id previous-event-params specified-event]
+  (into [next-event-id] (concat previous-event-params (rest specified-event))))
 
 (defn link-effects [next-event-id event-params links effects]
   (if next-event-id
     (if-let [selected-link (select-link next-event-id links effects)]
-      (assoc-in effects selected-link (into [next-event-id] event-params))
+      (assoc-in effects selected-link (make-event next-event-id event-params (get-in effects selected-link)))
       effects)
     effects))
 
