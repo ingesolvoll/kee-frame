@@ -64,15 +64,15 @@
 (deftest interceptors
   (testing "Inserts dispatch to next"
     (is (= {:dispatch [:next]}
-           (chain/link-effects :next chain/links {}))))
+           (chain/link-effects :next [] chain/links {}))))
 
   (testing "Throws when only one potential link and it's taken"
     (is (thrown? ExceptionInfo
-                 (chain/link-effects :next chain/links {:dispatch [:something-bad]}))))
+                 (chain/link-effects :next [] chain/links {:dispatch [:something-bad]}))))
 
   (testing "Inserts on-success on http"
     (is (= [:next]
-           (-> (chain/link-effects :next chain/links {:http-xhrio {}})
+           (-> (chain/link-effects :next [] chain/links {:http-xhrio {}})
                (get-in [:http-xhrio :on-success])))))
 
   (testing "Can use special pointer to next action when explicit params are needed"
@@ -81,15 +81,17 @@
 
   (testing "Reports error when on-success or dispatch are specified and none of them point to correct next event"
     (is (thrown? ExceptionInfo
-                 (chain/link-effects :next-event chain/links {:dispatch   [:something]
-                                                              :http-xhrio {:on-success [:something-else]}}))))
+                 (chain/link-effects :next-event [] chain/links {:dispatch   [:something]
+                                                                 :http-xhrio {:on-success [:something-else]}}))))
   (testing "Exactly one event dispatches to next in chain."
     (is (= {:dispatch   [:break-out-of-here]
             :http-xhrio {:get        "cnn.com"
                          :on-success [:next-event]}}
-           (chain/link-effects :next-event chain/links {:dispatch   [:break-out-of-here]
-                                                        :http-xhrio {:get "cnn.com"}}))))
+           (chain/link-effects :next-event [] chain/links {:dispatch   [:break-out-of-here]
+                                                           :http-xhrio {:get "cnn.com"}}))))
 
-  (comment (testing "Will pass its parameters on to next in chain"
-             (is (= {:dispatch [:next-event 1 2]}
-                    (chain/link-effects :next-event chain/links {}))))))
+  (testing "Will pass its parameters on to next in chain"
+    (is (= {:dispatch [:next-event 1 2]}
+           (-> {:coeffects {:event [:this-event 1 2]}}
+               ((chain/effect-postprocessor :next-event))
+               :effects)))))

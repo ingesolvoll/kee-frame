@@ -153,7 +153,7 @@
 (defn next-already-valid? [next-event-id specified-links]
   (->> specified-links
        (filter (fn [[_ value]]
-                 (#{:kee-frame.core/next next-event-id} (first value))))
+                 (= next-event-id (first value))))
        count
        (= 1)))
 
@@ -172,18 +172,19 @@
                         :specified-links specified})))))
 
 
-(defn link-effects [next-event-id links effects]
+(defn link-effects [next-event-id event-params links effects]
   (if next-event-id
     (if-let [selected-link (select-link next-event-id links effects)]
-      (assoc-in effects selected-link [next-event-id])
+      (assoc-in effects selected-link (into [next-event-id] event-params))
       effects)
     effects))
 
 (defn effect-postprocessor [next-event-id]
   (fn [ctx]
-    (update ctx :effects #(->> %
-                               (link-effects next-event-id links)
-                               (replace-pointers next-event-id)))))
+    (let [event-params (rest (rf/get-coeffect ctx :event))]
+      (update ctx :effects #(->> %
+                                 (replace-pointers next-event-id)
+                                 (link-effects next-event-id event-params links))))))
 
 (defn chain-interceptor [current-event-id next-event-id]
   (rf/->interceptor
