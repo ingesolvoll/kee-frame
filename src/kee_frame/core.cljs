@@ -10,7 +10,7 @@
   (swap! state/controllers assoc id controller))
 
 (defn reg-chain [id & handlers]
-  (apply chain/reg-chain-2 id handlers))
+  (apply chain/reg-chain id handlers))
 
 (defn path-for [handler & params]
   (apply router/url handler params))
