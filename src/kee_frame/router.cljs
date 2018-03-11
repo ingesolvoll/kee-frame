@@ -26,10 +26,10 @@
 
 (defn start! [{:keys [routes initial-db postprocess-route app-db-spec]
                :or   {postprocess-route identity
-                      app-db-spec       map?
                       initial-db        {}}}]
   (let [initialized? (boolean @state/routes)]
     (reset! state/routes routes)
+    (reset! state/app-db-spec app-db-spec)
     (rf/dispatch-sync [:init initial-db])
     (when-not initialized?
       (accountant/configure-navigation!

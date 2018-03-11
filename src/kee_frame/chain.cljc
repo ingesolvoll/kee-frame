@@ -111,8 +111,8 @@
                instructions
                (inc counter))))))
 
-(defn reg-chain [id & step-fns]
+(defn reg-chain [id interceptors & step-fns]
   (let [instructions (collect-event-instructions id step-fns)]
     (doseq [{:keys [id event-handler interceptor]} instructions]
       (rf/console :log "Registering chain handler fn " id)
-      (rf/reg-event-fx id [interceptor rf/debug] event-handler))))
+      (rf/reg-event-fx id (into [interceptor] interceptors) event-handler))))
