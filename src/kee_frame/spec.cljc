@@ -1,7 +1,6 @@
 (ns kee-frame.spec
   (:require [re-frame.interceptor :refer [->interceptor get-effect get-coeffect assoc-coeffect assoc-effect]]
             [re-frame.core :refer [console]]
-            [kee-frame.state :as state]
             [clojure.spec.alpha :as s]))
 
 (defn log-spec-error [new-db spec]
@@ -11,13 +10,16 @@
     (console :log "Failing spec " spec))
   (console :groupEnd "*****************************"))
 
+(defn rollback [context new-db db-spec-atom]
+  (do
+    (log-spec-error new-db @db-spec-atom)
+    (assoc-effect context :db (get-coeffect context :db))))
+
 (defn spec-interceptor [db-spec-atom]
   (->interceptor
     :id :spec
     :after (fn [context]
              (let [new-db (get-effect context :db)]
                (if (and @db-spec-atom new-db (not (s/valid? @db-spec-atom new-db)))
-                 (do
-                   (log-spec-error new-db @db-spec-atom)
-                   (assoc-effect context :db (get-coeffect context :db)))
+                 (rollback context new-db db-spec-atom)
                  context)))))
