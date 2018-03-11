@@ -12,25 +12,23 @@
     (keyword
       (str (namespace event-id) "/" (name event-id) "-" counter))))
 
-(defn next? [x]
-  (= x :kee-frame.core/next))
-
 (defn replace-pointers [next-event effects]
   (walk/postwalk
     (fn [x]
-      (if (next? x)
+      (if (= x :kee-frame.core/next)
         next-event                                          ;; (throw (ex-info "Found next pointer, but no next step" {:token x}))
         x))
     effects))
 
 (def links {:http-xhrio :on-success})
 
-(defn one-valid-link? [potential specified]
-  (and (= 1 (count potential))
-       (->> specified
-            (filter (fn [[path]] (= path (first potential))))
-            count
-            (= 0))))
+(defn single-valid-link [potential specified]
+  (when (and (= 1 (count potential))
+             (->> specified
+                  (filter (fn [[path]] (= path (first potential))))
+                  count
+                  (= 0)))
+    (first potential)))
 
 (defn cleanup-link [link] (filter identity link))
 
@@ -47,39 +45,34 @@
        (map (fn [link]
               (cleanup-link link)))))
 
-(defn next-already-valid? [next-event-id specified-links]
-  (->> specified-links
-       (filter (fn [[_ value]]
-                 (= next-event-id (first value))))
-       count
-       (= 1)))
-
 (defn single-valid-next [next-event-id specified-links]
-  (->> specified-links
-       (filter (fn [[_ value]]
-                 (= next-event-id (first value))))
-       ffirst))
+  (let [xs (->> specified-links
+                (filter (fn [[_ value]]
+                          (= next-event-id (first value)))))]
+    (when (-> xs count (= 1))
+      (ffirst xs))))
 
 (defn dispatch-empty-or-next [effects next-event-id]
-  (or (not (:dispatch effects))
-      (-> effects
-          :dispatch
-          first
-          (= next-event-id))))
+  (when (or (not (:dispatch effects))
+            (-> effects
+                :dispatch
+                first
+                (= next-event-id)))
+    [:dispatch]))
 
 (defn select-link [next-event-id links effects]
   (let [potential (potential-links links effects)
         specified (specified-links links effects)]
-    (cond
-      (next-already-valid? next-event-id specified) (single-valid-next next-event-id specified)
-      (one-valid-link? potential specified) (first potential)
-      (dispatch-empty-or-next effects next-event-id) [:dispatch]
-      :else (throw
-              (ex-info "Not possible to select next in chain"
-                       {:next-id         next-event-id
-                        :dispatch        (:dispatch effects)
-                        :potential-links potential
-                        :specified-links specified})))))
+    (or
+      (single-valid-next next-event-id specified)
+      (single-valid-link potential specified)
+      (dispatch-empty-or-next effects next-event-id)
+      (throw
+        (ex-info "Not possible to select next in chain"
+                 {:next-id         next-event-id
+                  :dispatch        (:dispatch effects)
+                  :potential-links potential
+                  :specified-links specified})))))
 
 (defn make-event [next-event-id previous-event-params specified-event]
   (into [next-event-id] (concat previous-event-params (rest specified-event))))
