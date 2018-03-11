@@ -24,25 +24,29 @@
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
-(defn start! [{:keys [routes initial-db postprocess-route app-db-spec]
+(defn start! [{:keys [routes initial-db postprocess-route app-db-spec debug? interceptors]
                :or   {postprocess-route identity
-                      initial-db        {}}}]
+                      initial-db        {}
+                      debug?            false}}]
   (let [initialized? (boolean @state/routes)]
     (reset! state/routes routes)
     (reset! state/app-db-spec app-db-spec)
+    (reset! state/debug? debug?)
+
     (rf/dispatch-sync [:init initial-db])
+
+    (rf/reg-event-fx ::route-changed
+                     interceptors
+                     (fn [{:keys [db] :as ctx} [_ route]]
+                       (swap! state/controllers controller/apply-route ctx route)
+                       {:db (assoc db :kee-frame/route route)}))
+
+    (rf/reg-fx :navigate-to  #(apply goto %))
+
+    (rf/reg-sub :kee-frame/route :kee-frame/route)
+
     (when-not initialized?
       (accountant/configure-navigation!
         {:nav-handler  (nav-handler postprocess-route)
          :path-exists? #(boolean (bidi/match-route @state/routes %))}))
     (accountant/dispatch-current!)))
-
-(rf/reg-event-fx ::route-changed
-                 [rf/debug]
-                 (fn [{:keys [db] :as ctx} [_ route]]
-                   (swap! state/controllers controller/apply-route ctx route)
-                   {:db (assoc db :kee-frame/route route)}))
-
-(rf/reg-fx :navigate-to #(apply goto %))
-
-(rf/reg-sub :kee-frame/route :kee-frame/route)

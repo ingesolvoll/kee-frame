@@ -4,7 +4,8 @@
     #?(:cljs
        [cljs.core.match :refer [match]])
     #?(:clj
-    [clojure.core.match :refer [match]])))
+    [clojure.core.match :refer [match]])
+    [kee-frame.state :as state]))
 
 (defn process-params [params route]
   (cond
@@ -13,7 +14,8 @@
 
 (defn do-start [id ctx start params]
   (when start
-    (rf/console :log "Starting controller " id " with params " params)
+    (when @state/debug?
+      (rf/console :log "Starting controller " id " with params " params))
     (cond
       (vector? start) (rf/dispatch (conj start params))
       (ifn? start) (when-let [start-dispatch (start ctx params)]

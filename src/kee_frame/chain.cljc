@@ -4,7 +4,8 @@
     #?(:cljs
        [cljs.spec.alpha :as s])
     #?(:clj
-            [clojure.spec.alpha :as s])))
+            [clojure.spec.alpha :as s])
+            [kee-frame.state :as state]))
 
 (defn step-id [event-id counter]
   (if (= 0 counter)
@@ -114,5 +115,6 @@
 (defn reg-chain [id interceptors & step-fns]
   (let [instructions (collect-event-instructions id step-fns)]
     (doseq [{:keys [id event-handler interceptor]} instructions]
-      (rf/console :log "Registering chain handler fn " id)
+      (when @state/debug?
+        (rf/console :log "Registering chain handler fn " id))
       (rf/reg-event-fx id (into [interceptor] interceptors) event-handler))))

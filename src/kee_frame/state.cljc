@@ -5,3 +5,5 @@
 (def routes (atom nil))
 
 (def app-db-spec (atom nil))
+
+(def debug? (atom false))
