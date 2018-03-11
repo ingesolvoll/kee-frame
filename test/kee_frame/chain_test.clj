@@ -47,12 +47,12 @@
                :effects)))))
 
 (deftest outer-side-effecting-api
-  (testing "Plain chain"
-    (chain/reg-chain :my/chain
-                     (fn [{:keys [db]} [_ x]]
-                       {:db (assoc db :x x)})
-                     (fn [{:keys [db]} [_ x]]
-                       {:db (assoc db :x-again x)}))
-    (rf/dispatch [:my/chain 1])
-    (is (= {:x 1 :x-again 1}
-           @re-frame.db/app-db))))
+  (comment (testing "Plain chain"
+             (chain/reg-chain :my/chain
+                              (fn [{:keys [db]} [_ x]]
+                                {:db (assoc db :x x)})
+                              (fn [{:keys [db]} [_ x]]
+                                {:db (assoc db :x-again x)}))
+             (rf/dispatch [:my/chain 1])
+             (is (= {:x 1 :x-again 1}
+                    @re-frame.db/app-db)))))
