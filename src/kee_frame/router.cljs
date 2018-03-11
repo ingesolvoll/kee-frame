@@ -37,7 +37,7 @@
 
     (rf/reg-event-fx ::route-changed
                      interceptors
-                     (fn [{:keys [db] :as ctx} [_ route]]
+                     (fn [{:keys [db] :as ctx} [route]]
                        (swap! state/controllers controller/apply-route ctx route)
                        {:db (assoc db :kee-frame/route route)}))
 

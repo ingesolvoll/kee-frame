@@ -6,7 +6,7 @@
             [kee-frame.spec :refer [spec-interceptor]]
             [kee-frame.debug :refer [debug-interceptor]]))
 
-(def interceptors [(spec-interceptor state/app-db-spec) (debug-interceptor state/debug?)])
+(def interceptors [rf/trim-v (spec-interceptor state/app-db-spec) (debug-interceptor state/debug?)])
 
 (defn start! [options]
   (router/start! (assoc options :interceptors interceptors)))
