@@ -42,6 +42,17 @@
 
     (is (= {:dispatch [:next-event 1 2 3 4]}
            (-> {:coeffects {:event [:previous-event 1 2]}
-                :effects {:dispatch [:kee-frame.core/next 3 4]}}
+                :effects   {:dispatch [:kee-frame.core/next 3 4]}}
                ((chain/effect-postprocessor :next-event))
                :effects)))))
+
+(deftest outer-side-effecting-api
+  (testing "Plain chain"
+    (chain/reg-chain :my/chain
+                     (fn [{:keys [db]} [_ x]]
+                       {:db (assoc db :x x)})
+                     (fn [{:keys [db]} [_ x]]
+                       {:db (assoc db :x-again x)}))
+    (rf/dispatch [:my/chain 1])
+    (is (= {:x 1 :x-again 1}
+           @re-frame.db/app-db))))
