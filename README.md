@@ -106,3 +106,52 @@ This rules of controller states are stolen entirely from Keechma. They are:
 * When both previous and current are not nil, but different, call `stop`, then `start`.
 
 ## Event chains
+One very common pattern in re-frame is to register 2 events, one for doing a side effect like HTTP, one for handling the response data. Sometimes you need more than 2 events. Creating these event chains is boring and verbose, and you easily lose track of the flow. See an example below:
+
+```clojure      
+(reg-event-fx :add-customer
+              interceptors
+              (fn [_ [_ customer]]
+                {:http-xhrio {:method          :post
+                              :uri             "/customers"
+                              :body            customer-data
+                              :on-success      [:customer-added]}}))
+
+(reg-event-db :customer-added
+              interceptors
+              (fn [db [_ customer]]
+                (update db :customers conj customer)))
+```
+
+If some code ends up in between these 2 close friends, the cost of following the flow greatly increases. Even when they are positioned next to each other, an extra amount of thinking is required in order to see where the data goes.
+
+Kee-frame tries to solve the problem of verbosity and readability by using event chains. Through the magic of re-frame `interceptors`, we are able to chain together event handlers without registering them by name. We are also able to automatically infer how to dispatch to next in chain. Here's the above example using a chain:
+
+```clojure      
+(reg-chain :add-customer
+            (fn [_ [_ customer]]
+              {:http-xhrio {:method          :post
+                            :uri             "/customers"
+                            :body            customer-data}})
+            (fn [db [_ _ added-customer]]
+              (update db :customers conj added-customer)))
+```
+
+The chain code does the same thing as the event code. It registers the events `:add-customer` and `:add-customer-1` as normal re-frame events. The events are registered with an interceptor that processes the event effects and finds the appropriate `on-success` handler for the HTTP effect. Less work for you to do and less cognitive load reading the code later on.
+
+The chain concept might not always be a good fit, but quite often it does a great job of uncluttering your event ping pong.
+
+## Chain rules
+Every parameter received through the chain is passed on to the next step. So the parameters to the first chain function will be appended to the head of the next function's parameters, and so on. The last function called will receive the concatenation of all previous parameter lists. This might seem a bit odd, but quite often you need the id received on step 1 to do something in step 3.
+
+You are allowed to dispatch out of chain, but there must always be a "slot" available for the chain to put its next dispatch. Currently only `dispatch` and `on-success` of :http-xhrio are supported, one of them must be not set by the previous event. The effects supported by the inference algorithm will be configurable soon.
+
+You can specify your dispatch explicitly using a special keyword as your event id, like this: `{:on-success [:kee-frame.core/next 1 2 3]}`. The keyword will be replaced by a generated id for the next in chain. 
+
+## Credits
+
+The implementation of kee-frame is quite simple, building on excellent solid libraries and other people's ideas. The main influence is the [Keechma](https://keechma.com/) framework. It is a superb piece of work, go check it out! Apart from that, the following libraries make kee-frame possible:
+
+* [re-frame](https://github.com/Day8/re-frame) and 
+* [bidi](https://github.com/juxt/bidi). Simple and easy bidirectional routing. I love bidi, but I'm considering adding support for more data-oriented routing libraries like keechma and bide.
+* 
