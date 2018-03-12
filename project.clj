@@ -13,7 +13,10 @@
 
   :plugins [[com.jakemccrary/lein-test-refresh "0.20.0"]
             [venantius/ultra "0.5.2"]]
-  :deploy-repositories [["clojars" {:sign-releases false :url "https://clojars.org/repo"}]]
+  :deploy-repositories [["clojars" {:sign-releases false
+                                    :url           "https://clojars.org/repo"
+                                    :username      :env/clojars_username
+                                    :password      :env/clojars_password}]]
 
   :source-paths ["src"]
   :aliases {"deploy!" ["do" ["test"] ["deploy" "clojars"]]})
