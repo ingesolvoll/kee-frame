@@ -53,12 +53,16 @@ Kee-frame uses [bidi](https://github.com/juxt/bidi) for routing. Head over to th
 ```
 
 ## Starting your app
-The `start!` function hooks your route configuration up to browser events so you don't have to deal with that mess. 
+The `start!` function starts the router and configures the application.
 
 ```clojure
-(k/start! {:routes my-routes})
-
+(k/start!  {:routes       my-routes
+            :app-db-spec :my-app/db-spec
+            :initial-db  your-blank-db-map
+            :debug?      true})
 ```
+
+Subsequent calls to start are not a problem, browser events will only get hooked up once. The `routes` property is required, the rest are opt-in features. The `debug` boolean option is for enabling debug interceptors on all your events, as well traces from the activities of controllers. If you provide an `app-db-spec`, the framework inserts an interceptor that lets you know when you are trying to corrupt your DB structure.
 
 
 ## Controllers
