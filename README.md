@@ -5,9 +5,7 @@ Micro framework on top of [re-frame](https://github.com/Day8/re-frame). Inspired
 [![Build Status](https://travis-ci.org/ingesolvoll/kee-frame.svg?branch=master)](https://travis-ci.org/ingesolvoll/kee-frame)
 
 ## Rationale
-Re-frame events are, like React itself, a very useful low level abstraction. But you shouldn't build your entire system on low level abstractions. Being low level and simple makes you a great building block though. Kee-frame leverages this to help you organize your re-frame events in a simple and meaningful way.
-
-Kee-frame, like Keechma, encourages a design where the URL is the single source of truth, while eliminating a lot of boilerplate setup code.
+Re-frame events are very simple and very generic. They are perfect building blocks for higher level abstractions. Kee-frame is leveraging this to implement the main ideas from the Keechma framework in re-frame. The core idea of Keechma is that the URL is the single source of truth, the view is a function of the URL. Kee-frame is re-frame with batteries included, with a few powerful abstractions built on top.
 
 ## Features
 * Automatic router setup
@@ -18,10 +16,10 @@ Kee-frame, like Keechma, encourages a design where the URL is the single source 
 * Figwheel-friendly.
 
 ## Benefits of leaving the URL in charge
-* Back/forward and all browser history in general just works
-* Bookmarkable URLs all the way. Same URL, same view.
+* Back/forward and bookmarking in general just works
 * When figwheel reloads the code, you keep your state and stay on the same page.
 * No need for `component-did-mount` to trigger data loading from your view.
+* UI code is purely declarative
 
 ## Demo application
 I made a simple demo app showing footbal results. Have a look around, and observe how all data loading just works while navigating and refreshing the page.
@@ -40,21 +38,28 @@ Add the following dependency to your `project.clj` file:
 
 ## Getting started
 
-The `kee-frame.core` namespace contains the public API. It mirrors `reg-event-db` and `reg-event-fx` from `re-frame.core`, as well as exposing the API of `kee-frame`.
+The `kee-frame.core` namespace contains the public API. It also contains wrapped versions of `reg-event-db` and `reg-event-fx`.
 
 ```clojure
-(require '[kee-frame.core :as kee-frame :refer [reg-controller]])
+(require '[kee-frame.core :as k :refer [reg-controller reg-chain reg-event-db reg-event-fx]])
 ```
 
 ## Routes
-Any data-centric router lib is a good fit for kee-frame, [bidi](https://github.com/juxt/bidi) was chosen out of familiarity.
+Kee-frame uses [bidi](https://github.com/juxt/bidi) for routing. Head over to their page to read about route syntax and features, here are the routes from the demo app:
 
 ```clojure
 (def my-routes ["" {"/"                       :index
                     ["/league/" :id "/" :tab] :league}])
-
-(kee-frame/start! my-routes)
 ```
+
+## Starting your app
+The `start!` function hooks your route configuration up to browser events so you don't have to deal with that mess. 
+
+```clojure
+(k/start! {:routes my-routes})
+
+```
+
 
 ## Controllers
 A controller is a map with two required keys (`params` and `start`), and one optional (`stop`). 
