@@ -150,8 +150,11 @@ You can specify your dispatch explicitly using a special keyword as your event i
 
 ## Credits
 
-The implementation of kee-frame is quite simple, building on excellent solid libraries and other people's ideas. The main influence is the [Keechma](https://keechma.com/) framework. It is a superb piece of work, go check it out! Apart from that, the following libraries make kee-frame possible:
+The implementation of kee-frame is quite simple, building on rock solid libraries and other people's ideas. The main influence is the [Keechma](https://keechma.com/) framework. It is a superb piece of thinking and work, go check it out! Apart from that, the following libraries make kee-frame possible:
 
-* [re-frame](https://github.com/Day8/re-frame) and 
+* [re-frame](https://github.com/Day8/re-frame) and [reagent](https://reagent-project.github.io/). The world needs to know about these 2 kings of frontend development, and we all need to contribute to their widespread use. This framework is an attempt in that direction.
 * [bidi](https://github.com/juxt/bidi). Simple and easy bidirectional routing. I love bidi, but I'm considering adding support for more data-oriented routing libraries like keechma and bide.
-* 
+* [accountant](https://github.com/venantius/accountant). A navigation library that hooks to any routing system. Made my life so much easier when I discovered it.
+* [etaoin](https://github.com/igrishaev/etaoin) and [lein-test-refresh](https://github.com/jakemcc/lein-test-refresh). 2 good examples of how powerful Clojure is. Etaoin makes browser integration testing fun again, while lein-test-refresh provides you with a development flow that no other platform will give you.
+
+Thank you!
