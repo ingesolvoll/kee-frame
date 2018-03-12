@@ -1,4 +1,4 @@
-(defproject kee-frame "0.1.3"
+(defproject kee-frame "0.1.4-SNAPSHOT"
   :description "A micro-framework on top of re-frame"
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
@@ -15,4 +15,5 @@
             [venantius/ultra "0.5.2"]]
   :deploy-repositories [["clojars" {:sign-releases false :url "https://clojars.org/repo"}]]
 
-  :source-paths ["src"])
+  :source-paths ["src"]
+  :aliases {"deploy!" ["do" ["test"] ["deploy" "clojars"]]})
