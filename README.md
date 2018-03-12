@@ -22,7 +22,7 @@ Re-frame events are very simple and generic, making them perfect building blocks
 * UI code is purely declarative
 
 ## Demo application
-I made a simple demo app showing footbal results. Have a look around, and observe how all data loading just works while navigating and refreshing the page.
+I made a simple demo app showing football results. Have a look around, and observe how all data loading just works while navigating and refreshing the page.
 
 [Online demo app](http://kee-frame-sample.herokuapp.com/) 
 
@@ -148,12 +148,17 @@ You are allowed to dispatch out of chain, but there must always be a "slot" avai
 
 You can specify your dispatch explicitly using a special keyword as your event id, like this: `{:on-success [:kee-frame.core/next 1 2 3]}`. The keyword will be replaced by a generated id for the next in chain. 
 
+
+## Introducing kee-frame into an existing app
+
+The chain feature is a pure add-on to re-frame, and can be easily introduced in an existing app. The controller feature depends on the specific routing implementation of kee-frame, so to use controllers you might need to adapt your routing. In order to ease this process, the `start!` function has a configuration option named `:process-route`. This can be a function that accepts the route data and modifies it to fit your existing app.
+
 ## Credits
 
 The implementation of kee-frame is quite simple, building on rock solid libraries and other people's ideas. The main influence is the [Keechma](https://keechma.com/) framework. It is a superb piece of thinking and work, go check it out! Apart from that, the following libraries make kee-frame possible:
 
 * [re-frame](https://github.com/Day8/re-frame) and [reagent](https://reagent-project.github.io/). The world needs to know about these 2 kings of frontend development, and we all need to contribute to their widespread use. This framework is an attempt in that direction.
-* [bidi](https://github.com/juxt/bidi). Simple and easy bidirectional routing. I love bidi, but I'm considering adding support for more data-oriented routing libraries like keechma and bide.
+* [bidi](https://github.com/juxt/bidi). Simple and easy bidirectional routing. I love bidi and think it fits very well with kee-frame, but I'm considering adding support for more routing libraries.
 * [accountant](https://github.com/venantius/accountant). A navigation library that hooks to any routing system. Made my life so much easier when I discovered it.
 * [etaoin](https://github.com/igrishaev/etaoin) and [lein-test-refresh](https://github.com/jakemcc/lein-test-refresh). 2 good examples of how powerful Clojure is. Etaoin makes browser integration testing fun again, while lein-test-refresh provides you with a development flow that no other platform will give you.
 
