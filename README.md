@@ -5,7 +5,7 @@ Micro framework on top of [re-frame](https://github.com/Day8/re-frame). Inspired
 [![Build Status](https://travis-ci.org/ingesolvoll/kee-frame.svg?branch=master)](https://travis-ci.org/ingesolvoll/kee-frame)
 
 ## Rationale
-Re-frame events are very simple and generic, making them perfect building blocks for higher level abstractions. Kee-frame is leveraging this to implement the main ideas from the Keechma framework in re-frame. An opiniated out-of-the-box routing solution will hopefully make it easier to get started with re-frame. Controllers and chains will hopefully help you scale in the long run.
+Re-frame events are very simple and generic, making them perfect building blocks for higher level abstractions. Kee-frame is leveraging this to implement the main ideas from the Keechma framework in re-frame. An opiniated out-of-the-box routing solution makes it easier to get started with re-frame. Controllers and chains helps you scale in the long run.
 
 ## Features
 * Automatic router setup
@@ -45,7 +45,9 @@ The `kee-frame.core` namespace contains the public API. It also contains wrapped
 ```
 
 ## Routes
-Kee-frame uses [bidi](https://github.com/juxt/bidi) for routing. Head over to their page to read about route syntax and features, here are the routes from the demo app:
+Kee-frame uses [bidi](https://github.com/juxt/bidi) for routing. I won't go into detail here about the bidi way of doing things, go read their docs if you're unfamiliar with the structure.
+
+Here are the routes from the demo app:
 
 ```clojure
 (def my-routes ["" {"/"                       :index
@@ -58,8 +60,8 @@ The `start!` function starts the router and configures the application.
 ```clojure
 (k/start!  {:routes       my-routes
             :app-db-spec :my-app/db-spec
-            :initial-db  your-blank-db-map
-            :debug?      true})
+            :initial-db   your-blank-db-map
+            :debug?       true})
 ```
 
 Subsequent calls to start are not a problem, browser events will only get hooked up once. 
@@ -68,11 +70,10 @@ The `routes` property is required, the rest are opt-in features.
 
 The `debug` boolean option is for enabling debug interceptors on all your events, as well traces from the activities of controllers. 
 
-If you provide an `app-db-spec`, the framework inserts an interceptor that lets you know when you are trying to corrupt your DB structure.
-
+If you provide an `app-db-spec`, the framework will let you know when a bug in your event handler is trying to corrupt your DB structure. This is incredibly useful, so you should put down the effort to spec up your db!
 
 ## Controllers
-A controller is a map with two required keys (`params` and `start`), and one optional (`stop`). 
+A controller is a connection between the route data and your event handlers. It is a map with two required keys (`params` and `start`), and one optional (`stop`).
 
 The `params` function receives the route data every time the URL changes. Its only job is to return the part of the route that it's interested in. This value combined with the previous value decides the next state of the controller. I'll come back to that in more detail.
 
@@ -103,3 +104,5 @@ This rules of controller states are stolen entirely from Keechma. They are:
 * When previous parameter was nil and current is not nil, call `start`.
 * When previous parameter was not nil and current is nil, call `stop`.
 * When both previous and current are not nil, but different, call `stop`, then `start`.
+
+## Event chains
