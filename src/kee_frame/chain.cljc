@@ -11,7 +11,7 @@
   (if (= 0 counter)
     event-id
     (keyword
-      (str (namespace event-id) "/" (name event-id) "-" counter))))
+      (str (namespace event-id) (if (namespace event-id) "/") (name event-id) "-" counter))))
 
 (defn replace-pointers [next-event effects]
   (walk/postwalk

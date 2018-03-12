@@ -5,6 +5,12 @@
             [re-frame.core :as rf])
   (:import (clojure.lang ExceptionInfo)))
 
+(deftest utils
+  (testing "Can produce next step id with namespaced keyword"
+    (is (= :ns/id-2 (chain/step-id :ns/id 2))))
+  (testing "Can produce next step id with plain keyword"
+    (is (= :keyw-2 (chain/step-id :keyw 2)))))
+
 (deftest interceptors
   (testing "Inserts dispatch to next"
     (is (= {:dispatch [:next]}
