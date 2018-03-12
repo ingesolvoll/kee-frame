@@ -5,7 +5,7 @@ Micro framework on top of [re-frame](https://github.com/Day8/re-frame). Inspired
 [![Build Status](https://travis-ci.org/ingesolvoll/kee-frame.svg?branch=master)](https://travis-ci.org/ingesolvoll/kee-frame)
 
 ## Rationale
-Re-frame events are very simple and very generic. They are perfect building blocks for higher level abstractions. Kee-frame is leveraging this to implement the main ideas from the Keechma framework in re-frame. The core idea of Keechma is that the URL is the single source of truth, the view is a function of the URL. Kee-frame is re-frame with batteries included, with a few powerful abstractions built on top.
+Re-frame events are very simple and generic, making them perfect building blocks for higher level abstractions. Kee-frame is leveraging this to implement the main ideas from the Keechma framework in re-frame. An opiniated out-of-the-box routing solution will hopefully make it easier to get started with re-frame. Controllers and chains will hopefully help you scale in the long run.
 
 ## Features
 * Automatic router setup
