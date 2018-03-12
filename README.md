@@ -5,30 +5,26 @@ Micro framework on top of [re-frame](https://github.com/Day8/re-frame). Inspired
 [![Build Status](https://travis-ci.org/ingesolvoll/kee-frame.svg?branch=master)](https://travis-ci.org/ingesolvoll/kee-frame)
 
 ## Rationale
-I love re-frame. Compared to 
+Re-frame events are, like React itself, a very useful low level abstraction. But you shouldn't build your entire system on low level abstractions. Being low level and simple makes you a great building block though. Kee-frame leverages this to help you organize your re-frame events in a simple and meaningful way.
 
-Everyone loves re-frame. Very little boilerplate, just enough structure for your app. So what's to improve? Nothing really. It does what it does perfectly well. But it still has the same weakness as every focused Clojure lib out there:
-
-* It's not a complete solution. There are missing parts. Important parts.
-* The other parts are also small focused libs.
-
-To me, the most obvious parts missing are routing and a higher level approach to data loading. Users, particularly beginners, don't need the abundance of options in client side routing, they need a setup that just works. And they need clean and simple solutions to common patterns in SPAs. Solutions that don't involve `component-did-mount` and other low level constructs. kee-frame provides a tiny bit of architecture, and some library glue to get you started quickly.
+Kee-frame, like Keechma, encourages a design where the URL is the single source of truth, while eliminating a lot of boilerplate setup code.
 
 ## Features
-* Automatic router configuration
+* Automatic router setup
 * URL as the single source of truth
-* Route controllers for data setup and teardown.
-* Chained event handlers with shorthand syntax
+* Route controllers for data loading.
+* Event chains for reducing callback ping pong.
+* Spec checking for your app DB
 * Figwheel-friendly.
 
-## Benefits of chosen architecture
+## Benefits of leaving the URL in charge
 * Back/forward and all browser history in general just works
 * Bookmarkable URLs all the way. Same URL, same view.
 * When figwheel reloads the code, you keep your state and stay on the same page.
-* No need for `component-did-mount` to trigger data loading from your view components means stronger decoupling.
+* No need for `component-did-mount` to trigger data loading from your view.
 
 ## Demo application
-I made an example app that shows historical and real-time soccer results. I believe it shows very well the strengths of the framework.
+I made a simple demo app showing footbal results. Have a look around, and observe how all data loading just works while navigating and refreshing the page.
 
 [Online demo app](http://kee-frame-sample.herokuapp.com/) 
 
@@ -39,13 +35,13 @@ Feel free to clone the demo app and do some figwheelin' with it!
 ## Installation
 Add the following dependency to your `project.clj` file:
 ```
-[kee-frame "0.1.3"]
+[kee-frame "0.1.4"]
 ```
 
 ## Getting started
-kee-frame can be introduced into your re-frame app without affecting any existing code. You wire up your views, events and subscriptions as you normally do, and sprinkle a bit of kee-frame on top of that.
 
-The `kee-frame.core` namespace contains the public API
+The `kee-frame.core` namespace contains the public API. It mirrors `reg-event-db` and `reg-event-fx` from `re-frame.core`, as well as exposing the API of `kee-frame`.
+
 ```clojure
 (require '[kee-frame.core :as kee-frame :refer [reg-controller]])
 ```
