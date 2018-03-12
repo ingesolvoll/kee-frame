@@ -62,37 +62,39 @@ The `start!` function starts the router and configures the application.
             :debug?      true})
 ```
 
-Subsequent calls to start are not a problem, browser events will only get hooked up once. The `routes` property is required, the rest are opt-in features. The `debug` boolean option is for enabling debug interceptors on all your events, as well traces from the activities of controllers. If you provide an `app-db-spec`, the framework inserts an interceptor that lets you know when you are trying to corrupt your DB structure.
+Subsequent calls to start are not a problem, browser events will only get hooked up once. 
+
+The `routes` property is required, the rest are opt-in features. 
+
+The `debug` boolean option is for enabling debug interceptors on all your events, as well traces from the activities of controllers. 
+
+If you provide an `app-db-spec`, the framework inserts an interceptor that lets you know when you are trying to corrupt your DB structure.
 
 
 ## Controllers
 A controller is a map with two required keys (`params` and `start`), and one optional (`stop`). 
 
-The `params` function receives the route data on every navigation event from the router. Its only job is to return the part of the route that it's interested in. This value combined with the previous value decides the next state of the controller. I'll come back to that in more detail.
+The `params` function receives the route data every time the URL changes. Its only job is to return the part of the route that it's interested in. This value combined with the previous value decides the next state of the controller. I'll come back to that in more detail.
 
-The `start` function takes as parameters the value returned from `params` and the full re-frame context. It should return nil or an event vector to be dispatched.
+The `start` function accepts the full re-frame context and the value returned from `params`. It should return nil or an event vector to be dispatched.
 
 The `stop` function receives the re-frame context and also returns nil or an event vector.
 
 ```clojure      
-(reg-controller :main
-                {:params (fn [route] (-> route :page (= "todos"))
-                 :start  (fn [params ctx] [:all-todos-poll/start])
-                 :stop (fn [ctx] [:all-todos-poll/stop])})
-
-(reg-controller :todo
-                {:params (fn [route] (number? (-> route :params :id))
-                 :start  (fn [todo-id ctx]
-                           [:load-todo-from-server todo-id])})
+(reg-controller :league
+                {:params (fn [{:keys [handler route-params]}]
+                           (when (= handler :league)
+                             (:id route-params)))
+                 :start  (fn [_ id]
+                           [:league/load id])})
 ```
 
 For `start` and `stop` it's very common to ignore the parameters and just return an event vector, and for that you can use a vector instead of a function:
 
 ```clojure      
-(reg-controller :main
-                {:params (fn [route] (-> route :page (= "todos"))
-                 :start  [:all-todos-poll/start]
-                 :stop   [:all-todos-poll/stop]})
+(reg-controller :leagues
+                {:params (constantly true) ;; Will cause the controller to start immediately, but only once
+                 :start  [:leagues/load]})
 ```
 
 ## Controller state transitions
