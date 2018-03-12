@@ -125,7 +125,11 @@ One very common pattern in re-frame is to register 2 events, one for doing a sid
 
 If some code ends up in between these 2 close friends, the cost of following the flow greatly increases. Even when they are positioned next to each other, an extra amount of thinking is required in order to see where the data goes.
 
-Kee-frame tries to solve the problem of verbosity and readability by using event chains. Through the magic of re-frame `interceptors`, we are able to chain together event handlers without registering them by name. We are also able to automatically infer how to dispatch to next in chain. Here's the above example using a chain:
+Kee-frame tries to solve the problem of verbosity and readability by using event chains. 
+
+A chain is a list of FX (not DB) type event handlers. 
+
+Through the magic of re-frame `interceptors`, we are able to chain together event handlers without registering them by name. We are also able to infer how to dispatch to next in chain. Here's the above example using a chain:
 
 ```clojure      
 (reg-chain :add-customer
@@ -133,8 +137,8 @@ Kee-frame tries to solve the problem of verbosity and readability by using event
               {:http-xhrio {:method          :post
                             :uri             "/customers"
                             :body            customer-data}})
-            (fn [db [_ _ added-customer]]
-              (update db :customers conj added-customer)))
+            (fn [{:keys [db]} [_ _ added-customer]] ;; Remember: No DB functions, only FX.
+              {:db (update db :customers conj added-customer)}))
 ```
 
 The chain code does the same thing as the event code. It registers the events `:add-customer` and `:add-customer-1` as normal re-frame events. The events are registered with an interceptor that processes the event effects and finds the appropriate `on-success` handler for the HTTP effect. Less work for you to do and less cognitive load reading the code later on.
