@@ -7,6 +7,9 @@ Micro framework on top of [re-frame](https://github.com/Day8/re-frame). Inspired
 ## Rationale
 Re-frame events are very simple and generic, making them perfect building blocks for higher level abstractions. Kee-frame is leveraging this to implement the main ideas from the Keechma framework in re-frame. An opiniated out-of-the-box routing solution makes it easier to get started with re-frame. Controllers and event chains helps you scale in the long run.
 
+## Maturity
+Reasonably well tested through the demo app and production apps at my work. API might see some breaking changes in the near future, but hopefully not. Eagerly awaiting feedback!
+
 ## Features
 * Automatic router setup
 * URL as the single source of truth
