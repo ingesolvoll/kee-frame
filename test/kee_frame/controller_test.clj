@@ -38,7 +38,8 @@
 
   (testing "Error handling"
     (is (thrown-with-msg? ExceptionInfo #"Invalid dispatch value"
-                 (-> {:my-controller {:params (constantly true)
-                                      :start  (fn [ctx params]
-                                                "heisann")}}
-                     (c/apply-route {} {:handler :some-page}))))))
+                          (c/apply-route {:my-controller {:params (constantly true)
+                                                          :start  (fn [ctx params]
+                                                                    "heisann")}}
+                                         {}
+                                         {:handler :some-page})))))
