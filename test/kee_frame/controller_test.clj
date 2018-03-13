@@ -42,4 +42,20 @@
                                                           :start  (fn [ctx params]
                                                                     "heisann")}}
                                          {}
-                                         {:handler :some-page})))))
+                                         {:handler :some-page}))))
+  (testing "Error handling on arity start"
+    (is (thrown-with-msg? ExceptionInfo #"Wrong arity for start function"
+                          (c/apply-route {:my-controller {:params (constantly true)
+                                                          :start  (fn [ctx]
+                                                                    [:does "not" "matter"])}}
+                                         {}
+                                         {:handler :some-page}))))
+
+  (testing "Error handling on arity for stop"
+    (is (thrown-with-msg? ExceptionInfo #"Wrong arity for stop function"
+                          (-> {:my-controller {:params (fn [{:keys [handler]}] (= :some-page handler))
+                                               :start  (fn [ctx p] nil)
+                                               :stop   (fn [] [:nah])}}
+                              (c/apply-route {} {:handler :some-page})
+                              (c/apply-route {} {:handler :not-some-page}))))))
+
