@@ -21,37 +21,20 @@
                       (s/explain-data ::spec/event-vector dispatch))))
     (rf/dispatch dispatch)))
 
-(defmacro wrap-arity-exception [body message data]
-  `(try
-     ~body
-     (catch clojure.lang.ArityException _#
-       (throw (ex-info ~message ~data)))))
-
 (defn do-start [id ctx start params]
   (when start
     (when @state/debug?
       (rf/console :log "Starting controller " id " with params " params))
     (cond
       (vector? start) (rf/dispatch (conj start params))
-      (ifn? start) (validate-and-dispatch!
-                     (wrap-arity-exception
-                       (start ctx params)
-                       "Wrong arity for start function. Should be 2 arguments, ctx and params"
-                       {:id     id
-                        :ctx    ctx
-                        :params params})))))
+      (ifn? start) (validate-and-dispatch! (start ctx params)))))
 
 (defn do-stop [id ctx stop]
   (when stop
     (rf/console :log "Stopping controller " id)
     (cond
       (vector? stop) (rf/dispatch stop)
-      (ifn? stop) (validate-and-dispatch!
-                    (wrap-arity-exception
-                      (stop ctx)
-                      "Wrong arity for stop function. Should be 1 arguments, the re-frame ctx"
-                      {:id     id
-                       :ctx    ctx})))))
+      (ifn? stop) (validate-and-dispatch! (stop ctx)))))
 
 (defn process-controller [id {:keys [last-params params start stop]} ctx route]
   (let [current-params (process-params params route)]
