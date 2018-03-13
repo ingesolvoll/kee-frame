@@ -10,6 +10,9 @@
 (s/def ::controller (s/keys :req-un [::params ::start]
                             :opt-un [::stop]))
 
+(s/def ::chain-handler ifn?)
+(s/def ::chain-handlers (s/* ::chain-handler))
+
 (defn log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")
   (let [{:keys [::s/problems ::s/spec]} (s/explain-data spec new-db)]
