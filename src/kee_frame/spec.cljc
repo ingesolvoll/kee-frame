@@ -3,6 +3,13 @@
             [re-frame.core :refer [console]]
             [clojure.spec.alpha :as s]))
 
+(s/def ::params ifn?)
+(s/def ::start ifn?)
+(s/def ::stop ifn?)
+
+(s/def ::controller (s/keys :req-un [::params ::start]
+                            :opt-un [::stop]))
+
 (defn log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")
   (let [{:keys [::s/problems ::s/spec]} (s/explain-data spec new-db)]
