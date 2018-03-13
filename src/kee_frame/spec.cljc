@@ -3,15 +3,17 @@
             [re-frame.core :refer [console]]
             [clojure.spec.alpha :as s]))
 
-(s/def ::params ifn?)
-(s/def ::start ifn?)
-(s/def ::stop ifn?)
+(s/def ::params (s/or :path-vector vector? :fn ifn?))
+(s/def ::start (s/or :vector ::event-vector :fn ifn?))
+(s/def ::stop (s/or :vector ::event-vector :fn ifn?))
 
 (s/def ::controller (s/keys :req-un [::params ::start]
                             :opt-un [::stop]))
 
 (s/def ::chain-handler ifn?)
 (s/def ::chain-handlers (s/* ::chain-handler))
+
+(s/def ::event-vector (s/cat :event-key keyword? :event-args (s/* any?)))
 
 (defn log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")
