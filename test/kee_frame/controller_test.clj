@@ -1,7 +1,8 @@
 (ns kee-frame.controller-test
   (:require [clojure.test :refer :all]
             [kee-frame.controller :as c]
-            [re-frame.core :as rf]))
+            [re-frame.core :as rf])
+  (:import (clojure.lang ExceptionInfo)))
 
 (deftest compact-syntax
   (testing "Can start and stop"
@@ -33,4 +34,11 @@
                              :start  (fn [ctx params]
                                        [:start/event])}}
             (c/apply-route {} {:handler :some-page}))
-        (is (= [[:start/event]] @events))))))
+        (is (= [[:start/event]] @events)))))
+
+  (testing "Error handling"
+    (is (thrown-with-msg? ExceptionInfo #"Invalid dispatch value"
+                 (-> {:my-controller {:params (constantly true)
+                                      :start  (fn [ctx params]
+                                                "heisann")}}
+                     (c/apply-route {} {:handler :some-page}))))))
