@@ -32,7 +32,7 @@ Feel free to clone the demo app and do some figwheelin' with it!
 
 ## Installation
 Add the following dependency to your `project.clj` file:
-```
+```clojure
 [kee-frame "0.1.4"]
 ```
 
