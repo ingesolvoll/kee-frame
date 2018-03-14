@@ -24,7 +24,7 @@
 (defn reg-event-db [id handler]
   (rf/reg-event-db id interceptors handler))
 
-(defn reg-chain-named [handlers]
+(defn reg-chain-named [& handlers]
   (apply chain/reg-chain-named interceptors handlers))
 
 (defn reg-chain [id & handlers]
