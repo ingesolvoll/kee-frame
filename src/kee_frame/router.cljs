@@ -3,7 +3,8 @@
             [kee-frame.state :as state]
             [kee-frame.controller :as controller]
             [accountant.core :as accountant]
-            [bidi.bidi :as bidi]))
+            [bidi.bidi :as bidi]
+            [reagent.core :as reagent]))
 
 (defn url [& params]
   (apply bidi/path-for @state/routes params))
@@ -24,7 +25,7 @@
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
-(defn start! [{:keys [routes initial-db process-route app-db-spec debug?]
+(defn start! [{:keys [routes initial-db process-route app-db-spec debug? root-component]
                :or   {process-route identity
                       initial-db    {}
                       debug?        false}}]
@@ -44,6 +45,10 @@
     (rf/reg-fx :navigate-to #(apply goto %))
 
     (rf/reg-sub :kee-frame/route :kee-frame/route)
+
+    (when root-component
+      (reagent/render root-component
+                      (.getElementById js/document "app")))
 
     (when-not initialized?
       (accountant/configure-navigation!
