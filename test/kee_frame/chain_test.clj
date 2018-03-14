@@ -52,13 +52,31 @@
                ((chain/effect-postprocessor :next-event))
                :effects)))))
 
-(deftest outer-side-effecting-api
-  (comment (testing "Plain chain"
-             (chain/reg-chain :my/chain
-                              (fn [{:keys [db]} [_ x]]
-                                {:db (assoc db :x x)})
-                              (fn [{:keys [db]} [_ x]]
-                                {:db (assoc db :x-again x)}))
-             (rf/dispatch [:my/chain 1])
-             (is (= {:x 1 :x-again 1}
-                    @re-frame.db/app-db)))))
+(deftest outer-api
+  (testing "Plain chain"
+    (let [instructions (chain/collect-event-instructions :my/chain
+                                                         [identity
+                                                          identity])]
+      (is (= [:my/chain :my/chain-1]
+             (map :id instructions)))))
+
+  (testing "Bad chain"
+    (is (thrown-with-msg? ExceptionInfo #""
+                          (chain/collect-event-instructions :my/chain
+                                                            ["string-should-not-be-here"]))))
+
+  (testing "Named chain"
+    (let [instructions (chain/collect-named-event-instructions
+                         [:step-1
+                          identity
+                          :step-2
+                          identity])]
+      (is (= [:step-1 :step-2]
+             (map :id instructions)))))
+
+  (testing "Bad named chain gives good error message"
+    (is (thrown-with-msg? ExceptionInfo #""
+                          (chain/collect-named-event-instructions
+                            [:step-1
+                             identity
+                             :step-2])))))

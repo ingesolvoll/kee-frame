@@ -13,16 +13,10 @@
 (defn start! [options]
   (router/start! (assoc options :interceptors interceptors)))
 
-
 (defn reg-controller [id controller]
   (when-not (s/valid? ::spec/controller controller)
     (throw (ex-info "Invalid controller" (s/explain-data ::spec/controller controller))))
   (swap! state/controllers assoc id controller))
-
-(s/fdef reg-controller
-        :args (s/cat :id keyword?
-                     :controller ::spec/controller))
-
 
 (defn reg-event-fx [id handler]
   (rf/reg-event-fx id interceptors handler))
@@ -30,14 +24,11 @@
 (defn reg-event-db [id handler]
   (rf/reg-event-db id interceptors handler))
 
-(defn reg-chain [id & handlers]
-  (when-not (s/valid? ::spec/chain-handlers handlers)
-    (throw (ex-info "Invalid chain" (s/explain-data ::spec/chain-handlers handlers))))
-  (apply chain/reg-chain id interceptors handlers))
+(defn reg-chain-named [handlers]
+  (apply chain/reg-chain-named interceptors handlers))
 
-(s/fdef reg-chain
-        :args (s/cat :id keyword?
-                     :chain-handlers ::spec/chain-handlers))
+(defn reg-chain [id & handlers]
+  (apply chain/reg-chain id interceptors handlers))
 
 (defn path-for [handler & params]
   (apply router/url handler params))

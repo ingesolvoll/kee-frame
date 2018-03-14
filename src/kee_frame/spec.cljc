@@ -12,6 +12,7 @@
 
 (s/def ::chain-handler ifn?)
 (s/def ::chain-handlers (s/* ::chain-handler))
+(s/def ::named-chain-handlers (s/* (s/cat :id keyword? :event-handler ::chain-handler)))
 
 (s/def ::event-vector (s/cat :event-key keyword? :event-args (s/* any?)))
 
