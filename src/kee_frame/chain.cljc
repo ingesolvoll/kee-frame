@@ -111,7 +111,7 @@
 
 (defn collect-event-instructions [id step-fns]
   (when (= ::s/invalid (s/conform ::spec/chain-handlers step-fns))
-    (throw (ex-info "Invalid chain" (s/explain-data ::spec/named-chain-handlers step-fns))))
+    (throw (ex-info "Invalid chain" (s/explain-data ::spec/chain-handlers step-fns))))
 
   (->> step-fns
        (partition 2 1 [nil])
