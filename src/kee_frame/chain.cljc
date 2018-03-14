@@ -101,7 +101,7 @@
 (defn collect-named-event-instructions [step-fns]
   (let [chain-handlers (s/conform ::spec/named-chain-handlers step-fns)]
     (when (= ::s/invalid chain-handlers)
-      (throw (ex-info "Invalid named chain" (s/explain-data ::spec/named-chain-handlers step-fns))))
+      (throw (ex-info "Invalid named chain. Should be pairs of keyword and handler" (s/explain-data ::spec/named-chain-handlers step-fns))))
     (->> chain-handlers
          (partition 2 1 [nil])
          (map (fn [[{:keys [id] :as handler-1} handler-2]]
@@ -109,15 +109,15 @@
                   (assoc handler-1 :next-id (:id handler-2)
                                    :interceptor (chain-interceptor id next-id))))))))
 
-(defn collect-event-instructions [id step-fns]
+(defn collect-event-instructions [key step-fns]
   (when (= ::s/invalid (s/conform ::spec/chain-handlers step-fns))
     (throw (ex-info "Invalid chain" (s/explain-data ::spec/chain-handlers step-fns))))
 
   (->> step-fns
        (partition 2 1 [nil])
        (map-indexed (fn [counter [current-handler next-handler]]
-                      (let [id (step-id id counter)
-                            next-id (when next-handler (step-id id (inc counter)))]
+                      (let [id (step-id key counter)
+                            next-id (when next-handler (step-id key (inc counter)))]
                         {:id            id
                          :next-id       next-id
                          :event-handler current-handler
