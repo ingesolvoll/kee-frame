@@ -10,7 +10,19 @@
 
 (def interceptors [(spec-interceptor state/app-db-spec) (debug-interceptor state/debug?) rf/trim-v])
 
+(def valid-option-key? #{:routes :process-route :debug? :app-db-spec :root-component :initial-db})
+
+(defn extra-options [options]
+  (->> options
+       (filter (fn [[k]] (not (valid-option-key? k))))
+       (into {})))
+
 (defn start! [options]
+  (when-not (s/valid? ::spec/start-options options)
+    (throw (ex-info "Invalid options" (s/explain-data ::spec/start-options options))))
+  (let [extras (extra-options options)]
+    (when (seq extras)
+      (throw (ex-info (str "Uknown startup options. Valid keys are " valid-option-key?) extras))))
   (router/start! (assoc options :interceptors interceptors)))
 
 (defn reg-controller [id controller]
