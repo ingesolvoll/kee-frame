@@ -31,7 +31,8 @@
 
 (defn do-stop [id ctx stop]
   (when stop
-    (rf/console :log "Stopping controller " id)
+    (when @state/debug?
+      (rf/console :log "Stopping controller " id))
     (cond
       (vector? stop) (rf/dispatch stop)
       (ifn? stop) (validate-and-dispatch! (stop ctx)))))
