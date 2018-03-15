@@ -6,6 +6,7 @@
             [kee-frame.spec :as spec]
             [kee-frame.spec :refer [spec-interceptor]]
             [kee-frame.debug :refer [debug-interceptor]]
+            [re-frame.core :refer [console]]
             [clojure.spec.alpha :as s]))
 
 (def interceptors [(spec-interceptor state/app-db-spec) (debug-interceptor state/debug?) rf/trim-v])
@@ -29,8 +30,7 @@
   (when-not (s/valid? ::spec/controller controller)
     (throw (ex-info "Invalid controller" (s/explain-data ::spec/controller controller))))
   (when (get @state/controllers id)
-    (throw (ex-info "Duplicated controllers" {:id           id
-                                              :existing-ids (keys @state/controllers)})))
+    (console :warn "Overwriting controller with id " id))
   (swap! state/controllers assoc id controller))
 
 (defn reg-event-fx [id handler]
