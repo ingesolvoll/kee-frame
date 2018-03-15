@@ -28,6 +28,9 @@
 (defn reg-controller [id controller]
   (when-not (s/valid? ::spec/controller controller)
     (throw (ex-info "Invalid controller" (s/explain-data ::spec/controller controller))))
+  (when (get @state/controllers id)
+    (throw (ex-info "Duplicated controllers" {:id           id
+                                              :existing-ids (keys @state/controllers)})))
   (swap! state/controllers assoc id controller))
 
 (defn reg-event-fx [id handler]
