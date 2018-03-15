@@ -152,6 +152,23 @@ You are allowed to dispatch out of chain, but there must always be a "slot" avai
 
 You can specify your dispatch explicitly using a special keyword as your event id, like this: `{:on-success [:kee-frame.core/next 1 2 3]}`. The keyword will be replaced by a generated id for the next in chain. 
 
+## Browser navigation
+
+Using URL strings in your links and navigation is error prone and quickly becomes a maintenance problem. Therefore, kee-frame encourages you to only interact with route data instead of concrete URLs. It provides 2 abstractions to help you with that:
+
+The `kee-frame.core/path-for` function accepts a bidi route and returns a URL string:
+
+`(k/path-for :todos :id 14) => "/todos/14"`
+
+Kee-frame also includes a re-frame effect for triggering a browser navigation, after all navigation is a side effect. The effect is `:navigate-to` and it accepts a bidi route. The example below shows a handler that receives some data and navigates to the view page for those data.
+
+```clojure      
+(reg-event-fx :todo-added
+              (fn [_ [_ todo]]
+                {:db          (update db :todos conj todo)
+                 :navigate-to [:todo :id (:id todo)]]})) ;; "/todos/14"
+```
+
 
 ## Introducing kee-frame into an existing app
 
