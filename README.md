@@ -172,7 +172,10 @@ Kee-frame also includes a re-frame effect for triggering a browser navigation, a
 
 ## Introducing kee-frame into an existing app
 
-The chain feature is a pure add-on to re-frame, and can be easily introduced in an existing app. The controller feature depends on the specific routing implementation of kee-frame, so to use controllers you might need to adapt your routing. In order to ease this process, the `start!` function has a configuration option named `:process-route`. This can be a function that accepts the route data and modifies it to fit your existing app.
+Several parts of kee-frame are designed to be opt-in. This means that you can include kee-frame in your project and start using parts of it.
+
+If you want controllers and routes, you need to replace your current routing with kee-frame's routing. In order to ease this process, the `start!` function has a configuration option named `:process-route`. This can be a function that accepts the route data and modifies it to fit your existing app.
+
 
 ## Maturity
 Reasonably well tested through the demo app and production apps at my work. API might see some breaking changes in the near future, but hopefully not. Eagerly awaiting feedback!
