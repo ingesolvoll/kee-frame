@@ -47,8 +47,10 @@
     (rf/reg-sub :kee-frame/route :kee-frame/route)
 
     (when root-component
-      (reagent/render root-component
-                      (.getElementById js/document "app")))
+      (if-let [app-element (.getElementById js/document "app")]
+        (reagent/render root-component
+                        app-element)
+        (throw (ex-info "Could not find element with id 'app' to mount app into" {:component root-component}))))
 
     (when-not initialized?
       (accountant/configure-navigation!
