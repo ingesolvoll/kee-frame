@@ -152,6 +152,18 @@ You are allowed to dispatch out of chain, but there must always be a "slot" avai
 
 You can specify your dispatch explicitly using a special keyword as your event id, like this: `{:on-success [:kee-frame.core/next 1 2 3]}`. The keyword will be replaced by a generated id for the next in chain. 
 
+## But I want to decide the name of my events!
+
+Sometimes you may want to specify your event names, to ease debugging or readability. In that case, use the `kee-frame.core/reg-chain-named`, like this: 
+
+```clojure
+(reg-chain-named :first-id 
+                  first-fn 
+                  :second-id 
+                  second-fn
+                  ....)
+```
+
 ## Browser navigation
 
 Using URL strings in your links and navigation is error prone and quickly becomes a maintenance problem. Therefore, kee-frame encourages you to only interact with route data instead of concrete URLs. It provides 2 abstractions to help you with that:
