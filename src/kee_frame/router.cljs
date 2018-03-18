@@ -23,19 +23,9 @@
           (rf/console :log "Available routes: " @state/routes)
           (rf/console :groupEnd)))))
 
-(rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
-
-(defn start! [{:keys [routes initial-db process-route app-db-spec debug? root-component]
-               :or   {process-route identity
-                      initial-db    {}
-                      debug?        false}}]
+(defn bootstrap-routes [routes process-route debug?]
   (let [initialized? (boolean @state/routes)]
     (reset! state/routes routes)
-    (reset! state/app-db-spec app-db-spec)
-    (reset! state/debug? debug?)
-
-    (rf/dispatch-sync [:init initial-db])
-
     (rf/reg-event-fx ::route-changed
                      (if debug? [rf/debug])
                      (fn [{:keys [db] :as ctx} [_ route]]
@@ -46,14 +36,28 @@
 
     (rf/reg-sub :kee-frame/route :kee-frame/route)
 
-    (when root-component
-      (if-let [app-element (.getElementById js/document "app")]
-        (reagent/render root-component
-                        app-element)
-        (throw (ex-info "Could not find element with id 'app' to mount app into" {:component root-component}))))
-
     (when-not initialized?
       (accountant/configure-navigation!
         {:nav-handler  (nav-handler process-route)
          :path-exists? #(boolean (bidi/match-route @state/routes %))}))
     (accountant/dispatch-current!)))
+
+(rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
+
+(defn start! [{:keys [routes initial-db process-route app-db-spec debug? root-component]
+               :or   {process-route identity
+                      initial-db    {}
+                      debug?        false}}]
+  (reset! state/app-db-spec app-db-spec)
+  (reset! state/debug? debug?)
+
+  (rf/dispatch-sync [:init initial-db])
+
+  (when root-component
+    (if-let [app-element (.getElementById js/document "app")]
+      (reagent/render root-component
+                      app-element)
+      (throw (ex-info "Could not find element with id 'app' to mount app into" {:component root-component}))))
+
+  (when routes
+    (bootstrap-routes routes process-route debug?)))
