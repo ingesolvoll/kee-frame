@@ -58,15 +58,18 @@ Here are the routes from the demo app:
 The `start!` function starts the router and configures the application.
 
 ```clojure
-(k/start!  {:routes       my-routes
-            :app-db-spec :my-app/db-spec
-            :initial-db   your-blank-db-map
-            :debug?       true})
+(k/start!  {:routes         my-routes
+            :app-db-spec    :my-app/db-spec
+            :initial-db     your-blank-db-map
+            :root-component [my-root-reagent-component]
+            :debug?         true})
 ```
 
 Subsequent calls to start are not a problem, browser events will only get hooked up once. 
 
 The `routes` property is required, the rest are opt-in features. 
+
+If you provide `:root-component`, kee-frame will render that component in the DOM element with id "app". Make sure you have such an element in your index.html. You are free to do the initial rendering yourself if you want, just skip this setting. If you use this feature, make sure that `k/start!` is called every time figwheel reloads your code. 
 
 The `debug` boolean option is for enabling debug interceptors on all your events, as well traces from the activities of controllers. 
 
