@@ -58,15 +58,18 @@ Here are the routes from the demo app:
 The `start!` function starts the router and configures the application.
 
 ```clojure
-(k/start!  {:routes       my-routes
-            :app-db-spec :my-app/db-spec
-            :initial-db   your-blank-db-map
-            :debug?       true})
+(k/start!  {:routes         my-routes
+            :app-db-spec    :my-app/db-spec
+            :initial-db     your-blank-db-map
+            :root-component [my-root-reagent-component]
+            :debug?         true})
 ```
 
-Subsequent calls to start are not a problem, browser events will only get hooked up once. 
+Subsequent calls to start are not a problem, so call this function as often as you want.
 
-The `routes` property is required, the rest are opt-in features. 
+The `routes` property causes kee-frame to wire up the browser to navigate by those routes. Skip this property if you want to do your own routing. See the "Introducing kee-frame into an existing app" section.
+
+If you provide `:root-component`, kee-frame will render that component in the DOM element with id "app". Make sure you have such an element in your index.html. You are free to do the initial rendering yourself if you want, just skip this setting. If you use this feature, make sure that `k/start!` is called every time figwheel reloads your code. 
 
 The `debug` boolean option is for enabling debug interceptors on all your events, as well traces from the activities of controllers. 
 
@@ -152,6 +155,18 @@ You are allowed to dispatch out of chain, but there must always be a "slot" avai
 
 You can specify your dispatch explicitly using a special keyword as your event id, like this: `{:on-success [:kee-frame.core/next 1 2 3]}`. The keyword will be replaced by a generated id for the next in chain. 
 
+## But I want to decide the name of my events!
+
+Sometimes you may want to specify your event names, to ease debugging or readability. In that case, use the `kee-frame.core/reg-chain-named`, like this: 
+
+```clojure
+(reg-chain-named :first-id 
+                  first-fn 
+                  :second-id 
+                  second-fn
+                  ....)
+```
+
 ## Browser navigation
 
 Using URL strings in your links and navigation is error prone and quickly becomes a maintenance problem. Therefore, kee-frame encourages you to only interact with route data instead of concrete URLs. It provides 2 abstractions to help you with that:
@@ -176,6 +191,7 @@ Several parts of kee-frame are designed to be opt-in. This means that you can in
 
 If you want controllers and routes, you need to replace your current routing with kee-frame's routing. In order to ease this process, the `start!` function has a configuration option named `:process-route`. This can be a function that accepts the route data and modifies it to fit your existing app.
 
+Alternatively, make your current router dispatch the event `[:kee-frame.router/route-changed route-data]` on every route change. That should enable what you need for the controllers.
 
 ## Maturity
 Reasonably well tested through the demo app and production apps at my work. API might see some breaking changes in the near future, but hopefully not. Eagerly awaiting feedback!
