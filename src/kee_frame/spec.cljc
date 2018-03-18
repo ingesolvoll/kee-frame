@@ -23,8 +23,7 @@
 (s/def ::app-db-spec (s/nilable keyword?))
 (s/def ::debug? (s/nilable boolean?))
 
-(s/def ::start-options (s/keys :req-un [::routes]
-                               :opt-un [::root-component ::initial-db ::process-route ::app-db-spec ::debug?]))
+(s/def ::start-options (s/keys :opt-un [::routes ::root-component ::initial-db ::process-route ::app-db-spec ::debug?]))
 
 (defn log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")
