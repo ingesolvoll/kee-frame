@@ -51,6 +51,8 @@
                       debug?        false}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
+  (when routes
+    (bootstrap-routes routes process-route))
 
   (rf/dispatch-sync [:init initial-db])
   (reg-route-event)
@@ -60,7 +62,4 @@
     (if-let [app-element (.getElementById js/document "app")]
       (reagent/render root-component
                       app-element)
-      (throw (ex-info "Could not find element with id 'app' to mount app into" {:component root-component}))))
-
-  (when routes
-    (bootstrap-routes routes process-route)))
+      (throw (ex-info "Could not find element with id 'app' to mount app into" {:component root-component})))))
