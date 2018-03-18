@@ -7,6 +7,8 @@
             [reagent.core :as reagent]))
 
 (defn url [& params]
+  (when-not @state/routes
+    (throw (ex-info "No routes defined for this app" {:routes @state/routes})))
   (apply bidi/path-for @state/routes params))
 
 (defn goto [route & params]
