@@ -65,9 +65,9 @@ The `start!` function starts the router and configures the application.
             :debug?         true})
 ```
 
-Subsequent calls to start are not a problem, browser events will only get hooked up once. 
+Subsequent calls to start are not a problem, so call this function as often as you want.
 
-The `routes` property is required, the rest are opt-in features. 
+The `routes` property causes kee-frame to wire up the browser to navigate by those routes. Skip this property if you want to do your own routing. See the "Introducing kee-frame into an existing app" section.
 
 If you provide `:root-component`, kee-frame will render that component in the DOM element with id "app". Make sure you have such an element in your index.html. You are free to do the initial rendering yourself if you want, just skip this setting. If you use this feature, make sure that `k/start!` is called every time figwheel reloads your code. 
 
