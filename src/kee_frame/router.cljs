@@ -23,18 +23,10 @@
           (rf/console :log "Available routes: " @state/routes)
           (rf/console :groupEnd)))))
 
-(defn bootstrap-routes [routes process-route debug?]
+(defn bootstrap-routes [routes process-route]
   (let [initialized? (boolean @state/routes)]
     (reset! state/routes routes)
-    (rf/reg-event-fx ::route-changed
-                     (if debug? [rf/debug])
-                     (fn [{:keys [db] :as ctx} [_ route]]
-                       (swap! state/controllers controller/apply-route ctx route)
-                       {:db (assoc db :kee-frame/route route)}))
-
     (rf/reg-fx :navigate-to #(apply goto %))
-
-    (rf/reg-sub :kee-frame/route :kee-frame/route)
 
     (when-not initialized?
       (accountant/configure-navigation!
@@ -44,6 +36,13 @@
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
+(defn reg-route-event []
+  (rf/reg-event-fx ::route-changed
+                   (if @state/debug? [rf/debug])
+                   (fn [{:keys [db] :as ctx} [_ route]]
+                     (swap! state/controllers controller/apply-route ctx route)
+                     {:db (assoc db :kee-frame/route route)})))
+
 (defn start! [{:keys [routes initial-db process-route app-db-spec debug? root-component]
                :or   {process-route identity
                       initial-db    {}
@@ -52,6 +51,8 @@
   (reset! state/debug? debug?)
 
   (rf/dispatch-sync [:init initial-db])
+  (reg-route-event)
+  (rf/reg-sub :kee-frame/route :kee-frame/route)
 
   (when root-component
     (if-let [app-element (.getElementById js/document "app")]
@@ -60,4 +61,4 @@
       (throw (ex-info "Could not find element with id 'app' to mount app into" {:component root-component}))))
 
   (when routes
-    (bootstrap-routes routes process-route debug?)))
+    (bootstrap-routes routes process-route)))
