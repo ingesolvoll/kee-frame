@@ -47,14 +47,13 @@
 
 (defn start! [{:keys [routes initial-db process-route app-db-spec debug? root-component]
                :or   {process-route identity
-                      initial-db    {}
                       debug?        false}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
   (when routes
     (bootstrap-routes routes process-route))
 
-  (rf/dispatch-sync [:init initial-db])
+  (when initial-db (rf/dispatch-sync [:init initial-db]))
   (reg-route-event)
   (rf/reg-sub :kee-frame/route :kee-frame/route)
 
