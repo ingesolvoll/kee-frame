@@ -53,7 +53,8 @@
   (when routes
     (bootstrap-routes routes process-route))
 
-  (when initial-db (rf/dispatch-sync [:init initial-db]))
+  (when initial-db
+    (rf/dispatch-sync [:init initial-db]))
   (reg-route-event)
   (rf/reg-sub :kee-frame/route :kee-frame/route)
 
