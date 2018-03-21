@@ -3,9 +3,11 @@
             [re-frame.interceptor :refer [->interceptor get-effect get-coeffect assoc-coeffect assoc-effect]]
             [clojure.data :as data]))
 
-(defn debug-enabled? [{:keys [blacklist] :as debug?} [event-key]]
+(defn debug-enabled? [{:keys [blacklist]
+                       :as   debug?} [event-key]]
   (and debug?
-       (not (blacklist event-key))))
+       (not (and blacklist
+                 (blacklist event-key)))))
 
 (defn debug-interceptor [debug?]
   (->interceptor
