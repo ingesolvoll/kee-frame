@@ -31,7 +31,7 @@
     (throw (ex-info "Invalid controller" (s/explain-data ::spec/controller controller))))
   (when (get @state/controllers id)
     (console :warn "Overwriting controller with id " id))
-  (swap! state/controllers assoc id controller))
+  (swap! state/controllers update id merge controller))
 
 (defn reg-event-fx [id handler]
   (rf/reg-event-fx id interceptors handler))
