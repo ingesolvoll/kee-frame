@@ -66,14 +66,22 @@
                       app-element)
       (throw (ex-info "Could not find element with id 'app' to mount app into" {:component root-component})))))
 
+(defn make-route-component [component route]
+  (if (fn? component)
+    [component route]
+    component))
+
 (defn switch-route [f & pairs]
+  (when-not (= 0 (mod (count pairs) 2))
+    (throw (ex-info "switch-route accepts an even number of args" {:pairs       pairs
+                                                                   :pairs-count (count pairs)})))
   (let [route (rf/subscribe [:kee-frame/route])
         dispatch-value (f @route)]
     (loop [[first-pair & rest-pairs] (partition 2 pairs)]
       (if first-pair
         (let [[value component] first-pair]
           (if (= value dispatch-value)
-            component
+            (make-route-component component @route)
             (recur rest-pairs)))
         (throw (ex-info "Could not find a component to match route" {:route @route
                                                                      :pairs pairs}))))))
