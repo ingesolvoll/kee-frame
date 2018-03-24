@@ -47,3 +47,6 @@
 
 (defn path-for [handler & params]
   (apply router/url handler params))
+
+(defn switch-route [f & pairs]
+  (apply router/switch-route f pairs))

@@ -55,11 +55,25 @@
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))
+
   (reg-route-event)
-  (rf/reg-sub :kee-frame/route :kee-frame/route)
+
+  (rf/reg-sub :kee-frame/route (fn [db] (:kee-frame/route db nil)))
 
   (when root-component
     (if-let [app-element (.getElementById js/document "app")]
       (reagent/render root-component
                       app-element)
       (throw (ex-info "Could not find element with id 'app' to mount app into" {:component root-component})))))
+
+(defn switch-route [f & pairs]
+  (let [route (rf/subscribe [:kee-frame/route])
+        dispatch-value (f @route)]
+    (loop [[first-pair & rest-pairs] (partition 2 pairs)]
+      (if first-pair
+        (let [[value component] first-pair]
+          (if (= value dispatch-value)
+            component
+            (recur rest-pairs)))
+        (throw (ex-info "Could not find a component to match route" {:route @route
+                                                                     :pairs pairs}))))))
