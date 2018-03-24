@@ -21,7 +21,7 @@
                       (s/explain-data ::spec/event-vector dispatch))))
     (rf/dispatch dispatch)))
 
-(defn do-start [id ctx start params]
+(defn start! [id ctx start params]
   (when start
     (when @state/debug?
       (rf/console :log "Starting controller " id " with params " params))
@@ -29,7 +29,7 @@
       (vector? start) (rf/dispatch (conj start params))
       (ifn? start) (validate-and-dispatch! (start ctx params)))))
 
-(defn do-stop [id ctx stop]
+(defn stop! [id ctx stop]
   (when stop
     (when @state/debug?
       (rf/console :log "Stopping controller " id))
@@ -41,10 +41,10 @@
   (let [current-params (process-params params route)]
     (match [last-params current-params (= last-params current-params)]
            [_ _ true] nil
-           [nil _ false] (do-start id ctx start current-params)
-           [_ nil false] (do-stop id ctx stop)
-           [_ _ false] (do (do-stop id ctx stop)
-                           (do-start id ctx start current-params)))
+           [nil _ false] (start! id ctx start current-params)
+           [_ nil false] (stop! id ctx stop)
+           [_ _ false] (do (stop! id ctx stop)
+                           (start! id ctx start current-params)))
     current-params))
 
 (defn apply-route [controllers ctx route]
