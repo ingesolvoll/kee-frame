@@ -5,7 +5,7 @@
   :url "https://github.com/ingesolvoll/kee-frame"
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.9.0"]
-                 [org.clojure/clojurescript "1.9.946"]
+                 [org.clojure/clojurescript "1.10.217"]
                  [re-frame "0.10.3-alpha1"]
                  [bidi "2.0.16"]
                  [venantius/accountant "0.1.9"]
