@@ -203,7 +203,8 @@ In compojure, the wildcard route would look like this:
 ```clojure
 (GET "*" req {:headers {"Content-Type" "text/html"}
                   :status  200
-                  :body    (index-handler req)})```
+                  :body    (index-handler req)})
+```
 
 ## Maturity
 Reasonably well tested through the demo app and production apps at my work. API might see some breaking changes in the near future, but hopefully not. Eagerly awaiting feedback!
