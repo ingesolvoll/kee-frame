@@ -1,10 +1,30 @@
 (ns kee-frame.router
-  (:require [re-frame.core :as rf]
+  (:require #?(:cljs [accountant.core :as accountant])
+            [re-frame.core :as rf]
             [kee-frame.state :as state]
             [kee-frame.controller :as controller]
-            [accountant.core :as accountant]
             [bidi.bidi :as bidi]
             [reagent.core :as reagent]))
+
+(defprotocol Router
+  (dispatch-current! [_])
+  (navigate! [_ url])
+  (init! [_ opts]))
+
+(defrecord AccountantRouter [opts]
+  Router
+  (dispatch-current! [_]
+    (accountant/dispatch-current!))
+  (navigate! [_ url]
+    (accountant/navigate! url))
+  (init! [_ {:keys [nav-handler path-exists?]}]
+    (accountant/init! {:nav-handler  (nav-handler process-route)
+                       :path-exists? #(boolean (bidi/match-route @state/routes %))})))
+
+(defn make-router
+  [router-type]
+  (case router-type
+    :accountant (->AccountantRouter opts)))
 
 (defn url [& params]
   (when-not @state/routes
@@ -12,6 +32,7 @@
   (apply bidi/path-for @state/routes params))
 
 (defn goto [route & params]
+  ;; changeme
   (accountant/navigate! (apply url route params)))
 
 (defn nav-handler [process-route]
@@ -25,15 +46,16 @@
           (rf/console :log "Available routes: " @state/routes)
           (rf/console :groupEnd)))))
 
-(defn bootstrap-routes [routes process-route]
+(defn bootstrap-routes [routes router process-route]
   (let [initialized? (boolean @state/routes)]
     (reset! state/routes routes)
     (rf/reg-fx :navigate-to #(apply goto %))
 
     (when-not initialized?
+      ;; changeme
       (accountant/configure-navigation!
-        {:nav-handler  (nav-handler process-route)
-         :path-exists? #(boolean (bidi/match-route @state/routes %))}))
+       {:nav-handler  (nav-handler process-route)
+        :path-exists? #(boolean (bidi/match-route @state/routes %))}))
     (accountant/dispatch-current!)))
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
@@ -45,13 +67,16 @@
                      (swap! state/controllers controller/apply-route ctx route)
                      {:db (assoc db :kee-frame/route route)})))
 
-(defn start! [{:keys [routes initial-db process-route app-db-spec debug? root-component]
+(defn start! [{:keys [routes router-type initial-db process-route app-db-spec debug? root-component]
                :or   {process-route identity
-                      debug?        false}}]
+                      debug?        false
+                      router-type   #?(:clj :test
+                                       :cljs :accountant)}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
   (when routes
-    (bootstrap-routes routes process-route))
+    (let [router (make-router router-type)]
+      (bootstrap-routes routes router process-route)))
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))
