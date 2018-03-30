@@ -2,11 +2,9 @@
   (:require [kee-frame.state :as state]
             [kee-frame.router :as router]
             [kee-frame.chain :as chain]
-            [re-frame.core :as rf]
-            [kee-frame.spec :as spec]
-            [kee-frame.spec :refer [spec-interceptor]]
+            [re-frame.core :as rf :refer [console]]
+            [kee-frame.spec :as spec :refer [spec-interceptor]]
             [kee-frame.debug :refer [debug-interceptor]]
-            [re-frame.core :refer [console]]
             [clojure.spec.alpha :as s]))
 
 (def interceptors [(spec-interceptor state/app-db-spec) (debug-interceptor state/debug?) rf/trim-v])
