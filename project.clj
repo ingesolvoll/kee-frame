@@ -6,7 +6,7 @@
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.10.217"]
-                 [re-frame "0.10.3-alpha1"]
+                 [re-frame "0.10.5"]
                  [bidi "2.0.16"]
                  [venantius/accountant "0.1.9"]
                  [org.clojure/core.match "0.3.0-alpha5"]]
