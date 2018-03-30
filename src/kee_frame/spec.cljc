@@ -34,9 +34,9 @@
     (console :log "Failing spec " spec))
   (console :groupEnd "*****************************"))
 
-(defn rollback [context new-db db-spec-atom]
+(defn rollback [context new-db db-spec]
   (do
-    (log-spec-error new-db @db-spec-atom)
+    (log-spec-error new-db db-spec)
     (assoc-effect context :db (get-coeffect context :db))))
 
 (defn spec-interceptor [db-spec-atom]
@@ -45,5 +45,5 @@
     :after (fn [context]
              (let [new-db (get-effect context :db)]
                (if (and @db-spec-atom new-db (not (s/valid? @db-spec-atom new-db)))
-                 (rollback context new-db db-spec-atom)
+                 (rollback context new-db @db-spec-atom)
                  context)))))
