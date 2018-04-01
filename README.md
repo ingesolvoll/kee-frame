@@ -184,6 +184,35 @@ Kee-frame also includes a re-frame effect for triggering a browser navigation, a
                  :navigate-to [:todo :id (:id todo)]]})) ;; "/todos/14"
 ```
 
+## Routing in your views
+
+Most apps need to different views for different URLs. This isn't too hard to solve in re-frame, just subscribe to your route and implement your dispatch logic like this:
+
+```clojure      
+(defn main-view []
+  (let [route (subscribe [:kee-frame/route])]
+    (fn []
+      [:div
+       (case (:handler @route)
+         :index [index-page]
+         :orders [orders-page])])))
+```
+
+Kee-frame provides a simple helper to do this:
+
+```clojure
+(defn main-view []
+  [k/switch-route :handler
+   :index [index-page] ;; Explicit call to reagent component, ignoring route data
+   :orders orders-page]) ;; Orders page will receive the route data as its parameter because of missing []
+```
+
+It looks pretty much the same, only more concise. But it does help you with a few subtle but important things:
+
+* Forces you into a known working pattern
+* No explicit reference to the route. The first argument to `switch-route` is a function that accepts the route and returns the value you are dispatching on
+* If you pass only a function reference to your reagent components (no surrounding []), kee-frame will invoke them with the route as the first parameter.
+* It will give you nice error messages when you make a mistake.
 
 ## Introducing kee-frame into an existing app
 
