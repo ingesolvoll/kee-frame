@@ -83,5 +83,6 @@
           (if (= value dispatch-value)
             (make-route-component component @route)
             (recur rest-pairs)))
-        (throw (ex-info "Could not find a component to match route" {:route @route
-                                                                     :pairs pairs}))))))
+        (throw (ex-info "Could not find a component to match route" {:route          @route
+                                                                     :dispatch-value dispatch-value
+                                                                     :pairs          pairs}))))))
