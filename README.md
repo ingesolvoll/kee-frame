@@ -23,6 +23,8 @@ Re-frame events are very simple and generic, making them perfect building blocks
 
 ## Articles
 
+[Learning kee-frame in 5 minutes](http://ingesolvoll.github.io/posts/2018-04-01-learning-kee-frame-in-5-minutes/)
+
 [Introduction and background for kee-frame controllers](http://ingesolvoll.github.io/posts/2018-04-01-kee-frame-putting-the-url-in-charge/)
 
 ## Demo application
