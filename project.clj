@@ -5,10 +5,10 @@
   :url "https://github.com/ingesolvoll/kee-frame"
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.9.0"]
-                 [org.clojure/clojurescript "1.10.217"]
+                 [org.clojure/clojurescript "1.9.946"]
                  [re-frame "0.10.5"]
                  [bidi "2.0.16"]
-                 [venantius/accountant "0.1.9"]
+                 [venantius/accountant "0.2.4"]
                  [org.clojure/core.match "0.3.0-alpha5"]]
 
   :plugins [[com.jakemccrary/lein-test-refresh "0.20.0"]
