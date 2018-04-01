@@ -65,13 +65,13 @@ The `start!` function starts the router and configures the application.
             :debug?         true})
 ```
 
-Subsequent calls to start are not a problem, so call this function as often as you want.
+Subsequent calls to start are not a problem, so call this function as often as you want. Typically on every figwheel reload.
 
 The `routes` property causes kee-frame to wire up the browser to navigate by those routes. Skip this property if you want to do your own routing. See the "Introducing kee-frame into an existing app" section.
 
 If you provide `:root-component`, kee-frame will render that component in the DOM element with id "app". Make sure you have such an element in your index.html. You are free to do the initial rendering yourself if you want, just skip this setting. If you use this feature, make sure that `k/start!` is called every time figwheel reloads your code. 
 
-The `debug` boolean option is for enabling debug interceptors on all your events, as well traces from the activities of controllers. 
+The `debug` boolean option is for enabling debug interceptors on all your events, as well as traces from the activities of controllers. 
 
 If you provide an `app-db-spec`, the framework will let you know when a bug in your event handler is trying to corrupt your DB structure. This is incredibly useful, so you should put down the effort to spec up your db!
 
@@ -192,6 +192,19 @@ Several parts of kee-frame are designed to be opt-in. This means that you can in
 If you want controllers and routes, you need to replace your current routing with kee-frame's routing. In order to ease this process, the `start!` function has a configuration option named `:process-route`. This can be a function that accepts the route data and modifies it to fit your existing app.
 
 Alternatively, make your current router dispatch the event `[:kee-frame.router/route-changed route-data]` on every route change. That should enable what you need for the controllers.
+
+## Server side routes
+Kee-frame does not use hash based routing (/#/some-route), URLs look like regular server URLs. I prefer this approach, but it requires a bit of server setup to work perfectly. A React SPA is typically loaded from the `"app"` element inside `index.html` served from the root `/` of your server. If the user navigates to some client route `/leagues/465` and then hits refresh, the server will be unable to match that route as it exists only on the client. We will get a 404 instead of the `index.html` that we need. We want this to work, so that URLs can still be deterministic, even if they exist only on the client.
+
+You can solve this in several ways, the simplest way is to include a wildcard route as the last route on the server. The server should serve `index.html` on any route not found on the server. This works, the downside is that you won't be able to serve a 404 page for non-matched URLs on the server. 
+
+In compojure, the wildcard route would look like this:
+
+```clojure
+(GET "*" req {:headers {"Content-Type" "text/html"}
+                  :status  200
+                  :body    (index-handler req)})
+```
 
 ## Maturity
 Reasonably well tested through the demo app and production apps at my work. API might see some breaking changes in the near future, but hopefully not. Eagerly awaiting feedback!
