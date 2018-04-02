@@ -9,7 +9,7 @@
 (defprotocol Router
   (dispatch-current! [_])
   (navigate! [_ url])
-  (init! [_]))
+  (init! [_ opts]))
 
 (defrecord TestRouter [url]
   Router
@@ -18,7 +18,7 @@
   (navigate! [this url]
     (prn "navigate!")
     (assoc this :url url))
-  (init! [_]
+  (init! [_ opts]
     (prn "init!")))
 
 #?(:cljs
@@ -28,15 +28,14 @@
        (accountant/dispatch-current!))
      (navigate! [_ url]
        (accountant/navigate! url))
-     (init! [_ {:keys [nav-handler path-exists?]}]
-       (accountant/init! {:nav-handler  (nav-handler process-route)
-                          :path-exists? #(boolean (bidi/match-route @state/routes %))}))))
+     (init! [_ {:keys [nav-handler path-exists?] :as opts}]
+       (accountant/init! opts))))
 
 (defn make-router
   [router-type]
   (case router-type
-    #?(:cljs :accountant (->AccountantRouter))
-    :test (->TestRouter)))
+    #?@(:cljs [:accountant (->AccountantRouter)])
+    :test (->TestRouter "/")))
 
 (defn url [& params]
   (when-not @state/routes
