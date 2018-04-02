@@ -1,39 +1,50 @@
 (ns kee-frame.router
-  (:require #?(:cljs [accountant.core :as accountant])
+  (:require #?@(:cljs [[accountant.core :as accountant]
+                       [reagent.core :as reagent]])
             [re-frame.core :as rf]
             [kee-frame.state :as state]
             [kee-frame.controller :as controller]
-            [bidi.bidi :as bidi]
-            [reagent.core :as reagent]))
+            [bidi.bidi :as bidi]))
 
 (defprotocol Router
   (dispatch-current! [_])
   (navigate! [_ url])
-  (init! [_ opts]))
+  (init! [_]))
 
-(defrecord AccountantRouter [opts]
+(defrecord TestRouter [url]
   Router
-  (dispatch-current! [_]
-    (accountant/dispatch-current!))
-  (navigate! [_ url]
-    (accountant/navigate! url))
-  (init! [_ {:keys [nav-handler path-exists?]}]
-    (accountant/init! {:nav-handler  (nav-handler process-route)
-                       :path-exists? #(boolean (bidi/match-route @state/routes %))})))
+  (dispatch-current! [{:keys [url]}]
+    (prn "dispatch" url))
+  (navigate! [this url]
+    (prn "navigate!")
+    (assoc this :url url))
+  (init! [_]
+    (prn "init!")))
+
+#?(:cljs
+   (defrecord AccountantRouter []
+     Router
+     (dispatch-current! [_]
+       (accountant/dispatch-current!))
+     (navigate! [_ url]
+       (accountant/navigate! url))
+     (init! [_ {:keys [nav-handler path-exists?]}]
+       (accountant/init! {:nav-handler  (nav-handler process-route)
+                          :path-exists? #(boolean (bidi/match-route @state/routes %))}))))
 
 (defn make-router
   [router-type]
   (case router-type
-    :accountant (->AccountantRouter opts)))
+    #?(:cljs :accountant (->AccountantRouter))
+    :test (->TestRouter)))
 
 (defn url [& params]
   (when-not @state/routes
     (throw (ex-info "No routes defined for this app" {:routes @state/routes})))
   (apply bidi/path-for @state/routes params))
 
-(defn goto [route & params]
-  ;; changeme
-  (accountant/navigate! (apply url route params)))
+(defn goto [route router & params]
+  (navigate! router (apply url route params)))
 
 (defn nav-handler [process-route]
   (fn [path]
@@ -49,14 +60,14 @@
 (defn bootstrap-routes [routes router process-route]
   (let [initialized? (boolean @state/routes)]
     (reset! state/routes routes)
-    (rf/reg-fx :navigate-to #(apply goto %))
+    (rf/reg-fx :navigate-to #(apply goto router %))
 
     (when-not initialized?
-      ;; changeme
-      (accountant/configure-navigation!
-       {:nav-handler  (nav-handler process-route)
-        :path-exists? #(boolean (bidi/match-route @state/routes %))}))
-    (accountant/dispatch-current!)))
+      (init! router
+             {:nav-handler  (nav-handler process-route)
+              :path-exists? #(boolean (bidi/match-route @state/routes %))})
+      (reset! state/router router))
+    (dispatch-current! router)))
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
@@ -74,9 +85,8 @@
                                        :cljs :accountant)}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
-  (when routes
-    (let [router (make-router router-type)]
-      (bootstrap-routes routes router process-route)))
+  (when-let [router (and routes (make-router router-type))]
+    (bootstrap-routes routes router process-route))
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))
@@ -85,11 +95,12 @@
 
   (rf/reg-sub :kee-frame/route (fn [db] (:kee-frame/route db nil)))
 
-  (when root-component
-    (if-let [app-element (.getElementById js/document "app")]
-      (reagent/render root-component
-                      app-element)
-      (throw (ex-info "Could not find element with id 'app' to mount app into" {:component root-component})))))
+  #?(:cljs
+     (when root-component
+       (if-let [app-element (.getElementById js/document "app")]
+         (reagent/render root-component
+                         app-element)
+         (throw (ex-info "Could not find element with id 'app' to mount app into" {:component root-component}))))))
 
 (defn make-route-component [component route]
   (if (fn? component)
