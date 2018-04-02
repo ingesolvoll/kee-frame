@@ -29,7 +29,7 @@
      (navigate! [_ url]
        (accountant/navigate! url))
      (init! [_ {:keys [nav-handler path-exists?] :as opts}]
-       (accountant/init! opts))))
+       (accountant/configure-navigation! opts))))
 
 (defn make-router
   [router-type]
