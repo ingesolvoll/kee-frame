@@ -1,38 +1,10 @@
 (ns kee-frame.router
-  (:require #?@(:cljs [[accountant.core :as accountant]
-                       [reagent.core :as reagent]])
+  (:require [kee-frame.interop :as interop]
             [re-frame.core :as rf]
+            [kee-frame.api :refer [dispatch-current! navigate!]]
             [kee-frame.state :as state]
             [kee-frame.controller :as controller]
             [bidi.bidi :as bidi]))
-
-(defprotocol Router
-  (dispatch-current! [_])
-  (navigate! [_ url]))
-
-(defrecord TestRouter [url nav-handler path-exists?]
-  Router
-  (dispatch-current! [{:keys [url]}]
-    (nav-handler url))
-  (navigate! [this url]
-    (when (path-exists? url)
-      (nav-handler url))
-    (assoc this :url url)))
-
-#?(:cljs
-   (defn accountant-router [opts]
-     (accountant/configure-navigation! opts)
-     (reify Router
-       (dispatch-current! [_]
-         (accountant/dispatch-current!))
-       (navigate! [_ url]
-         (accountant/navigate! url)))))
-
-(defn make-router
-  [router-type opts]
-  (case router-type
-    #?@(:cljs [:accountant (accountant-router opts)])
-    :test (map->TestRouter (assoc opts :url "/"))))
 
 (defn url [& params]
   (when-not @state/routes
@@ -53,16 +25,15 @@
           (rf/console :log "Available routes: " @state/routes)
           (rf/console :groupEnd)))))
 
-(defn bootstrap-routes [routes router-type process-route]
+(defn bootstrap-routes [routes process-route]
   (let [initialized? (boolean @state/routes)]
     (reset! state/routes routes)
     (rf/reg-fx :navigate-to #(apply goto %))
 
     (when-not initialized?
       (reset! state/router
-              (make-router router-type
-                           {:nav-handler  (nav-handler process-route)
-                            :path-exists? #(boolean (bidi/match-route @state/routes %))})))
+              (interop/make-router {:nav-handler  (nav-handler process-route)
+                                    :path-exists? #(boolean (bidi/match-route @state/routes %))})))
     (dispatch-current! @state/router)))
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
@@ -74,15 +45,13 @@
                      (swap! state/controllers controller/apply-route ctx route)
                      {:db (assoc db :kee-frame/route route)})))
 
-(defn start! [{:keys [routes router-type initial-db process-route app-db-spec debug? root-component]
+(defn start! [{:keys [routes initial-db process-route app-db-spec debug? root-component]
                :or   {process-route identity
-                      debug?        false
-                      router-type   #?(:clj :test
-                                       :cljs :accountant)}}]
+                      debug?        false}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
   (when routes
-    (bootstrap-routes routes router-type process-route))
+    (bootstrap-routes routes process-route))
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))
@@ -90,13 +59,7 @@
   (reg-route-event)
 
   (rf/reg-sub :kee-frame/route (fn [db] (:kee-frame/route db nil)))
-
-  #?(:cljs
-     (when root-component
-       (if-let [app-element (.getElementById js/document "app")]
-         (reagent/render root-component
-                         app-element)
-         (throw (ex-info "Could not find element with id 'app' to mount app into" {:component root-component}))))))
+  (interop/render-root root-component))
 
 (defn make-route-component [component route]
   (if (fn? component)
@@ -104,7 +67,7 @@
     component))
 
 (defn switch-route [f & pairs]
-  (when-not (= 0 (mod (count pairs) 2))
+  (when-not (even? (count pairs))
     (throw (ex-info "switch-route accepts an even number of args" {:pairs       pairs
                                                                    :pairs-count (count pairs)})))
   (let [route (rf/subscribe [:kee-frame/route])
