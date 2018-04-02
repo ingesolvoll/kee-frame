@@ -8,42 +8,39 @@
 
 (defprotocol Router
   (dispatch-current! [_])
-  (navigate! [_ url])
-  (init! [_ opts]))
+  (navigate! [_ url]))
 
-(defrecord TestRouter [url]
+(defrecord TestRouter [url nav-handler path-exists?]
   Router
   (dispatch-current! [{:keys [url]}]
-    (prn "dispatch" url))
+    (nav-handler url))
   (navigate! [this url]
-    (prn "navigate!")
-    (assoc this :url url))
-  (init! [_ opts]
-    (prn "init!")))
+    (when (path-exists? url)
+      (nav-handler url))
+    (assoc this :url url)))
 
 #?(:cljs
-   (defrecord AccountantRouter []
-     Router
-     (dispatch-current! [_]
-       (accountant/dispatch-current!))
-     (navigate! [_ url]
-       (accountant/navigate! url))
-     (init! [_ {:keys [nav-handler path-exists?] :as opts}]
-       (accountant/configure-navigation! opts))))
+   (defn accountant-router [opts]
+     (accountant/configure-navigation! opts)
+     (reify Router
+       (dispatch-current! [_]
+         (accountant/dispatch-current!))
+       (navigate! [_ url]
+         (accountant/navigate! url)))))
 
 (defn make-router
-  [router-type]
+  [router-type opts]
   (case router-type
-    #?@(:cljs [:accountant (->AccountantRouter)])
-    :test (->TestRouter "/")))
+    #?@(:cljs [:accountant (accountant-router opts)])
+    :test (map->TestRouter (assoc opts :url "/"))))
 
 (defn url [& params]
   (when-not @state/routes
     (throw (ex-info "No routes defined for this app" {:routes @state/routes})))
   (apply bidi/path-for @state/routes params))
 
-(defn goto [route router & params]
-  (navigate! router (apply url route params)))
+(defn goto [route & params]
+  (navigate! @state/router (apply url route params)))
 
 (defn nav-handler [process-route]
   (fn [path]
@@ -56,17 +53,17 @@
           (rf/console :log "Available routes: " @state/routes)
           (rf/console :groupEnd)))))
 
-(defn bootstrap-routes [routes router process-route]
+(defn bootstrap-routes [routes router-type process-route]
   (let [initialized? (boolean @state/routes)]
     (reset! state/routes routes)
-    (rf/reg-fx :navigate-to #(apply goto router %))
+    (rf/reg-fx :navigate-to #(apply goto %))
 
     (when-not initialized?
-      (init! router
-             {:nav-handler  (nav-handler process-route)
-              :path-exists? #(boolean (bidi/match-route @state/routes %))})
-      (reset! state/router router))
-    (dispatch-current! router)))
+      (reset! state/router
+              (make-router router-type
+                           {:nav-handler  (nav-handler process-route)
+                            :path-exists? #(boolean (bidi/match-route @state/routes %))})))
+    (dispatch-current! @state/router)))
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
@@ -84,8 +81,8 @@
                                        :cljs :accountant)}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
-  (when-let [router (and routes (make-router router-type))]
-    (bootstrap-routes routes router process-route))
+  (when routes
+    (bootstrap-routes routes router-type process-route))
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))
