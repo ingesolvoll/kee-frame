@@ -15,4 +15,5 @@
   (map->TestRouter (assoc opts :url "/")))
 
 (defn render-root [root-component]
-  (throw (ex-info "JVM can't handle " {:root root-component})))
+  (when root-component
+    (throw (ex-info "JVM can't render to the DOM" {:root root-component}))))
