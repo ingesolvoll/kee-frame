@@ -50,13 +50,13 @@
                       debug?        false}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
+
+  (reg-route-event)
   (when routes
     (bootstrap-routes routes process-route))
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))
-
-  (reg-route-event)
 
   (rf/reg-sub :kee-frame/route (fn [db] (:kee-frame/route db nil)))
   (interop/render-root root-component))
