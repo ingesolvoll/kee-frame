@@ -9,7 +9,8 @@
                  [re-frame "0.10.5"]
                  [bidi "2.0.16"]
                  [venantius/accountant "0.2.4"]
-                 [org.clojure/core.match "0.3.0-alpha5"]]
+                 [org.clojure/core.match "0.3.0-alpha5"]
+                 [day8.re-frame/test "0.1.5"]]
 
   :plugins [[com.jakemccrary/lein-test-refresh "0.20.0"]
             [venantius/ultra "0.5.2"]]
