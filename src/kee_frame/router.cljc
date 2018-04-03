@@ -14,26 +14,24 @@
 (defn goto [route & params]
   (navigate! @state/router (apply url route params)))
 
-(defn nav-handler [process-route]
+(defn nav-handler [match-route]
   (fn [path]
-    (if-let [route (->> path
-                        (bidi/match-route @state/routes)
-                        process-route)]
+    (if-let [route (match-route @state/routes path)]
       (rf/dispatch [::route-changed route])
       (do (rf/console :group "No route match found")
           (rf/console :error "No match found for path " path)
           (rf/console :log "Available routes: " @state/routes)
           (rf/console :groupEnd)))))
 
-(defn bootstrap-routes [routes process-route]
+(defn bootstrap-routes [routes match-route]
   (let [initialized? (boolean @state/routes)]
     (reset! state/routes routes)
     (rf/reg-fx :navigate-to #(apply goto %))
 
     (when-not initialized?
       (reset! state/router
-              (interop/make-router {:nav-handler  (nav-handler process-route)
-                                    :path-exists? #(boolean (bidi/match-route @state/routes %))})))
+              (interop/make-router {:nav-handler  (nav-handler match-route)
+                                    :path-exists? #(boolean (match-route @state/routes %))})))
     (dispatch-current! @state/router)))
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
@@ -45,15 +43,15 @@
                      (swap! state/controllers controller/apply-route ctx route)
                      {:db (assoc db :kee-frame/route route)})))
 
-(defn start! [{:keys [routes initial-db process-route app-db-spec debug? root-component]
-               :or   {process-route identity
-                      debug?        false}}]
+(defn start! [{:keys [routes initial-db match-route app-db-spec debug? root-component]
+               :or   {match-route bidi/match-route
+                      debug?      false}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
 
   (reg-route-event)
   (when routes
-    (bootstrap-routes routes process-route))
+    (bootstrap-routes routes match-route))
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))

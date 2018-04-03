@@ -20,13 +20,13 @@
 (s/def ::routes vector?)
 (s/def ::root-component (s/nilable vector?))
 (s/def ::initial-db (s/nilable map?))
-(s/def ::process-route (s/nilable ifn?))
+(s/def ::match-route (s/nilable fn?))
 (s/def ::app-db-spec (s/nilable keyword?))
 (s/def ::blacklist (s/coll-of keyword? :kind set?))
 (s/def ::debug? (s/nilable (s/or :boolean boolean?
                                  :config (s/keys :opt-un [::blacklist]))))
 
-(s/def ::start-options (s/keys :opt-un [::routes ::root-component ::initial-db ::process-route ::app-db-spec ::debug?]))
+(s/def ::start-options (s/keys :opt-un [::routes ::root-component ::initial-db ::match-route ::app-db-spec ::debug?]))
 
 (defn log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")
