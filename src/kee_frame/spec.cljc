@@ -17,7 +17,7 @@
 
 (s/def ::event-vector (s/cat :event-key keyword? :event-args (s/* any?)))
 
-(s/def ::routes vector?)
+(s/def ::routes any?)
 (s/def ::root-component (s/nilable vector?))
 (s/def ::initial-db (s/nilable map?))
 (s/def ::match-route (s/nilable fn?))
