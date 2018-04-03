@@ -6,7 +6,8 @@
        [cljs.spec.alpha :as s])
     #?(:clj
             [clojure.spec.alpha :as s])
-            [kee-frame.state :as state]))
+            [kee-frame.state :as state]
+            [expound.alpha :as e]))
 
 (defn step-id [event-id counter]
   (if (= 0 counter)
@@ -101,6 +102,7 @@
 (defn collect-named-event-instructions [step-fns]
   (let [chain-handlers (s/conform ::spec/named-chain-handlers step-fns)]
     (when (= ::s/invalid chain-handlers)
+      (e/expound ::spec/named-chain-handlers step-fns)
       (throw (ex-info "Invalid named chain. Should be pairs of keyword and handler" (s/explain-data ::spec/named-chain-handlers step-fns))))
     (->> chain-handlers
          (partition 2 1 [nil])
@@ -110,7 +112,8 @@
                                    :interceptor (chain-interceptor id next-id))))))))
 
 (defn collect-event-instructions [key step-fns]
-  (when (= ::s/invalid (s/conform ::spec/chain-handlers step-fns))
+  (when-not (s/valid? ::spec/chain-handlers step-fns)
+    (e/expound ::spec/chain-handlers step-fns)
     (throw (ex-info "Invalid chain" (s/explain-data ::spec/chain-handlers step-fns))))
 
   (->> step-fns

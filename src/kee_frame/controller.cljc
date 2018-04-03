@@ -7,7 +7,8 @@
     [clojure.core.match :refer [match]])
     [kee-frame.state :as state]
     [kee-frame.spec :as spec]
-    [clojure.spec.alpha :as s]))
+    [clojure.spec.alpha :as s]
+    [expound.alpha :as e]))
 
 (defn process-params [params route]
   (cond
@@ -17,6 +18,7 @@
 (defn validate-and-dispatch! [dispatch]
   (when dispatch
     (when-not (s/valid? ::spec/event-vector dispatch)
+      (e/expound ::spec/event-vector dispatch)
       (throw (ex-info "Invalid dispatch value"
                       (s/explain-data ::spec/event-vector dispatch))))
     (rf/dispatch dispatch)))

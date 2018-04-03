@@ -10,6 +10,7 @@
                  [bidi "2.0.16"]
                  [venantius/accountant "0.2.4"]
                  [org.clojure/core.match "0.3.0-alpha5"]
+                 [expound "0.5.0"]
                  [day8.re-frame/test "0.1.5"]]
 
   :plugins [[com.jakemccrary/lein-test-refresh "0.20.0"]

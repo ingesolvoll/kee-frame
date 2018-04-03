@@ -5,7 +5,8 @@
             [re-frame.core :as rf :refer [console]]
             [kee-frame.spec :as spec :refer [spec-interceptor]]
             [kee-frame.debug :refer [debug-interceptor]]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [expound.alpha :as e]))
 
 (def interceptors [(spec-interceptor state/app-db-spec) (debug-interceptor state/debug?) rf/trim-v])
 
@@ -18,6 +19,7 @@
 
 (defn start! [options]
   (when-not (s/valid? ::spec/start-options options)
+    (e/expound ::spec/start-options options)
     (throw (ex-info "Invalid options" (s/explain-data ::spec/start-options options))))
   (let [extras (extra-options options)]
     (when (seq extras)
@@ -26,6 +28,7 @@
 
 (defn reg-controller [id controller]
   (when-not (s/valid? ::spec/controller controller)
+    (e/expound ::spec/controller controller)
     (throw (ex-info "Invalid controller" (s/explain-data ::spec/controller controller))))
   (when (get @state/controllers id)
     (console :warn "Overwriting controller with id " id))

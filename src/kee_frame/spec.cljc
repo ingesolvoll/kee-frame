@@ -1,7 +1,8 @@
 (ns kee-frame.spec
   (:require [re-frame.interceptor :refer [->interceptor get-effect get-coeffect assoc-coeffect assoc-effect]]
             [re-frame.core :refer [console]]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [expound.alpha :as e]))
 
 (s/def ::params (s/or :path-vector vector? :fn ifn?))
 (s/def ::start (s/or :vector ::event-vector :fn ifn?))
@@ -29,9 +30,7 @@
 
 (defn log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")
-  (let [{:keys [::s/problems ::s/spec]} (s/explain-data spec new-db)]
-    (console :log "Problems " problems)
-    (console :log "Failing spec " spec))
+  (e/expound spec new-db)
   (console :groupEnd "*****************************"))
 
 (defn rollback [context new-db db-spec]
