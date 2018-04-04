@@ -2,7 +2,8 @@
   (:require [re-frame.interceptor :refer [->interceptor get-effect get-coeffect assoc-coeffect assoc-effect]]
             [re-frame.core :refer [console]]
             [clojure.spec.alpha :as s]
-            [expound.alpha :as e]))
+            [expound.alpha :as e]
+            [kee-frame.api :as api]))
 
 (s/def ::params (s/or :path-vector vector? :fn ifn?))
 (s/def ::start (s/or :vector ::event-vector :fn ifn?))
@@ -18,6 +19,7 @@
 (s/def ::event-vector (s/cat :event-key keyword? :event-args (s/* any?)))
 
 (s/def ::routes any?)
+(s/def ::router #(satisfies? api/Router %))
 (s/def ::root-component (s/nilable vector?))
 (s/def ::initial-db (s/nilable map?))
 (s/def ::match-route (s/nilable fn?))
@@ -26,7 +28,7 @@
 (s/def ::debug? (s/nilable (s/or :boolean boolean?
                                  :config (s/keys :opt-un [::blacklist]))))
 
-(s/def ::start-options (s/keys :opt-un [::routes ::root-component ::initial-db ::match-route ::app-db-spec ::debug?]))
+(s/def ::start-options (s/keys :opt-un [::routes ::router ::root-component ::initial-db ::match-route ::app-db-spec ::debug?]))
 
 (defn log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")

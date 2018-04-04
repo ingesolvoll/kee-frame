@@ -10,7 +10,7 @@
 
 (def interceptors [(spec-interceptor state/app-db-spec) (debug-interceptor state/debug?) rf/trim-v])
 
-(def valid-option-key? #{:routes :process-route :debug? :app-db-spec :root-component :initial-db})
+(def valid-option-key? #{:router :routes :process-route :debug? :app-db-spec :root-component :initial-db})
 
 (defn extra-options [options]
   (->> options

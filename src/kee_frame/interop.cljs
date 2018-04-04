@@ -5,13 +5,13 @@
 
 (defn accountant-router [opts]
   (accountant/configure-navigation! opts)
-  (reify api/Router
+  (reify api/Navigator
     (dispatch-current! [_]
       (accountant/dispatch-current!))
     (navigate! [_ url]
       (accountant/navigate! url))))
 
-(defn make-router
+(defn make-navigator
   [opts]
   (accountant-router opts))
 

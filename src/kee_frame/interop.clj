@@ -1,8 +1,8 @@
 (ns kee-frame.interop
   (:require [kee-frame.api :as api]))
 
-(defrecord TestRouter [url nav-handler path-exists?]
-  api/Router
+(defrecord TestNavigator [nav-handler path-exists?]
+  api/Navigator
   (dispatch-current! [{:keys [url]}]
     (nav-handler url))
   (navigate! [this url]
@@ -10,9 +10,9 @@
       (nav-handler url))
     (assoc this :url url)))
 
-(defn make-router
+(defn make-navigator
   [opts]
-  (map->TestRouter (assoc opts :url "/")))
+  (map->TestNavigator (assoc opts :url "/")))
 
 (defn render-root [root-component]
   (when root-component

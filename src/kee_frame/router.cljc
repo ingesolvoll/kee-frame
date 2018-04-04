@@ -1,38 +1,43 @@
 (ns kee-frame.router
   (:require [kee-frame.interop :as interop]
             [re-frame.core :as rf]
-            [kee-frame.api :refer [dispatch-current! navigate!]]
+            [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
             [kee-frame.state :as state]
             [kee-frame.controller :as controller]
             [bidi.bidi :as bidi]))
 
-(defn url [& params]
-  (when-not @state/routes
-    (throw (ex-info "No routes defined for this app" {:routes @state/routes})))
-  (apply bidi/path-for @state/routes params))
+(defn url [data]
+  (when-not @state/router
+    (throw (ex-info "No router defined for this app" {:router @state/router})))
+  (data->url @state/router data))
 
 (defn goto [route & params]
-  (navigate! @state/router (apply url route params)))
+  (navigate! @state/navigator (apply url route params)))
 
-(defn nav-handler [match-route]
+(defn nav-handler [router]
   (fn [path]
-    (if-let [route (match-route @state/routes path)]
+    (if-let [route (url->data router path)]
       (rf/dispatch [::route-changed route])
       (do (rf/console :group "No route match found")
           (rf/console :error "No match found for path " path)
-          (rf/console :log "Available routes: " @state/routes)
           (rf/console :groupEnd)))))
 
-(defn bootstrap-routes [routes match-route]
-  (let [initialized? (boolean @state/routes)]
-    (reset! state/routes routes)
+(defrecord BidiRouter [routes]
+  api/Router
+  (data->url [_ data] (apply bidi/path-for routes data))
+  (url->data [_ url] (bidi/match-route routes url)))
+
+(defn bootstrap-routes [routes router]
+  (let [initialized? (boolean @state/navigator)
+        router (or router (->BidiRouter routes))]
+    (reset! state/router router)
     (rf/reg-fx :navigate-to #(apply goto %))
 
     (when-not initialized?
-      (reset! state/router
-              (interop/make-router {:nav-handler  (nav-handler match-route)
-                                    :path-exists? #(boolean (match-route @state/routes %))})))
-    (dispatch-current! @state/router)))
+      (reset! state/navigator
+              (interop/make-navigator {:nav-handler  (nav-handler router)
+                                       :path-exists? #(boolean (url->data router %))})))
+    (dispatch-current! @state/navigator)))
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
@@ -43,15 +48,14 @@
                      (swap! state/controllers controller/apply-route ctx route)
                      {:db (assoc db :kee-frame/route route)})))
 
-(defn start! [{:keys [routes initial-db match-route app-db-spec debug? root-component]
-               :or   {match-route bidi/match-route
-                      debug?      false}}]
+(defn start! [{:keys [routes initial-db router app-db-spec debug? root-component]
+               :or   {debug? false}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
 
   (reg-route-event)
-  (when routes
-    (bootstrap-routes routes match-route))
+  (when (or routes router)
+    (bootstrap-routes routes router))
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))
