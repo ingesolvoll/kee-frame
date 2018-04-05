@@ -257,6 +257,10 @@ In compojure, the wildcard route would look like this:
                   :body    (index-handler req)})
 ```
 
+## Error messages
+
+Helpful error messages are important to kee-frame. You should not get stuck because of "undefined is not a function". If you make a mistake, kee-frame should make it very clear to you what you did wrong and how you can fix it. If you find pain spots, please post an issue so we can find better solutions.
+
 ## Maturity
 Reasonably well tested through the demo app and production apps at my work. API might see some breaking changes in the near future, but hopefully not. Eagerly awaiting feedback!
 
