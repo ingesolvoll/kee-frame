@@ -23,7 +23,7 @@
         x))
     effects))
 
-(def links {:http-xhrio :on-success})
+(def links [[:http-xhrio :on-success]])
 
 (defn single-valid-link [potential specified]
   (when (and (= 1 (count potential))
@@ -33,20 +33,16 @@
                   (= 0)))
     (first potential)))
 
-(defn cleanup-link [link] (filter identity link))
-
 (defn specified-links [links effects]
   (->> links
        (map (fn [link]
-              [(cleanup-link link) (get-in effects (cleanup-link link))]))
+              [link (get-in effects link)]))
        (filter (comp identity second))))
 
 (defn potential-links [links effects]
-  (->> links
-       (filter (fn [[path]]
-                 (or (nil? path) (path effects))))
-       (map (fn [link]
-              (cleanup-link link)))))
+  (filter (fn [[path]]
+            (path effects))
+          links))
 
 (defn single-valid-next [next-event-id specified-links]
   (let [xs (->> specified-links
