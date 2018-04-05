@@ -9,3 +9,5 @@
 (def app-db-spec (atom nil))
 
 (def debug? (atom false))
+
+(def links (atom [[:http-xhrio :on-success]]))

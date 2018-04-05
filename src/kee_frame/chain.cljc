@@ -23,8 +23,6 @@
         x))
     effects))
 
-(def links [[:http-xhrio :on-success]])
-
 (defn single-valid-link [potential specified]
   (when (and (= 1 (count potential))
              (->> specified
@@ -33,16 +31,16 @@
                   (= 0)))
     (first potential)))
 
-(defn specified-links [links effects]
-  (->> links
+(defn specified-links [effects]
+  (->> @state/links
        (map (fn [link]
               [link (get-in effects link)]))
        (filter (comp identity second))))
 
-(defn potential-links [links effects]
+(defn potential-links [effects]
   (filter (fn [[path]]
             (path effects))
-          links))
+          @state/links))
 
 (defn single-valid-next [next-event-id specified-links]
   (let [xs (->> specified-links
@@ -59,9 +57,9 @@
                 (= next-event-id)))
     [:dispatch]))
 
-(defn select-link [next-event-id links effects]
-  (let [potential (potential-links links effects)
-        specified (specified-links links effects)]
+(defn select-link [next-event-id effects]
+  (let [potential (potential-links effects)
+        specified (specified-links effects)]
     (or
       (single-valid-next next-event-id specified)
       (single-valid-link potential specified)
@@ -76,9 +74,9 @@
 (defn make-event [next-event-id previous-event-params specified-event]
   (into [next-event-id] (concat previous-event-params (rest specified-event))))
 
-(defn link-effects [next-event-id event-params links effects]
+(defn link-effects [next-event-id event-params effects]
   (if next-event-id
-    (if-let [selected-link (select-link next-event-id links effects)]
+    (if-let [selected-link (select-link next-event-id effects)]
       (assoc-in effects selected-link (make-event next-event-id event-params (get-in effects selected-link)))
       effects)
     effects))
@@ -88,7 +86,7 @@
     (let [event-params (rest (rf/get-coeffect ctx :event))]
       (update ctx :effects #(->> %
                                  (replace-pointers next-event-id)
-                                 (link-effects next-event-id event-params links))))))
+                                 (link-effects next-event-id event-params))))))
 
 (defn chain-interceptor [current-event-id next-event-id]
   (rf/->interceptor
