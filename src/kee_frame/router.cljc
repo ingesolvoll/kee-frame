@@ -11,8 +11,8 @@
     (throw (ex-info "No router defined for this app" {:router @state/router})))
   (data->url @state/router data))
 
-(defn goto [route & params]
-  (navigate! @state/navigator (apply url route params)))
+(defn goto [data]
+  (navigate! @state/navigator (url data)))
 
 (defn nav-handler [router]
   (fn [path]
@@ -31,7 +31,7 @@
   (let [initialized? (boolean @state/navigator)
         router (or router (->BidiRouter routes))]
     (reset! state/router router)
-    (rf/reg-fx :navigate-to #(apply goto %))
+    (rf/reg-fx :navigate-to goto)
 
     (when-not initialized?
       (reset! state/navigator
