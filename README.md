@@ -224,9 +224,23 @@ It looks pretty much the same, only more concise. But it does help you with a fe
 
 Several parts of kee-frame are designed to be opt-in. This means that you can include kee-frame in your project and start using parts of it.
 
-If you want controllers and routes, you need to replace your current routing with kee-frame's routing. In order to ease this process, the `start!` function has a configuration option named `:process-route`. This can be a function that accepts the route data and modifies it to fit your existing app.
+If you want controllers and routes, you need to replace your current routing with kee-frame's routing. If your current routing requires a lot of work
+  to fit with the standard bidi routing solution, you may implement a custom router. See the next section for more details.
 
 Alternatively, make your current router dispatch the event `[:kee-frame.router/route-changed route-data]` on every route change. That should enable what you need for the controllers.
+
+## Using a different router implementation
+
+You may not like bidi, or you are already using a different router. In that case, all you have to do is implement your own version of the protocol
+`kee-frame.api/Router` and pass it in with the rest of your config:
+
+```clojure
+(k/start!  {:router         (->ReititRouter reitit-routes)
+            :root-component [my-root-reagent-component]
+            ...})
+```
+
+[Here are some example router implementations](https://github.com/ingesolvoll/kee-frame-sample/blob/master/src/cljs/kee_frame_sample/routers.cljs).
 
 ## Server side routes
 Kee-frame does not use hash based routing (/#/some-route), URLs look like regular server URLs. I prefer this approach, but it requires a bit of server setup to work perfectly. A React SPA is typically loaded from the `"app"` element inside `index.html` served from the root `/` of your server. If the user navigates to some client route `/leagues/465` and then hits refresh, the server will be unable to match that route as it exists only on the client. We will get a 404 instead of the `index.html` that we need. We want this to work, so that URLs can still be deterministic, even if they exist only on the client.
