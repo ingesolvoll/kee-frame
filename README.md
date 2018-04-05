@@ -179,7 +179,7 @@ Using URL strings in your links and navigation is error prone and quickly become
 
 The `kee-frame.core/path-for` function accepts a bidi route and returns a URL string:
 
-`(k/path-for :todos :id 14) => "/todos/14"`
+`(k/path-for [:todos :id 14]) => "/todos/14"`
 
 Kee-frame also includes a re-frame effect for triggering a browser navigation, after all navigation is a side effect. The effect is `:navigate-to` and it accepts a bidi route. The example below shows a handler that receives some data and navigates to the view page for those data.
 
@@ -241,6 +241,8 @@ You may not like bidi, or you are already using a different router. In that case
 ```
 
 [Here are some example router implementations](https://github.com/ingesolvoll/kee-frame-sample/blob/master/src/cljs/kee_frame_sample/routers.cljs).
+
+If you choose to use a different router than bidi, you also need to use the corresponding routing data format when using `path-for` and the `:navigate-to` effect.
 
 ## Server side routes
 Kee-frame does not use hash based routing (/#/some-route), URLs look like regular server URLs. I prefer this approach, but it requires a bit of server setup to work perfectly. A React SPA is typically loaded from the `"app"` element inside `index.html` served from the root `/` of your server. If the user navigates to some client route `/leagues/465` and then hits refresh, the server will be unable to match that route as it exists only on the client. We will get a 404 instead of the `index.html` that we need. We want this to work, so that URLs can still be deterministic, even if they exist only on the client.
