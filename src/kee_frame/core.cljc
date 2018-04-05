@@ -24,7 +24,7 @@
   (let [extras (extra-options options)]
     (when (seq extras)
       (throw (ex-info (str "Uknown startup options. Valid keys are " valid-option-key?) extras))))
-  (router/start! (assoc options :interceptors interceptors)))
+  (router/start! options))
 
 (defn reg-controller [id controller]
   (when-not (s/valid? ::spec/controller controller)
