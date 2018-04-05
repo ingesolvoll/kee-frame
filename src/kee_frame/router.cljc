@@ -54,6 +54,10 @@
   (reset! state/debug? debug?)
 
   (reg-route-event)
+  (when (and routes router)
+    (throw (ex-info "Both routes and router specified. If you want to use these routes, pass them to your router constructor."
+                    {:routes routes
+                     :router router})))
   (when (or routes router)
     (bootstrap-routes routes router))
 
