@@ -28,7 +28,10 @@
 (s/def ::debug? (s/nilable (s/or :boolean boolean?
                                  :config (s/keys :opt-un [::blacklist]))))
 
-(s/def ::start-options (s/keys :opt-un [::routes ::router ::root-component ::initial-db ::match-route ::app-db-spec ::debug?]))
+(s/def ::chain-link (s/coll-of keyword? :kind vector?))
+(s/def ::chain-links (s/nilable (s/coll-of ::chain-link)))
+
+(s/def ::start-options (s/keys :opt-un [::routes ::router ::root-component ::initial-db ::match-route ::app-db-spec ::debug? ::chain-links]))
 
 (defn log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")

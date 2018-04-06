@@ -48,10 +48,12 @@
                      (swap! state/controllers controller/apply-route ctx route)
                      {:db (assoc db :kee-frame/route route)})))
 
-(defn start! [{:keys [routes initial-db router app-db-spec debug? root-component]
+(defn start! [{:keys [routes initial-db router app-db-spec debug? root-component chain-links]
                :or   {debug? false}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
+  (when chain-links
+    (swap! state/links concat chain-links))
 
   (reg-route-event)
   (when (and routes router)
