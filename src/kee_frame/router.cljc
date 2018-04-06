@@ -24,7 +24,10 @@
 
 (defrecord BidiRouter [routes]
   api/Router
-  (data->url [_ data] (apply bidi/path-for routes data))
+  (data->url [_ data]
+    (when-not (vector? data)
+      (throw (ex-info "Bidi route data is a vector consisting of handler and route params as kw args" {:data data})))
+    (apply bidi/path-for routes data))
   (url->data [_ url] (bidi/match-route routes url)))
 
 (defn bootstrap-routes [routes router]
