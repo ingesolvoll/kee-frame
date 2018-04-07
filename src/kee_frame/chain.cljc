@@ -33,8 +33,8 @@
 
 (defn specified-links [effects]
   (->> @state/links
-       (map (fn [{:keys [path]}]
-              [path (get-in effects path)]))
+       (map (fn [{:keys [path dispatched]}]
+              [path (dispatched effects)]))
        (filter (comp identity second))))
 
 (defn potential-links [effects]
