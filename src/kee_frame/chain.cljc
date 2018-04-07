@@ -38,8 +38,8 @@
        (filter (comp identity second))))
 
 (defn potential-links [effects]
-  (filter (fn [{:keys [path]}]
-            ((first path) effects))
+  (filter (fn [{:keys [present?]}]
+            (present? effects))
           @state/links))
 
 (defn single-valid-next [next-event-id specified-links]
