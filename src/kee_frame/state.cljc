@@ -10,4 +10,4 @@
 
 (def debug? (atom false))
 
-(def links (atom [[:http-xhrio :on-success]]))
+(def links (atom [{:path [:http-xhrio :on-success]}]))

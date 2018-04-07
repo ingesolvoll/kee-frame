@@ -26,20 +26,20 @@
 (defn single-valid-link [potential specified]
   (when (and (= 1 (count potential))
              (->> specified
-                  (filter (fn [[path]] (= path (first potential))))
+                  (filter (fn [[path]] (= path (-> potential first :path))))
                   count
                   (= 0)))
-    (first potential)))
+    (-> potential first :path)))
 
 (defn specified-links [effects]
   (->> @state/links
-       (map (fn [link]
-              [link (get-in effects link)]))
+       (map (fn [{:keys [path]}]
+              [path (get-in effects path)]))
        (filter (comp identity second))))
 
 (defn potential-links [effects]
-  (filter (fn [[path]]
-            (path effects))
+  (filter (fn [{:keys [path]}]
+            ((first path) effects))
           @state/links))
 
 (defn single-valid-next [next-event-id specified-links]
