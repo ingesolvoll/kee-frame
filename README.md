@@ -173,6 +173,16 @@ Sometimes you may want to specify your event names, to ease debugging or readabi
                   ....)
 ```
 
+## Configuring chains (since 0.2.0)
+
+Apps that introduce their own effect handlers, or use libraries with custom effect handlers, need to tell the chain system how to dispatch using these handlers. The default config looks like this:
+
+`[[:http-xhrio :on-success]]`
+
+Basically, you just provide a path into the data structure of your effect handler. The chain will use this path if your event handler includes a key corresponding to the first element in in your path vector.
+
+This configuration is considered simplistic and probably not good enough for all use cases. It is likely to be changed in `0.2.x`. The goal is to have a configuration that is flexible enough, while easily readable. Suggestions and specific use cases are welcome.
+
 ## Browser navigation
 
 Using URL strings in your links and navigation is error prone and quickly becomes a maintenance problem. Therefore, kee-frame encourages you to only interact with route data instead of concrete URLs. It provides 2 abstractions to help you with that:
@@ -229,7 +239,7 @@ If you want controllers and routes, you need to replace your current routing wit
 
 Alternatively, make your current router dispatch the event `[:kee-frame.router/route-changed route-data]` on every route change. That should enable what you need for the controllers.
 
-## Using a different router implementation
+## Using a different router implementation (since 0.2.0)
 
 You may not like bidi, or you are already using a different router. In that case, all you have to do is implement your own version of the protocol
 `kee-frame.api/Router` and pass it in with the rest of your config:
