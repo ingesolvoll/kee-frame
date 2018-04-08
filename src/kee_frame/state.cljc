@@ -12,4 +12,4 @@
 
 (def links (atom [{:effect-present?   (fn [effects] (:http-xhrio effects))
                    :explicit-dispatch (fn [effects] (get-in effects [:http-xhrio :on-success]))
-                   :insert-dispatch   (fn [effects event] (assoc-in effects [:http-xhrio :on-success] event))}]))
+                   :insert-dispatch   (fn [effects dispatch] (assoc-in effects [:http-xhrio :on-success] dispatch))}]))
