@@ -43,10 +43,9 @@
   (let [xs (->> @state/links
                 (filter (fn [{:keys [dispatched]}]
                           (= next-event-id
-                             (-> effects dispatched first))))
-                (map :path))]
+                             (-> effects dispatched first)))))]
     (when (= 1 (count xs))
-      (first xs))))
+      (-> xs first :path))))
 
 (defn select-link [next-event-id effects]
   (or
@@ -59,8 +58,8 @@
                 :dispatch (:dispatch effects)
                 :links    @state/links}))))
 
-(defn make-event [next-event-id previous-event-params specified-event]
-  (into [next-event-id] (concat previous-event-params (rest specified-event))))
+(defn make-event [next-event-id previous-event-params [_ & params]]
+  (into [next-event-id] (concat previous-event-params params)))
 
 (defn link-effects [next-event-id event-params effects]
   (if next-event-id

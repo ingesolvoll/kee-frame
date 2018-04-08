@@ -24,10 +24,10 @@
     (rf-test/run-test-sync
       (rf/reg-sub :test-prop :test-prop)
       (kf/reg-chain :test-chain
-                    (fn [_ _] {:http-xhrio {:on-success [:test-chain-1]}})
-                    (fn [_ _] {:db {:test-prop :on-success-worked}}))
-      (rf/dispatch [:test-chain])
-      (is (= :on-success-worked @(rf/subscribe [:test-prop]))))))
+                    (fn [_ []] {:http-xhrio {:on-success [:test-chain-1 4 5]}})
+                    (fn [_ [_ _ three _ five]] {:db {:test-prop [three five]}}))
+      (rf/dispatch [:test-chain 1 2 3])
+      (is (= [3 5] @(rf/subscribe [:test-prop]))))))
 
 (deftest error-cases
   (testing "Nothing left to fill in"
