@@ -177,11 +177,24 @@ Sometimes you may want to specify your event names, to ease debugging or readabi
 
 Apps that introduce their own effect handlers, or use libraries with custom effect handlers, need to tell the chain system how to dispatch using these handlers. The default config looks like this:
 
-`[[:http-xhrio :on-success]]`
+```clojure
+[{
+  ;; Is the effect in the map?
+  :effect-present?   (fn [effects] (:http-xhrio effects)) 
+  ;;  Was the dispatch for this effect already set? Then return the value
+  :explicit-dispatch (fn [effects] (get-in effects [:http-xhrio :on-success]))
+  ;; Framework will call this function to insert inferred dispatch to next handler in chain
+  :insert-dispatch   (fn [effects dispatch] (assoc-in effects [:http-xhrio :on-success] dispatch))  
+}]
+```
 
-Basically, you just provide a path into the data structure of your effect handler. The chain will use this path if your event handler includes a key corresponding to the first element in in your path vector.
+Add it through the start function like this:
 
-This configuration is considered simplistic and probably not good enough for all use cases. It is likely to be changed in `0.2.x`. The goal is to have a configuration that is flexible enough, while easily readable. Suggestions and specific use cases are welcome.
+```clojure
+(k/start!  {:chain-links    [chain-config-map-1 chain-config-map-2]
+            :root-component [my-root-reagent-component]
+            ...})
+```
 
 ## Browser navigation
 
