@@ -10,6 +10,6 @@
 
 (def debug? (atom false))
 
-(def links (atom [{:present?    (fn [effects] (:http-xhrio effects))
-                   :dispatched? (fn [effects] (get-in effects [:http-xhrio :on-success]))
-                   :insert      (fn [effects event] (assoc-in effects [:http-xhrio :on-success] event))}]))
+(def links (atom [{:effect-present?   (fn [effects] (:http-xhrio effects))
+                   :explicit-dispatch (fn [effects] (get-in effects [:http-xhrio :on-success]))
+                   :insert-dispatch   (fn [effects event] (assoc-in effects [:http-xhrio :on-success] event))}]))

@@ -25,9 +25,9 @@
 
 (defn single-valid-link [effects]
   (let [links (->> @state/links
-                   (filter (fn [{:keys [dispatched? present?]}]
-                             (and (present? effects)
-                                  (not (dispatched? effects))))))]
+                   (filter (fn [{:keys [explicit-dispatch effect-present?]}]
+                             (and (effect-present? effects)
+                                  (not (explicit-dispatch effects))))))]
     (when (= 1 (count links))
       (first links))))
 
@@ -37,14 +37,14 @@
                 :dispatch
                 first
                 (= next-event-id)))
-    {:dispatched? :dispatch
-     :insert      (fn [effects event] (assoc effects :dispatch event))}))
+    {:explicit-dispatch :dispatch
+     :insert-dispatch   (fn [effects event] (assoc effects :dispatch event))}))
 
 (defn single-valid-next [next-event-id effects]
   (let [xs (->> @state/links
-                (filter (fn [{:keys [dispatched?]}]
+                (filter (fn [{:keys [explicit-dispatch]}]
                           (= next-event-id
-                             (-> effects dispatched? first)))))]
+                             (-> effects explicit-dispatch first)))))]
     (when (= 1 (count xs))
       (first xs))))
 
@@ -64,8 +64,8 @@
 
 (defn link-effects [next-event-id event-params effects]
   (if next-event-id
-    (if-let [{:keys [insert dispatched?]} (select-link next-event-id effects)]
-      (insert effects (make-event next-event-id event-params (dispatched? effects)))
+    (if-let [{:keys [insert-dispatch explicit-dispatch]} (select-link next-event-id effects)]
+      (insert-dispatch effects (make-event next-event-id event-params (explicit-dispatch effects)))
       effects)
     effects))
 
