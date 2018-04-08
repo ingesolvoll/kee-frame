@@ -27,8 +27,10 @@
 (s/def ::blacklist (s/coll-of keyword? :kind set?))
 (s/def ::debug? (s/nilable (s/or :boolean boolean?
                                  :config (s/keys :opt-un [::blacklist]))))
-
-(s/def ::chain-link (s/coll-of keyword? :kind vector?))
+(s/def :chain/present? fn?)
+(s/def :chain/dispatched? fn?)
+(s/def :chain/insert fn?)
+(s/def ::chain-link (s/keys :req-un [:chain/present? :chain/dispatched? :chain/insert]))
 (s/def ::chain-links (s/nilable (s/coll-of ::chain-link)))
 
 (s/def ::start-options (s/keys :opt-un [::routes ::router ::root-component ::initial-db ::match-route ::app-db-spec ::debug? ::chain-links]))
