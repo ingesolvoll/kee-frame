@@ -39,18 +39,14 @@
                 (= next-event-id)))
     [:dispatch]))
 
-(defn specified-links [effects]
-  (->> @state/links
-       (map (fn [{:keys [path dispatched]}]
-              [path (dispatched effects)]))
-       (filter (comp identity second))))
-
 (defn single-valid-next [next-event-id effects]
-  (let [xs (->> (specified-links effects)
-                (filter (fn [[_ value]]
-                          (= next-event-id (first value)))))]
-    (when (-> xs count (= 1))
-      (ffirst xs))))
+  (let [xs (->> @state/links
+                (filter (fn [{:keys [dispatched]}]
+                          (= next-event-id
+                             (-> effects dispatched first))))
+                (map :path))]
+    (when (= 1 (count xs))
+      (first xs))))
 
 (defn select-link [next-event-id effects]
   (or
