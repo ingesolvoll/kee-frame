@@ -19,35 +19,17 @@
   (walk/postwalk
     (fn [x]
       (if (= x :kee-frame.core/next)
-        next-event                                          ;; (throw (ex-info "Found next pointer, but no next step" {:token x}))
+        next-event
         x))
     effects))
 
-(defn single-valid-link [potential specified]
-  (when (and (= 1 (count potential))
-             (->> specified
-                  (filter (fn [[path]] (= path (-> potential first :path))))
-                  count
-                  (= 0)))
-    (-> potential first :path)))
-
-(defn specified-links [effects]
-  (->> @state/links
-       (map (fn [{:keys [path dispatched]}]
-              [path (dispatched effects)]))
-       (filter (comp identity second))))
-
-(defn potential-links [effects]
-  (filter (fn [{:keys [present?]}]
-            (present? effects))
-          @state/links))
-
-(defn single-valid-next [next-event-id specified-links]
-  (let [xs (->> specified-links
-                (filter (fn [[_ value]]
-                          (= next-event-id (first value)))))]
-    (when (-> xs count (= 1))
-      (ffirst xs))))
+(defn single-valid-link [effects]
+  (let [links (->> @state/links
+                   (filter (fn [{:keys [dispatched present?]}]
+                             (and (present? effects)
+                                  (not (dispatched effects))))))]
+    (when (= 1 (count links))
+      (-> links first :path))))
 
 (defn dispatch-empty-or-next [effects next-event-id]
   (when (or (not (:dispatch effects))
@@ -57,19 +39,29 @@
                 (= next-event-id)))
     [:dispatch]))
 
+(defn specified-links [effects]
+  (->> @state/links
+       (map (fn [{:keys [path dispatched]}]
+              [path (dispatched effects)]))
+       (filter (comp identity second))))
+
+(defn single-valid-next [next-event-id effects]
+  (let [xs (->> (specified-links effects)
+                (filter (fn [[_ value]]
+                          (= next-event-id (first value)))))]
+    (when (-> xs count (= 1))
+      (ffirst xs))))
+
 (defn select-link [next-event-id effects]
-  (let [potential (potential-links effects)
-        specified (specified-links effects)]
-    (or
-      (single-valid-next next-event-id specified)
-      (single-valid-link potential specified)
-      (dispatch-empty-or-next effects next-event-id)
-      (throw
-        (ex-info "Not possible to select next in chain"
-                 {:next-id         next-event-id
-                  :dispatch        (:dispatch effects)
-                  :potential-links potential
-                  :specified-links specified})))))
+  (or
+    (single-valid-next next-event-id effects)
+    (single-valid-link effects)
+    (dispatch-empty-or-next effects next-event-id)
+    (throw
+      (ex-info "Not possible to select next in chain"
+               {:next-id  next-event-id
+                :dispatch (:dispatch effects)
+                :links    @state/links}))))
 
 (defn make-event [next-event-id previous-event-params specified-event]
   (into [next-event-id] (concat previous-event-params (rest specified-event))))
