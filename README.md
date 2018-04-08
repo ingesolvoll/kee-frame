@@ -181,8 +181,10 @@ Apps that introduce their own effect handlers, or use libraries with custom effe
 [{
   ;; Is the effect in the map?
   :effect-present?   (fn [effects] (:http-xhrio effects)) 
+  
   ;;  Was the dispatch for this effect already set? Then return the value
   :explicit-dispatch (fn [effects] (get-in effects [:http-xhrio :on-success]))
+  
   ;; Framework will call this function to insert inferred dispatch to next handler in chain
   :insert-dispatch   (fn [effects dispatch] (assoc-in effects [:http-xhrio :on-success] dispatch))  
 }]
