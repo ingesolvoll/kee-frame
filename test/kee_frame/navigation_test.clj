@@ -37,3 +37,10 @@
     (rf-test/run-test-sync
       (is (thrown-with-msg? ExceptionInfo #"Invalid dispatch value"
                             (k/start! {:routes routes}))))))
+
+(deftest routing-syntax
+  (testing "Regression for changed router api"
+    (state/reset-state!)
+    (k/start! {:routes routes})
+    (is (thrown-with-msg? ExceptionInfo #"Bidi route data is a vector"
+                          (k/path-for :some-route)))))
