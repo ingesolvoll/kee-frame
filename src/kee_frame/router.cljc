@@ -26,7 +26,7 @@
   api/Router
   (data->url [_ data]
     (when-not (vector? data)
-      (throw (ex-info "Bidi route data is a vector consisting of handler and route params as kw args" {:data data})))
+      (throw (ex-info "Bidi route data is a vector consisting of handler and route params as kw args" {:route data})))
     (apply bidi/path-for routes data))
   (url->data [_ url] (bidi/match-route routes url)))
 
