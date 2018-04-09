@@ -22,7 +22,6 @@
 (s/def ::router #(satisfies? api/Router %))
 (s/def ::root-component (s/nilable vector?))
 (s/def ::initial-db (s/nilable map?))
-(s/def ::match-route (s/nilable fn?))
 (s/def ::app-db-spec (s/nilable keyword?))
 (s/def ::blacklist (s/coll-of keyword? :kind set?))
 (s/def ::debug? (s/nilable (s/or :boolean boolean?
@@ -33,7 +32,7 @@
 (s/def ::chain-link (s/keys :req-un [:chain/present? :chain/dispatched? :chain/insert]))
 (s/def ::chain-links (s/nilable (s/coll-of ::chain-link)))
 
-(s/def ::start-options (s/keys :opt-un [::routes ::router ::root-component ::initial-db ::match-route ::app-db-spec ::debug? ::chain-links]))
+(s/def ::start-options (s/keys :opt-un [::routes ::router ::root-component ::initial-db ::app-db-spec ::debug? ::chain-links]))
 
 (defn log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")
