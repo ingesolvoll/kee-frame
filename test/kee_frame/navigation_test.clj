@@ -35,6 +35,5 @@
                   (atom {:test-controller {:params (constantly true)
                                            :start  (fn [_ _] "This is not cool")}})]
       (rf-test/run-test-sync
-        (k/start! {:routes routes})
-        (is (thrown-with-msg? ExceptionInfo #""
-                              (navigate! "/testing/2")))))))
+        (is (thrown-with-msg? ExceptionInfo #"Invalid dispatch value"
+                              (k/start! {:routes routes})))))))
