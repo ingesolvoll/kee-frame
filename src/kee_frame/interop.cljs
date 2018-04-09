@@ -3,13 +3,16 @@
             [accountant.core :as accountant]
             [reagent.core :as reagent]))
 
+(defrecord AccountantNavigator []
+  api/Navigator
+  (dispatch-current! [_]
+    (accountant/dispatch-current!))
+  (navigate! [_ url]
+    (accountant/navigate! url)))
+
 (defn accountant-router [opts]
   (accountant/configure-navigation! opts)
-  (reify api/Navigator
-    (dispatch-current! [_]
-      (accountant/dispatch-current!))
-    (navigate! [_ url]
-      (accountant/navigate! url))))
+  (->AccountantNavigator))
 
 (defn make-navigator
   [opts]
