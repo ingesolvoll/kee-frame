@@ -8,7 +8,7 @@
             [clojure.spec.alpha :as s]
             [expound.alpha :as e]))
 
-(def interceptors [(spec-interceptor state/app-db-spec) (debug-interceptor state/debug?) rf/trim-v])
+(def kee-frame-interceptors [(spec-interceptor state/app-db-spec) (debug-interceptor state/debug?) rf/trim-v])
 
 (def valid-option-key? #{:router :routes :process-route :debug? :chain-links :app-db-spec :root-component :initial-db})
 
@@ -34,17 +34,19 @@
     (console :warn "Overwriting controller with id " id))
   (swap! state/controllers update id merge controller))
 
-(defn reg-event-fx [id handler]
-  (rf/reg-event-fx id interceptors handler))
+(defn reg-event-fx
+  ([id handler] (reg-event-fx id nil handler))
+  ([id interceptors handler] (rf/reg-event-fx id (concat kee-frame-interceptors interceptors) handler)))
 
-(defn reg-event-db [id handler]
-  (rf/reg-event-db id interceptors handler))
+(defn reg-event-db
+  ([id handler] (reg-event-db id nil handler))
+  ([id interceptors handler] (rf/reg-event-db id (concat kee-frame-interceptors interceptors) handler)))
 
 (defn reg-chain-named [& handlers]
-  (apply chain/reg-chain-named interceptors handlers))
+  (apply chain/reg-chain-named kee-frame-interceptors handlers))
 
 (defn reg-chain [id & handlers]
-  (apply chain/reg-chain id interceptors handlers))
+  (apply chain/reg-chain id kee-frame-interceptors handlers))
 
 (defn path-for [handler & params]
   (apply router/url handler params))
