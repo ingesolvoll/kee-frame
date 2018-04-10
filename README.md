@@ -159,7 +159,7 @@ The chain concept might not always be a good fit, but quite often it does a grea
 ## Chain rules
 Every parameter received through the chain is passed on to the next step. So the parameters to the first chain function will be appended to the head of the next function's parameters, and so on. The last function called will receive the concatenation of all previous parameter lists. This might seem a bit odd, but quite often you need the id received on step 1 to do something in step 3.
 
-You are allowed to dispatch out of chain, but there must always be a "slot" available for the chain to put its next dispatch. Currently only `dispatch` and `on-success` of :http-xhrio are supported, one of them must be not set by the previous event. The effects supported by the inference algorithm will be configurable soon.
+You are allowed to dispatch out of chain, but there must always be a "slot" available for the chain to put its next dispatch.
 
 You can specify your dispatch explicitly using a special keyword as your event id, like this: `{:on-success [:kee-frame.core/next 1 2 3]}`. The keyword will be replaced by a generated id for the next in chain. 
 
@@ -177,7 +177,7 @@ Sometimes you may want to specify your event names, to ease debugging or readabi
 
 ## Configuring chains (since 0.2.0)
 
-Apps that introduce their own effect handlers, or use libraries with custom effect handlers, need to tell the chain system how to dispatch using these handlers. The default config looks like this:
+`dispatch` and `on-success` of :http-xhrio are supported by default in event chains. Apps that introduce their own effect handlers, or use libraries with custom effect handlers, need to tell the chain system how to dispatch using these handlers. The default config looks like this:
 
 ```clojure
 [{
@@ -267,7 +267,7 @@ You may not like bidi, or you are already using a different router. In that case
             ...})
 ```
 
-[Here are some example router implementations](https://github.com/ingesolvoll/kee-frame-sample/blob/master/src/cljs/kee_frame_sample/routers.cljs).
+[Here are some example (not fully tested) router implementations](https://github.com/ingesolvoll/kee-frame-sample/blob/master/src/cljs/kee_frame_sample/routers.cljs).
 
 If you choose to use a different router than bidi, you also need to use the corresponding routing data format when using `path-for` and the `:navigate-to` effect.
 
