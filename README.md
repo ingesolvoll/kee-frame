@@ -235,7 +235,7 @@ Kee-frame provides a simple helper to do this:
 
 ```clojure
 (defn main-view []
-  [k/switch-route :handler
+  [k/switch-route (fn [route] (:handler route))
    :index [index-page] ;; Explicit call to reagent component, ignoring route data
    :orders orders-page]) ;; Orders page will receive the route data as its parameter because of missing []
 ```
