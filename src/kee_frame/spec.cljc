@@ -29,7 +29,7 @@
 (s/def :chain/present? fn?)
 (s/def :chain/dispatched? fn?)
 (s/def :chain/insert fn?)
-(s/def ::chain-link (s/keys :req-un [:chain/present? :chain/dispatched? :chain/insert]))
+(s/def ::chain-link (s/keys :req-un [:chain/effect-present? :chain/get-dispatch :chain/set-dispatch]))
 (s/def ::chain-links (s/nilable (s/coll-of ::chain-link)))
 
 (s/def ::start-options (s/keys :opt-un [::routes ::router ::root-component ::initial-db ::app-db-spec ::debug? ::chain-links]))
