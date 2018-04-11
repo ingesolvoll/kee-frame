@@ -1,6 +1,10 @@
 (ns kee-frame.chain-test
   (:require [clojure.test :refer :all]
-            [kee-frame.chain :as chain])
+            [kee-frame.chain :as chain]
+            [day8.re-frame.test :as rf-test]
+            [kee-frame.state :as state]
+            [kee-frame.core :as k]
+            [re-frame.core :as rf])
   (:import (clojure.lang ExceptionInfo)))
 
 (deftest utils
@@ -78,3 +82,25 @@
                             [:step-1
                              identity
                              :step-2])))))
+
+(def custom-chain-links [{:effect-present? (fn [effects] (:my-custom-effect effects))
+                          :get-dispatch    (fn [effects] (get-in effects [:my-custom-effect :got-it]))
+                          :set-dispatch    (fn [effects dispatch] (assoc-in effects [:my-custom-effect :got-it] dispatch))}])
+
+(def routes ["" {"/"               :index
+                 ["/testing/" :id] :some-route}])
+
+(deftest integration
+  (testing "Custom chain links"
+    (state/reset-state!)
+
+    (rf-test/run-test-sync
+      (k/start! {:routes routes
+                 :chain-links custom-chain-links})
+      (rf/reg-fx :my-custom-effect (fn [config] (rf/dispatch (:got-it config))))
+      (rf/reg-sub :test-prop :test-prop)
+      (k/reg-chain :test-event
+                   (fn [_ _] {:my-custom-effect {}})
+                   (fn [_ _] {:db {:test-prop 2}}))
+      (rf/dispatch [:test-event])
+      (is (= 2 @(rf/subscribe [:test-prop]))))))
