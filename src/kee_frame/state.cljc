@@ -15,6 +15,7 @@
                      :set-dispatch    (fn [effects dispatch] (assoc-in effects [:http-xhrio :on-success] dispatch))}])
 (def links (atom default-links))
 
+;; Test utility
 (defn reset-state! []
   (reset! controllers {})
   (reset! links default-links)
