@@ -38,6 +38,9 @@ I made a simple demo app showing football results. Have a look around, and obser
 
 Feel free to clone the demo app and do some figwheelin' with it!
 
+## Support
+Contact the author on [Twitter](https://twitter.com/ingesol) or join the discussion on [Slack](ttps://clojurians.slack.com/messages/CA7EJ0Y2U/details/)
+
 ## Installation
 Add the following dependency to your `project.clj` file:
 ```clojure
