@@ -147,11 +147,11 @@ Through the magic of re-frame `interceptors`, we are able to chain together even
 
 ```clojure      
 (reg-chain :add-customer
-            (fn [_ [_ customer]]
+            (fn [_ [customer]]
               {:http-xhrio {:method          :post
                             :uri             "/customers"
                             :body            customer-data}})
-            (fn [{:keys [db]} [_ _ added-customer]] ;; Remember: No DB functions, only FX.
+            (fn [{:keys [db]} [_ added-customer]] ;; Remember: No DB functions, only FX.
               {:db (update db :customers conj added-customer)}))
 ```
 
@@ -215,7 +215,7 @@ Kee-frame also includes a re-frame effect for triggering a browser navigation, a
 
 ```clojure      
 (reg-event-fx :todo-added
-              (fn [_ [_ todo]]
+              (fn [_ [todo]]
                 {:db          (update db :todos conj todo)
                  :navigate-to [:todo :id (:id todo)]]})) ;; "/todos/14"
 ```
