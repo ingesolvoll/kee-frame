@@ -147,10 +147,12 @@ Through the magic of re-frame `interceptors`, we are able to chain together even
 
 ```clojure      
 (reg-chain :add-customer
+            
             (fn [_ [customer]]
               {:http-xhrio {:method          :post
                             :uri             "/customers"
                             :body            customer-data}})
+            
             (fn [{:keys [db]} [_ added-customer]] ;; Remember: No DB functions, only FX.
               {:db (update db :customers conj added-customer)}))
 ```
