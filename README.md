@@ -38,6 +38,9 @@ I made a simple demo app showing football results. Have a look around, and obser
 
 Feel free to clone the demo app and do some figwheelin' with it!
 
+## Support
+Contact the author on [Twitter](https://twitter.com/ingesol) or join the discussion on [Slack](https://clojurians.slack.com/messages/kee-frame). Don't be afraid to create [issues](https://github.com/ingesolvoll/kee-frame/issues). Lack of user friendliness is also a bug!
+
 ## Installation
 Add the following dependency to your `project.clj` file:
 ```clojure
@@ -144,11 +147,13 @@ Through the magic of re-frame `interceptors`, we are able to chain together even
 
 ```clojure      
 (reg-chain :add-customer
-            (fn [_ [_ customer]]
+            
+            (fn [_ [customer]]
               {:http-xhrio {:method          :post
                             :uri             "/customers"
                             :body            customer-data}})
-            (fn [{:keys [db]} [_ _ added-customer]] ;; Remember: No DB functions, only FX.
+            
+            (fn [{:keys [db]} [_ added-customer]] ;; Remember: No DB functions, only FX.
               {:db (update db :customers conj added-customer)}))
 ```
 
@@ -212,7 +217,7 @@ Kee-frame also includes a re-frame effect for triggering a browser navigation, a
 
 ```clojure      
 (reg-event-fx :todo-added
-              (fn [_ [_ todo]]
+              (fn [_ [todo]]
                 {:db          (update db :todos conj todo)
                  :navigate-to [:todo :id (:id todo)]]})) ;; "/todos/14"
 ```
