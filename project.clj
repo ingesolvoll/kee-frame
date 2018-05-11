@@ -8,6 +8,8 @@
                  [org.clojure/clojurescript "1.9.946"]
                  [re-frame "0.10.5"]
                  [bidi "2.1.3"]
+                 [org.clojure/core.async "0.3.442"]
+                 [jarohen/chord "0.8.1"]
                  [venantius/accountant "0.2.4"]
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [expound "0.5.0"]
