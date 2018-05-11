@@ -27,8 +27,12 @@
   (data->url [_ data]
     (when-not (vector? data)
       (throw (ex-info "Bidi route data is a vector consisting of handler and route params as kw args" {:route data})))
-    (apply bidi/path-for routes data))
-  (url->data [_ url] (bidi/match-route routes url)))
+    (or (apply bidi/path-for routes data)
+        (throw (ex-info "Could not find path for " data {:routes routes}))))
+  (url->data [_ url]
+    (or (bidi/match-route routes url)
+        (throw (ex-info "Not a valid url" {:url    url
+                                           :routes routes})))))
 
 (defn bootstrap-routes [routes router]
   (let [initialized? (boolean @state/navigator)
