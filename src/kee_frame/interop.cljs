@@ -3,7 +3,6 @@
             [accountant.core :as accountant]
             [reagent.core :as reagent]
             [re-frame.core :as rf]
-            [kee-frame.core :as k]
             [delayed-scroll-restoration.index]))
 
 (defrecord AccountantNavigator []
@@ -30,11 +29,11 @@
 
 (rf/reg-event-db ::set-window-dimensions
                  (fn [db [_ dimensions]]
-                   (assoc db ::k/window-dimensions dimensions)))
+                   (assoc db :kee-frame.core/window-dimensions dimensions)))
 
-(rf/reg-sub ::k/window-dimensions ::k/window-dimensions)
+(rf/reg-sub :kee-frame.core/window-dimensions :kee-frame.core/window-dimensions)
 
-(rf/reg-sub ::k/window-size (fn [db] :small))               ;;TODO
+(rf/reg-sub :kee-frame.core/window-size (fn [db] :small))               ;;TODO
 
 (defn responsive-setup []
   (.addEventListener js/window
