@@ -3,7 +3,8 @@
             [accountant.core :as accountant]
             [reagent.core :as reagent]
             [re-frame.core :as rf]
-            [kee-frame.core :as k]))
+            [kee-frame.core :as k]
+            [delayed-scroll-restoration.index]))
 
 (defrecord AccountantNavigator []
   api/Navigator
