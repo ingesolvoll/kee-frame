@@ -23,5 +23,5 @@
                                     :username      :env/clojars_username
                                     :password      :env/clojars_password}]]
 
-  :source-paths ["src"]
+  :source-paths ["src" "assets"]
   :aliases {"deploy!" ["do" ["test"] ["deploy" "clojars"]]})
