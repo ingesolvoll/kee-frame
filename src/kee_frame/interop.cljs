@@ -3,7 +3,8 @@
             [accountant.core :as accountant]
             [reagent.core :as reagent]
             [re-frame.core :as rf]
-            [delayed-scroll-restoration.index]))
+            [delayed-scroll-restoration.index]
+            [chord.client :as chord]))
 
 (defrecord AccountantNavigator []
   api/Navigator
@@ -11,6 +12,8 @@
     (accountant/dispatch-current!))
   (navigate! [_ url]
     (accountant/navigate! url)))
+
+(def create-socket chord/ws-ch)
 
 (defn accountant-router [opts]
   (accountant/configure-navigation! opts)
@@ -33,7 +36,7 @@
 
 (rf/reg-sub :kee-frame.core/window-dimensions :kee-frame.core/window-dimensions)
 
-(rf/reg-sub :kee-frame.core/window-size (fn [db] :small))               ;;TODO
+(rf/reg-sub :kee-frame.core/window-size (fn [db] :small))   ;;TODO
 
 (defn responsive-setup []
   (.addEventListener js/window
