@@ -45,13 +45,11 @@
   (throw (ex-info (str "Could not find socket for path " path) {:available-sockets websockets})))
 
 (defn close-socket [path]
-  (when-let [socket (:ws-channel (socket-for path))]
+  (if-let [socket (:ws-channel (socket-for path))]
     (close! socket)
     (socket-not-found path @state/websockets)))
 
-(defn ws-send! [_ [_ path message]]
-  (let [{:keys [output-chan]} (socket-for path)]
-    (if output-chan
-      (go (>! output-chan message))
-      (socket-not-found path @state/websockets)))
-  nil)
+(defn ws-send! [path message]
+  (if-let [socket (:ws-channel (socket-for path))]
+    (go (>! socket message))
+    (socket-not-found path @state/websockets)))

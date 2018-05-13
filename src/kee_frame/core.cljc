@@ -60,4 +60,4 @@
 
 (rf/reg-fx ::websocket-close websocket/close-socket)
 
-(rf/reg-event-fx ::websocket-send websocket/ws-send!)
+(rf/reg-fx ::websocket-send websocket/ws-send!)
