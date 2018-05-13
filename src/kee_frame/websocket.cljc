@@ -1,6 +1,11 @@
 (ns kee-frame.websocket
+  #?(:cljs
+     (:require-macros
+       [cljs.core.async.macros :refer [go go-loop]]))
   (:require
-    [clojure.core.async :refer [go go-loop <! >! chan close!]]
+    [clojure.core.async :refer [<! >! chan close!]]
+    #?(:clj
+    [clojure.core.async :refer [go go-loop]])
     [re-frame.core :as rf]
     [kee-frame.interop :as interop]
     [kee-frame.state :as state]))
@@ -49,7 +54,7 @@
     (close! socket)
     (socket-not-found path @state/websockets)))
 
-(defn ws-send! [path message]
+(defn ws-send! [{:keys [path message]}]
   (if-let [socket (:ws-channel (socket-for path))]
     (go (>! socket message))
     (socket-not-found path @state/websockets)))
