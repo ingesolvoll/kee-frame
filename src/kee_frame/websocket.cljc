@@ -6,7 +6,7 @@
 
 (defonce ^:private websockets (atom {}))
 
-(defn receive-messages! [websocket-channel dispatch]
+(defn- receive-messages! [websocket-channel dispatch]
   (go-loop []
     (when-let [message (<! websocket-channel)]
       (rf/dispatch [dispatch message])
@@ -20,7 +20,7 @@
       (>! websocket-channel (wrap-message message))
       (recur))))
 
-(defn socket-for [path]
+(defn- socket-for [path]
   (or
     (get @websockets path)
     (let [output-chan (chan)
@@ -29,7 +29,7 @@
       (swap! websockets assoc path ref)
       ref)))
 
-(defn- start-websocket [create-socket {:keys [path dispatch wrap-message format]}]
+(defn start-websocket [create-socket {:keys [path dispatch wrap-message format]}]
   (let [{:keys [output-chan]} (socket-for path)]
     (go
       (let [url (interop/websocket-url path)
@@ -43,7 +43,7 @@
             (send-messages! output-chan ws-channel wrap-message)
             (receive-messages! ws-channel dispatch)))))))
 
-(defn socket-not-found [path websockets]
+(defn- socket-not-found [path websockets]
   (throw (ex-info (str "Could not find socket for path " path) {:available-sockets websockets})))
 
 (defn close-socket [path]
