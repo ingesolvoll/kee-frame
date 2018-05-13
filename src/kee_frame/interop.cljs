@@ -15,6 +15,13 @@
 
 (def create-socket chord/ws-ch)
 
+(defn websocket-url [path]
+  (str (if (= "https:" (-> js/document .-location .-protocol))
+         "wss://"
+         "ws://")
+       (-> js/document .-location .-host)
+       path))
+
 (defn accountant-router [opts]
   (accountant/configure-navigation! opts)
   (->AccountantNavigator))

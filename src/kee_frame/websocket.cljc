@@ -1,7 +1,8 @@
 (ns kee-frame.websocket
   (:require
     [clojure.core.async :refer [go go-loop <! >! chan close!]]
-    [re-frame.core :as rf]))
+    [re-frame.core :as rf]
+    [kee-frame.interop :as interop]))
 
 (defonce ^:private websockets (atom {}))
 
@@ -19,13 +20,6 @@
       (>! websocket-channel (wrap-message message))
       (recur))))
 
-(defn- websocket-url [path]
-  (str (if (= "https:" (-> js/document .-location .-protocol))
-         "wss://"
-         "ws://")
-       (-> js/document .-location .-host)
-       path))
-
 (defn socket-for [path]
   (or
     (get @websockets path)
@@ -38,7 +32,7 @@
 (defn- start-websocket [create-socket {:keys [path dispatch wrap-message format]}]
   (let [{:keys [output-chan]} (socket-for path)]
     (go
-      (let [url (websocket-url path)
+      (let [url (interop/websocket-url path)
             {:keys [ws-channel error]} (<! (create-socket url {:format format}))]
         (if error
           (swap! websockets assoc path {:state   :error
