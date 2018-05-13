@@ -12,7 +12,6 @@
       (recur))))
 
 (defn- send-messages!
-  "Receives messages from output-channel and send them to the server"
   [output-channel websocket-channel wrap-message]
   (go-loop []
     (let [message (<! output-channel)]
