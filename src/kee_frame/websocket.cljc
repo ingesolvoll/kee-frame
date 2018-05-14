@@ -55,6 +55,6 @@
     (socket-not-found path @state/websockets)))
 
 (defn ws-send! [{:keys [path message]}]
-  (if-let [socket (:ws-channel (socket-for path))]
+  (if-let [socket (:output-chan (socket-for path))]
     (go (>! socket message))
     (socket-not-found path @state/websockets)))
