@@ -2,13 +2,11 @@
   (:require [kee-frame.state :as state]
             [kee-frame.router :as router]
             [kee-frame.chain :as chain]
-            [kee-frame.websocket :as websocket]
             [re-frame.core :as rf :refer [console]]
             [kee-frame.spec :as spec :refer [spec-interceptor]]
             [kee-frame.debug :refer [debug-interceptor]]
             [clojure.spec.alpha :as s]
-            [expound.alpha :as e]
-            [kee-frame.interop :as interop]))
+            [expound.alpha :as e]))
 
 (def kee-frame-interceptors [(spec-interceptor state/app-db-spec) (debug-interceptor state/debug?) rf/trim-v])
 
@@ -55,9 +53,3 @@
 
 (defn switch-route [f & pairs]
   (apply router/switch-route f pairs))
-
-(rf/reg-fx ::websocket-open (partial websocket/start-websocket interop/create-socket))
-
-(rf/reg-fx ::websocket-close websocket/close-socket)
-
-(rf/reg-fx ::websocket-send websocket/ws-send!)
