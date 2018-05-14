@@ -38,11 +38,11 @@
       (let [url (interop/websocket-url path)
             {:keys [ws-channel error]} (<! (create-socket url {:format format}))]
         (if error
-          (swap! state/websockets assoc path {:state   :error
-                                              :message error})
+          (swap! state/websockets update path merge {:state   :error
+                                                     :message error})
           (do
-            (swap! state/websockets assoc path {:state  :alive
-                                                :socket ws-channel})
+            (swap! state/websockets update path merge {:state  :alive
+                                                       :socket ws-channel})
             (send-messages! output-chan ws-channel wrap-message)
             (receive-messages! ws-channel dispatch)))))))
 
