@@ -77,7 +77,7 @@
 
 (rf/reg-event-fx ::close close-socket)
 
-(rf/reg-fx ::send ws-send!)
+(rf/reg-event-fx ::send ws-send!)
 
 (rf/reg-sub ::sub (fn [db [_ path]]
                     (get-in db [::sockets path])))
