@@ -7,6 +7,7 @@
     #?(:clj
     [clojure.core.async :refer [go go-loop]])
     [re-frame.core :as rf]
+    [kee-frame.core :as k]
     [kee-frame.interop :as interop]
     [kee-frame.state :as state]))
 
@@ -45,39 +46,37 @@
 (defn- socket-not-found [path websockets]
   (throw (ex-info (str "Could not find socket for path " path) {:available-sockets websockets})))
 
-(defn close-socket [{:keys [db]} path]
-  (if-let [socket (:ws-channel (socket-for db path))]
-    (close! socket)
-    (socket-not-found path @state/websockets)))
-
-(defn ws-send! [{:keys [db]} {:keys [path message]}]
-  (if-let [socket (:output-chan (socket-for db path))]
-    (go (>! socket message))
-    (socket-not-found path @state/websockets)))
-
-(rf/reg-event-db
+(k/reg-event-db
   ::created
-  (fn [db [_ path output-chan]]
+  (fn [db [path output-chan]]
     (assoc-in db [::sockets path] {:output-chan output-chan
                                    :state       :initializing})))
 
-(rf/reg-event-db
+(k/reg-event-db
   ::error
-  (fn [db [_ path message]]
+  (fn [db [path message]]
     (update-in db [::sockets path] merge {:state   :error
                                           :message message})))
 
-(rf/reg-event-db
+(k/reg-event-db
   ::connected
-  (fn [db [_ path ws-chan]]
+  (fn [db [path ws-chan]]
     (assoc-in db [::sockets path] {:ws-chan ws-chan
                                    :state   :connected})))
 
 (rf/reg-fx ::open (partial start-websocket interop/create-socket))
 
-(rf/reg-event-fx ::close close-socket)
+(k/reg-event-fx ::close (fn [{:keys [db]} [path]]
+                          (if-let [socket (:ws-channel (socket-for db path))]
+                            (close! socket)
+                            (socket-not-found path @state/websockets))
+                          nil))
 
-(rf/reg-event-fx ::send ws-send!)
+(k/reg-event-fx ::send (fn [{:keys [db]} [path message]]
+                         (if-let [socket (:output-chan (socket-for db path))]
+                           (go (>! socket message))
+                           (socket-not-found path @state/websockets))
+                         nil))
 
 (rf/reg-sub ::sub (fn [db [_ path]]
                     (get-in db [::sockets path])))
