@@ -289,6 +289,50 @@ In compojure, the wildcard route would look like this:
                   :body    (index-handler req)})
 ```
 
+## Websockets
+
+Websocket support is activated by requiring the websocket namespace 
+```clojure
+(require '[kee-frame.websocket :as websocket])
+```
+Kee-frame hides the details of the websocket connection, leaving you with a couple of effects and events to control the
+situation. First, but not necessarily first, you want to establish the connection. That is done through a custom effect 
+in your event handler, like this:
+```clojure
+(reg-event-fx ::start-socket
+               (fn [{:keys [db]} _]
+                 {::websocket/open {:path         "/ws/"
+                                    :dispatch     ::your-socket-receiver-event ;; The re-frame event receiving server messages.
+                                    :format       :transit-json ;; Can be omitted, defaults to :edn
+                                    :wrap-message (fn [message] (assoc message :authToken (-> db :user :auth-token)))}}))
+```
+`:dispatch` is the re-frame event that should receive server-sent messages.
+`wrap-message` is a function used to transform the message just before sending to server. A typical use case is authentication
+tokens or other identifiers.
+
+This is how you send a message to the server:
+
+```clojure
+(reg-event-fx ::send-message
+              (fn [{:keys [db]} _]
+                {:dispatch [::websocket/send "/ws/" {:this-is "the message"
+                                                     :will-be "Automatically translated to edn/json/transit/etc"}]}))
+```
+You do not have to think about establishing the websocket before sending messages to it. Messages will be queued and sent
+when the socket becomes available.
+
+You might want to track the status of your socket. There's a subscription for that, goes like this:
+
+```clojure
+(subscribe [:kee-frame.websocket/sub "/ws/"])
+
+;; {:output-chan #object[cljs.core.async.impl.channels.ManyToManyChannel], 
+;; :state :connected, 
+;; :ws-chan #object[chord.channels.t_chord$channels19899]}
+
+```
+
+
 ## Error messages
 
 Helpful error messages are important to kee-frame. You should not get stuck because of "undefined is not a function". If you make a mistake, kee-frame should make it very clear to you what you did wrong and how you can fix it. If you find pain spots, please post an issue so we can find better solutions.
@@ -303,6 +347,7 @@ The implementation of kee-frame is quite simple, building on rock solid librarie
 * [re-frame](https://github.com/Day8/re-frame) and [reagent](https://reagent-project.github.io/). The world needs to know about these 2 kings of frontend development, and we all need to contribute to their widespread use. This framework is an attempt in that direction.
 * [bidi](https://github.com/juxt/bidi). Simple and easy bidirectional routing. I love bidi and think it fits very well with kee-frame, but I'm considering adding support for more routing libraries.
 * [accountant](https://github.com/venantius/accountant). A navigation library that hooks to any routing system. Made my life so much easier when I discovered it.
+* [chord](https://github.com/jarohen/chord). A server/client websocket library. Uses core.async as the main abstraction.
 * [etaoin](https://github.com/igrishaev/etaoin) and [lein-test-refresh](https://github.com/jakemcc/lein-test-refresh). 2 good examples of how powerful Clojure is. Etaoin makes browser integration testing fun again, while lein-test-refresh provides you with a development flow that no other platform will give you.
 
 Thank you!
