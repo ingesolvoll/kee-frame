@@ -38,10 +38,7 @@
           {:keys [ws-channel error]} (<! (create-socket url {:format format}))]
       (if error
         (rf/dispatch [::error path error])
-        (do
-          (rf/dispatch [::connected path ws-channel])
-          (send-messages! (chan) ws-channel wrap-message)
-          (receive-messages! ws-channel dispatch))))))
+        (rf/dispatch [::connected path ws-channel wrap-message dispatch])))))
 
 (defn- socket-not-found [path websockets]
   (throw (ex-info (str "Could not find socket for path " path) {:available-sockets websockets})))
@@ -58,11 +55,14 @@
     (update-in db [::sockets path] merge {:state   :error
                                           :message message})))
 
-(k/reg-event-db
+(k/reg-event-fx
   ::connected
-  (fn [db [path ws-chan]]
-    (assoc-in db [::sockets path] {:ws-chan ws-chan
-                                   :state   :connected})))
+  (fn [{:keys [db]} [path ws-chan wrap-message dispatch]]
+    (let [{:keys [output-chan]} (socket-for db path)]
+      (send-messages! output-chan ws-chan wrap-message)
+      (receive-messages! ws-chan dispatch)
+      {:db (update-in db [::sockets path] merge {:ws-chan ws-chan
+                                                 :state   :connected})})))
 
 (rf/reg-fx ::open (partial start-websocket interop/create-socket))
 
