@@ -289,7 +289,7 @@ In compojure, the wildcard route would look like this:
                   :body    (index-handler req)})
 ```
 
-## Websockets
+## Websockets (since 0.2.2)
 
 Websocket support is activated by requiring the websocket namespace 
 ```clojure
