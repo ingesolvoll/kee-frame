@@ -324,7 +324,7 @@ when the socket becomes available.
 You might want to track the status of your socket. There's a subscription for that, goes like this:
 
 ```clojure
-(subscribe [:kee-frame.websocket/sub "/ws/"])
+ @(subscribe [:kee-frame.websocket/sub "/ws/"])
 
 ;; {:output-chan #object[cljs.core.async.impl.channels.ManyToManyChannel], 
 ;; :state :connected, 
