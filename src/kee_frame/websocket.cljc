@@ -8,19 +8,22 @@
     [clojure.core.async :refer [go go-loop]])
     [re-frame.core :as rf]
     [kee-frame.core :as k]
-    [kee-frame.interop :as interop]))
+    [kee-frame.interop :as interop]
+    [kee-frame.state :as state]))
 
-(defn- receive-messages! [ws-chan dispatch]
+(defn- receive-messages! [path ws-chan dispatch]
   (go-loop []
     (when-let [message (<! ws-chan)]
+      (when @state/debug? (rf/dispatch [::log path :received (js/Date.) message]))
       (rf/dispatch [dispatch message])
       (recur))))
 
 (defn- send-messages!
-  [buffer-chan ws-chan wrap-message]
+  [path buffer-chan ws-chan wrap-message]
   (go-loop []
     (let [message (<! buffer-chan)]
       (>! ws-chan (wrap-message message))
+      (when @state/debug? (rf/dispatch [::log path :sent (js/Date.) message]))
       (recur))))
 
 (defn- socket-for [db path]
@@ -49,6 +52,13 @@
                                    :state       :initializing})))
 
 (k/reg-event-db
+  ::log
+  (fn [db [path type time message]]
+    (update-in db [::sockets path :log] conj {:time    time
+                                              :message message
+                                              :type    type})))
+
+(k/reg-event-db
   ::error
   (fn [db [path message]]
     (update-in db [::sockets path] merge {:state   :error
@@ -58,8 +68,8 @@
   ::connected
   (fn [{:keys [db]} [path ws-chan wrap-message dispatch]]
     (let [{:keys [buffer-chan]} (socket-for db path)]
-      (send-messages! buffer-chan ws-chan wrap-message)
-      (receive-messages! ws-chan dispatch)
+      (send-messages! path buffer-chan ws-chan wrap-message)
+      (receive-messages! path ws-chan dispatch)
       {:db (update-in db [::sockets path] merge {:ws-chan ws-chan
                                                  :state   :connected})})))
 
@@ -73,9 +83,9 @@
 
 (k/reg-event-fx ::send (fn [{:keys [db]} [path message]]
                          (if-let [buffer-chan (:buffer-chan (socket-for db path))]
-                           (go (>! buffer-chan message))
-                           (socket-not-found path (::sockets db)))
-                         nil))
+                           (do (go (>! buffer-chan message))
+                               (when @state/debug? {:dispatch [::log path :buffered (js/Date.) message]}))
+                           (socket-not-found path (::sockets db)))))
 
 (rf/reg-sub ::state (fn [db [_ path]]
-                       (get-in db [::sockets path])))
+                      (get-in db [::sockets path])))
