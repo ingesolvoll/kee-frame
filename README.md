@@ -307,6 +307,7 @@ in your event handler, like this:
                                     :wrap-message (fn [message] (assoc message :authToken (-> db :user :auth-token)))}}))
 ```
 `:dispatch` is the re-frame event that should receive server-sent messages.
+
 `wrap-message` is a function used to transform the message just before sending to server. A typical use case is authentication
 tokens or other identifiers.
 
