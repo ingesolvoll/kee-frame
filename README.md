@@ -44,7 +44,7 @@ Contact the author on [Twitter](https://twitter.com/ingesol) or join the discuss
 ## Installation
 Add the following dependency to your `project.clj` file:
 ```clojure
-[kee-frame "0.2.1"]
+[kee-frame "0.2.2"]
 ```
 
 ## Getting started
