@@ -14,7 +14,7 @@
 (defn- receive-messages! [path ws-chan dispatch]
   (go-loop []
     (when-let [message (<! ws-chan)]
-      (when @state/debug? (rf/dispatch [::log path :received (js/Date.) message]))
+      (when false (rf/dispatch [::log path :received (js/Date.) message]))
       (rf/dispatch [dispatch message])
       (recur))))
 
@@ -23,7 +23,7 @@
   (go-loop []
     (let [message (<! buffer-chan)]
       (>! ws-chan (wrap-message message))
-      (when @state/debug? (rf/dispatch [::log path :sent (js/Date.) message]))
+      (when false (rf/dispatch [::log path :sent (js/Date.) message]))
       (recur))))
 
 (defn- socket-for [db path]
@@ -84,7 +84,7 @@
 (k/reg-event-fx ::send (fn [{:keys [db]} [path message]]
                          (if-let [buffer-chan (:buffer-chan (socket-for db path))]
                            (do (go (>! buffer-chan message))
-                               (when @state/debug? {:dispatch [::log path :buffered (js/Date.) message]}))
+                               (when false {:dispatch [::log path :buffered (js/Date.) message]}))
                            (socket-not-found path (::sockets db)))))
 
 (rf/reg-sub ::state (fn [db [_ path]]
