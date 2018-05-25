@@ -13,10 +13,11 @@
 
 (defn- receive-messages! [path ws-chan dispatch]
   (go-loop []
-    (when-let [message (<! ws-chan)]
-      (when false (rf/dispatch [::log path :received (js/Date.) message]))
-      (rf/dispatch [dispatch message])
-      (recur))))
+    (if-let [message (<! ws-chan)]
+      (do (when false (rf/dispatch [::log path :received (js/Date.) message]))
+          (rf/dispatch [dispatch message])
+          (recur))
+      (rf/dispatch [::disconnected path]))))
 
 (defn- send-messages!
   [path buffer-chan ws-chan wrap-message]
@@ -63,6 +64,13 @@
   (fn [db [path message]]
     (update-in db [::sockets path] merge {:state   :error
                                           :message message})))
+
+(k/reg-event-fx
+  ::disconnected
+  (fn [{:keys [db]} [path]]
+    ;; TODO Reconnect, reporting
+    (println "Socket disconnected: " path)
+    nil))
 
 (k/reg-event-fx
   ::connected
