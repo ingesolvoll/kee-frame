@@ -11,13 +11,14 @@
     [kee-frame.interop :as interop]
     [kee-frame.state :as state]))
 
-(defn- receive-messages! [path ws-chan dispatch]
+(defn- receive-messages! [ws-chan {:keys [path dispatch]
+                                   :as   socket-config}]
   (go-loop []
     (if-let [message (<! ws-chan)]
       (do (when false (rf/dispatch [::log path :received (js/Date.) message]))
           (rf/dispatch [dispatch message])
           (recur))
-      (rf/dispatch [::disconnected path]))))
+      (rf/dispatch [::disconnected socket-config]))))
 
 (defn- send-messages!
   [path buffer-chan ws-chan wrap-message]
@@ -35,13 +36,14 @@
       (rf/dispatch [::created path buffer-chan])
       ref)))
 
-(defn start-websocket [create-socket {:keys [path dispatch wrap-message format]}]
+(defn start-websocket [create-socket {:keys [path format]
+                                      :as   socket-config}]
   (go
     (let [url (interop/websocket-url path)
           {:keys [ws-channel error]} (<! (create-socket url {:format format}))]
       (if error
         (rf/dispatch [::error path error])
-        (rf/dispatch [::connected path ws-channel wrap-message dispatch])))))
+        (rf/dispatch [::connected ws-channel socket-config])))))
 
 (defn- socket-not-found [path websockets]
   (throw (ex-info (str "No socket registered for path " path) websockets)))
@@ -67,17 +69,18 @@
 
 (k/reg-event-fx
   ::disconnected
-  (fn [{:keys [db]} [path]]
-    ;; TODO Reconnect, reporting
-    (println "Socket disconnected: " path)
-    nil))
+  (fn [_ [{:keys [reconnect?]
+           :as   socket-config}]]
+    (when reconnect?
+      {::open socket-config})))
 
 (k/reg-event-fx
   ::connected
-  (fn [{:keys [db]} [path ws-chan wrap-message dispatch]]
+  (fn [{:keys [db]} [ws-chan {:keys [path wrap-message]
+                              :as   socket-config}]]
     (let [{:keys [buffer-chan]} (socket-for db path)]
       (send-messages! path buffer-chan ws-chan wrap-message)
-      (receive-messages! path ws-chan dispatch)
+      (receive-messages! ws-chan socket-config)
       {:db (update-in db [::sockets path] merge {:ws-chan ws-chan
                                                  :state   :connected})})))
 
