@@ -11,11 +11,15 @@
     [kee-frame.interop :as interop]
     [kee-frame.state :as state]))
 
+(defn date []
+  #?(:clj  (java.util.Date.)
+     :cljs (js/Date.)))
+
 (defn- receive-messages! [ws-chan {:keys [path dispatch]
                                    :as   socket-config}]
   (go-loop []
     (if-let [message (<! ws-chan)]
-      (do (when false (rf/dispatch [::log path :received (js/Date.) message]))
+      (do (when false (rf/dispatch [::log path :received (date) message]))
           (rf/dispatch [dispatch message])
           (recur))
       (rf/dispatch [::disconnected socket-config]))))
@@ -25,7 +29,7 @@
   (go-loop []
     (let [message (<! buffer-chan)]
       (>! ws-chan (wrap-message message))
-      (when false (rf/dispatch [::log path :sent (js/Date.) message]))
+      (when false (rf/dispatch [::log path :sent (date) message]))
       (recur))))
 
 (defn- socket-for [db path]
@@ -95,7 +99,7 @@
 (k/reg-event-fx ::send (fn [{:keys [db]} [path message]]
                          (if-let [buffer-chan (:buffer-chan (socket-for db path))]
                            (do (go (>! buffer-chan message))
-                               (when false {:dispatch [::log path :buffered (js/Date.) message]}))
+                               (when false {:dispatch [::log path :buffered (date) message]}))
                            (socket-not-found path (::sockets db)))))
 
 (rf/reg-sub ::state (fn [db [_ path]]
