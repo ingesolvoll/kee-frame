@@ -3,7 +3,6 @@
             [accountant.core :as accountant]
             [reagent.core :as reagent]
             [re-frame.core :as rf]
-            [delayed-scroll-restoration.index]
             [chord.client :as chord]))
 
 (defrecord AccountantNavigator []
