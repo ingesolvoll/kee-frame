@@ -8,8 +8,7 @@
     [clojure.core.async :refer [go go-loop]])
     [re-frame.core :as rf]
     [kee-frame.core :as k]
-    [kee-frame.interop :as interop]
-    [kee-frame.state :as state]))
+    [kee-frame.interop :as interop]))
 
 (defn date []
   #?(:clj  (java.util.Date.)
@@ -27,10 +26,11 @@
 (defn- send-messages!
   [path buffer-chan ws-chan wrap-message]
   (go-loop []
-    (let [message (<! buffer-chan)]
-      (>! ws-chan (wrap-message message))
-      (when false (rf/dispatch [::log path :sent (date) message]))
-      (recur))))
+    (when-let [message (<! buffer-chan)]                    ;; buffer-chan may be closed
+      (if (>! ws-chan (wrap-message message))               ;; if ws-chan is closed put message back in buffer-chan
+        (do (when false (rf/dispatch [::log path :sent (date) message]))
+            (recur))
+        (>! buffer-chan message)))))
 
 (defn- socket-for [db path]
   (or
@@ -73,10 +73,13 @@
 
 (k/reg-event-fx
   ::disconnected
-  (fn [_ [{:keys [reconnect?]
-           :as   socket-config}]]
-    (when reconnect?
-      {::open socket-config})))
+  (fn [{:keys [db]} [{:keys [path reconnect?]
+                      :as   socket-config}]]
+    (when (get-in db [::sockets path])
+      (merge
+        {:db (update-in db [::sockets path] merge {:state :disconnected})}
+        (when reconnect?
+          {::open socket-config})))))
 
 (k/reg-event-fx
   ::connected
@@ -85,16 +88,18 @@
     (let [{:keys [buffer-chan]} (socket-for db path)]
       (send-messages! path buffer-chan ws-chan wrap-message)
       (receive-messages! ws-chan socket-config)
-      {:db (update-in db [::sockets path] merge {:ws-chan ws-chan
-                                                 :state   :connected})})))
+      {:db (update-in db [::sockets path] merge {:ws-channel ws-chan
+                                                 :state      :connected})})))
 
 (rf/reg-fx ::open (partial start-websocket interop/create-socket))
 
 (k/reg-event-fx ::close (fn [{:keys [db]} [path]]
-                          (if-let [socket (:ws-channel (socket-for db path))]
-                            (close! socket)
+                          (if-let [{:keys [buffer-chan ws-channel]} (socket-for db path)]
+                            (do
+                              (close! ws-channel)
+                              (close! buffer-chan))
                             (socket-not-found path (::sockets db)))
-                          nil))
+                          {:db (assoc-in db [::sockets path] nil)}))
 
 (k/reg-event-fx ::send (fn [{:keys [db]} [path message]]
                          (if-let [buffer-chan (:buffer-chan (socket-for db path))]

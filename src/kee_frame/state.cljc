@@ -8,8 +8,6 @@
 
 (def app-db-spec (atom nil))
 
-(def websockets (atom {}))
-
 (def debug? (atom false))
 
 (def default-links [{:effect-present? (fn [effects] (:http-xhrio effects))
@@ -20,7 +18,6 @@
 ;; Test utility
 (defn reset-state! []
   (reset! controllers {})
-  (reset! websockets {})
   (reset! links default-links)
   (reset! router nil)
   (reset! navigator nil))
