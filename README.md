@@ -44,7 +44,7 @@ Contact the author on [Twitter](https://twitter.com/ingesol) or join the discuss
 ## Installation
 Add the following dependency to your `project.clj` file:
 ```clojure
-[kee-frame "0.2.2"]
+[kee-frame "0.2.3"]
 ```
 
 ## Getting started
@@ -337,6 +337,16 @@ You might want to track the status of your socket. There's a subscription for th
 ## Error messages
 
 Helpful error messages are important to kee-frame. You should not get stuck because of "undefined is not a function". If you make a mistake, kee-frame should make it very clear to you what you did wrong and how you can fix it. If you find pain spots, please post an issue so we can find better solutions.
+
+## Scroll behavior on navigation
+In a traditional static website, the browser handles the scrolling for you nicely. Meaning that when you navigate back
+and forward, the browser "remembers" how far down you scrolled on the last visit. This is convenient for many websites,
+so Kee-frame utilizes a third-party JS lib to get this behavior for a SPA. The only thing you need to do is this in
+your main namespace:
+
+```clojure
+(:require [kee-frame.scroll])
+```
 
 ## Maturity
 Reasonably well tested through the demo app and production apps at my work. API might see some breaking changes in the near future, but hopefully not. Eagerly awaiting feedback!
