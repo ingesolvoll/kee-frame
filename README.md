@@ -29,6 +29,8 @@ Re-frame events are very simple and generic, making them perfect building blocks
 
 [Introduction and background for kee-frame controllers](http://ingesolvoll.github.io/posts/2018-04-01-kee-frame-putting-the-url-in-charge/)
 
+[Controller tricks](http://ingesolvoll.github.io/posts/2018-06-18-kee-frame-controller-tricks/)
+
 ## Demo application
 I made a simple demo app showing football results. Have a look around, and observe how all data loading just works while navigating and refreshing the page.
 
