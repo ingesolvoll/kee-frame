@@ -55,7 +55,7 @@
                      (swap! state/controllers controller/apply-route ctx route)
                      {:db (assoc db :kee-frame/route route)})))
 
-(defn start! [{:keys [routes initial-db router app-db-spec debug? root-component chain-links]
+(defn start! [{:keys [routes initial-db router app-db-spec debug? root-component chain-links breakpoints]
                :or   {debug? false}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
@@ -72,6 +72,8 @@
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))
+
+  (interop/set-breakpoints breakpoints)
 
   (rf/reg-sub :kee-frame/route (fn [db] (:kee-frame/route db nil)))
   (interop/render-root root-component))

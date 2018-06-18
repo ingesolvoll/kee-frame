@@ -31,8 +31,9 @@
 (s/def :chain/insert fn?)
 (s/def ::chain-link (s/keys :req-un [:chain/effect-present? :chain/get-dispatch :chain/set-dispatch]))
 (s/def ::chain-links (s/nilable (s/coll-of ::chain-link)))
+(s/def ::breakpoints vector?)
 
-(s/def ::start-options (s/keys :opt-un [::routes ::router ::root-component ::initial-db ::app-db-spec ::debug? ::chain-links]))
+(s/def ::start-options (s/keys :opt-un [::routes ::router ::root-component ::initial-db ::app-db-spec ::debug? ::chain-links ::breakpoints]))
 
 (defn log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")

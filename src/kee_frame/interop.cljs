@@ -3,7 +3,8 @@
             [accountant.core :as accountant]
             [reagent.core :as reagent]
             [re-frame.core :as rf]
-            [chord.client :as chord]))
+            [chord.client :as chord]
+            [breaking-point.core :as bp]))
 
 (defrecord AccountantNavigator []
   api/Navigator
@@ -44,8 +45,14 @@
 
 (rf/reg-sub :kee-frame.core/window-size (fn [db] :small))   ;;TODO
 
-(defn responsive-setup []
-  (.addEventListener js/window
-                     "resize"
-                     #(rf/dispatch [::set-window-dimensions {:width  js/window.innerWidth
-                                                             :height js/window.innerHeight}])))
+(defn set-breakpoints [breakpoints]
+  (rf/dispatch-sync [::bp/set-breakpoints
+                     {:breakpoints (or breakpoints
+                                       [:mobile
+                                        768
+                                        :tablet
+                                        992
+                                        :small-monitor
+                                        1200
+                                        :large-monitor])
+                      :debounce-ms 166}]))
