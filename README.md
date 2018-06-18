@@ -29,6 +29,8 @@ Re-frame events are very simple and generic, making them perfect building blocks
 
 [Introduction and background for kee-frame controllers](http://ingesolvoll.github.io/posts/2018-04-01-kee-frame-putting-the-url-in-charge/)
 
+[Controller tricks](http://ingesolvoll.github.io/posts/2018-06-18-kee-frame-controller-tricks/)
+
 ## Demo application
 I made a simple demo app showing football results. Have a look around, and observe how all data loading just works while navigating and refreshing the page.
 
@@ -338,7 +340,7 @@ You might want to track the status of your socket. There's a subscription for th
 
 Helpful error messages are important to kee-frame. You should not get stuck because of "undefined is not a function". If you make a mistake, kee-frame should make it very clear to you what you did wrong and how you can fix it. If you find pain spots, please post an issue so we can find better solutions.
 
-## Scroll behavior on navigation
+## Scroll behavior on navigation (since 0.2.3)
 In a traditional static website, the browser handles the scrolling for you nicely. Meaning that when you navigate back
 and forward, the browser "remembers" how far down you scrolled on the last visit. This is convenient for many websites,
 so Kee-frame utilizes a third-party JS lib to get this behavior for a SPA. The only thing you need to do is this in
@@ -347,9 +349,6 @@ your main namespace:
 ```clojure
 (:require [kee-frame.scroll])
 ```
-
-## Maturity
-Reasonably well tested through the demo app and production apps at my work. API might see some breaking changes in the near future, but hopefully not. Eagerly awaiting feedback!
 
 ## Credits
 
