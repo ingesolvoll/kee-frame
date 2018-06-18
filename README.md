@@ -348,9 +348,6 @@ your main namespace:
 (:require [kee-frame.scroll])
 ```
 
-## Maturity
-Reasonably well tested through the demo app and production apps at my work. API might see some breaking changes in the near future, but hopefully not. Eagerly awaiting feedback!
-
 ## Credits
 
 The implementation of kee-frame is quite simple, building on rock solid libraries and other people's ideas. The main influence is the [Keechma](https://keechma.com/) framework. It is a superb piece of thinking and work, go check it out! Apart from that, the following libraries make kee-frame possible:
