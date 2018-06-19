@@ -22,5 +22,4 @@
   (when root-component
     (throw (ex-info "JVM can't render to the DOM" {:root root-component}))))
 
-(defn set-breakpoints [_]
-  (throw (ex-info "No screen sizes on the JVM" {})))
+(defn set-breakpoints [_])
