@@ -86,9 +86,11 @@
       (throw (ex-info "Invalid named chain. Should be pairs of keyword and handler" (s/explain-data ::spec/named-chain-handlers step-fns))))
     (->> chain-handlers
          (partition 2 1 [nil])
-         (map (fn [[{:keys [id] :as handler-1} handler-2]]
+         (map (fn [[{:keys [id event-handler] :as handler-1} handler-2]]
                 (let [next-id (:id handler-2)]
                   (assoc handler-1 :next-id (:id handler-2)
+                                   :interceptors (:interceptors event-handler)
+                                   :event-handler (:fn event-handler)
                                    :interceptor (chain-interceptor id next-id))))))))
 
 (defn collect-event-instructions [key step-fns]

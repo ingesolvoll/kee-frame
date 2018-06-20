@@ -121,15 +121,31 @@
       (rf/dispatch [:test-event])
       (is (= 2 @(rf/subscribe [:test-prop])))))
 
+  (testing "Named chain with interceptor"
+    (state/reset-state!)
+
+    (rf-test/run-test-sync
+      (k/start! {:routes routes})
+      (rf/reg-sub :marker :marker)
+      (k/reg-chain-named
+        :test-event
+        (fn [_ _] {})
+        :test-event-step-2
+        [insert-marker]
+        (fn [_ _] nil))
+      (rf/dispatch [:test-event])
+      (is (= 69 @(rf/subscribe [:marker])))))
+
   (testing "Chain with interceptor"
     (state/reset-state!)
 
     (rf-test/run-test-sync
-      (k/start! {:routes      routes})
+      (k/start! {:routes routes})
       (rf/reg-sub :marker :marker)
-      (k/reg-chain :test-event
-                   (fn [_ _] {})
-                   [insert-marker]
-                   (fn [_ _] nil))
+      (k/reg-chain
+        :test-event
+        (fn [_ _] {})
+        [insert-marker]
+        (fn [_ _] nil))
       (rf/dispatch [:test-event])
       (is (= 69 @(rf/subscribe [:marker]))))))
