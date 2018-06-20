@@ -2,10 +2,8 @@
   (:require [re-frame.core :as rf]
             [clojure.walk :as walk]
             [kee-frame.spec :as spec]
-    #?(:cljs
-       [cljs.spec.alpha :as s])
-    #?(:clj
-            [clojure.spec.alpha :as s])
+            #?(:cljs [cljs.spec.alpha :as s]
+               :clj  [clojure.spec.alpha :as s])
             [kee-frame.state :as state]
             [expound.alpha :as e]))
 
@@ -94,19 +92,21 @@
                                    :interceptor (chain-interceptor id next-id))))))))
 
 (defn collect-event-instructions [key step-fns]
-  (when-not (s/valid? ::spec/chain-handlers step-fns)
-    (e/expound ::spec/chain-handlers step-fns)
-    (throw (ex-info "Invalid chain" (s/explain-data ::spec/chain-handlers step-fns))))
-
-  (->> step-fns
-       (partition 2 1 [nil])
-       (map-indexed (fn [counter [current-handler next-handler]]
-                      (let [id (step-id key counter)
-                            next-id (when next-handler (step-id key (inc counter)))]
-                        {:id            id
-                         :next-id       next-id
-                         :event-handler current-handler
-                         :interceptor   (chain-interceptor id next-id)})))))
+  (let [chain-handlers (s/conform ::spec/chain-handlers step-fns)]
+    (when (= ::s/invalid chain-handlers)
+      (e/expound ::spec/chain-handlers step-fns)
+      (throw (ex-info "Invalid chain. Should be functions or pairs of interceptor and function" (s/explain-data ::spec/chain-handlers step-fns))))
+    (->> chain-handlers
+         (partition 2 1 [nil])
+         (map-indexed (fn [counter [current-handler next-handler]]
+                        (let [{:keys [fn interceptors]} current-handler
+                              id (step-id key counter)
+                              next-id (when next-handler (step-id key (inc counter)))]
+                          {:id            id
+                           :next-id       next-id
+                           :event-handler fn
+                           :interceptors  interceptors
+                           :interceptor   (chain-interceptor id next-id)}))))))
 
 (defn register-chain-handlers! [instructions interceptors]
   (doseq [{:keys [id event-handler interceptor]} instructions]

@@ -67,6 +67,15 @@
                           (chain/collect-event-instructions :my/chain
                                                             ["string-should-not-be-here"]))))
 
+  (testing "Chain with interceptors"
+    (is (= :debug (-> (chain/collect-event-instructions :my/chain
+                                                        [[rf/debug]
+                                                         identity])
+                      first
+                      :interceptors
+                      first
+                      :id))))
+
   (testing "Named chain"
     (let [instructions (chain/collect-named-event-instructions
                          [:step-1
@@ -95,7 +104,7 @@
     (state/reset-state!)
 
     (rf-test/run-test-sync
-      (k/start! {:routes routes
+      (k/start! {:routes      routes
                  :chain-links custom-chain-links})
       (rf/reg-fx :my-custom-effect (fn [config] (rf/dispatch (:got-it config))))
       (rf/reg-sub :test-prop :test-prop)

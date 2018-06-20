@@ -12,7 +12,7 @@
 (s/def ::controller (s/keys :req-un [::params ::start]
                             :opt-un [::stop]))
 
-(s/def ::chain-handler ifn?)
+(s/def ::chain-handler (s/cat :interceptors (s/? vector?) :fn ifn?))
 (s/def ::chain-handlers (s/* ::chain-handler))
 (s/def ::named-chain-handlers (s/* (s/cat :id keyword? :event-handler ::chain-handler)))
 
