@@ -108,11 +108,11 @@
                            :interceptors  interceptors
                            :interceptor   (chain-interceptor id next-id)}))))))
 
-(defn register-chain-handlers! [instructions interceptors]
-  (doseq [{:keys [id event-handler interceptor]} instructions]
+(defn register-chain-handlers! [instructions kee-frame-interceptors]
+  (doseq [{:keys [id event-handler interceptor interceptors]} instructions]
     (when @state/debug?
       (rf/console :log "Registering chain handler fn " id))
-    (rf/reg-event-fx id (into [interceptor] interceptors) event-handler)))
+    (rf/reg-event-fx id (into [interceptor] (concat kee-frame-interceptors interceptors)) event-handler)))
 
 (defn reg-chain-named [interceptors & step-fns]
   (let [instructions (collect-named-event-instructions step-fns)]

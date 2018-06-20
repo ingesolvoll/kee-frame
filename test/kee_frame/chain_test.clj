@@ -4,8 +4,15 @@
             [day8.re-frame.test :as rf-test]
             [kee-frame.state :as state]
             [kee-frame.core :as k]
-            [re-frame.core :as rf])
+            [re-frame.core :as rf]
+            [re-frame.interceptor :refer [->interceptor get-effect get-coeffect assoc-coeffect assoc-effect]])
   (:import (clojure.lang ExceptionInfo)))
+
+(def insert-marker
+  (->interceptor
+    :id :insert-marker
+    :after (fn [context]
+             (assoc-in context [:effects :db :marker] 69))))
 
 (deftest utils
   (testing "Can produce next step id with namespaced keyword"
@@ -112,4 +119,17 @@
                    (fn [_ _] {:my-custom-effect {}})
                    (fn [_ _] {:db {:test-prop 2}}))
       (rf/dispatch [:test-event])
-      (is (= 2 @(rf/subscribe [:test-prop]))))))
+      (is (= 2 @(rf/subscribe [:test-prop])))))
+
+  (testing "Chain with interceptor"
+    (state/reset-state!)
+
+    (rf-test/run-test-sync
+      (k/start! {:routes      routes})
+      (rf/reg-sub :marker :marker)
+      (k/reg-chain :test-event
+                   (fn [_ _] {})
+                   [insert-marker]
+                   (fn [_ _] nil))
+      (rf/dispatch [:test-event])
+      (is (= 69 @(rf/subscribe [:marker]))))))
