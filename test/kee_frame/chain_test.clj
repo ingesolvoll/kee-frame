@@ -8,11 +8,11 @@
             [re-frame.interceptor :refer [->interceptor get-effect get-coeffect assoc-coeffect assoc-effect]])
   (:import (clojure.lang ExceptionInfo)))
 
-(def insert-marker
+(defn insert-marker [m]
   (->interceptor
     :id :insert-marker
     :after (fn [context]
-             (assoc-in context [:effects :db :marker] 69))))
+             (assoc-in context [:effects :db :marker] m))))
 
 (deftest utils
   (testing "Can produce next step id with namespaced keyword"
@@ -131,10 +131,10 @@
         :test-event
         (fn [_ _] {})
         :test-event-step-2
-        [insert-marker]
+        [(insert-marker 42)]
         (fn [_ _] nil))
       (rf/dispatch [:test-event])
-      (is (= 69 @(rf/subscribe [:marker])))))
+      (is (= 42 @(rf/subscribe [:marker])))))
 
   (testing "Chain with interceptor"
     (state/reset-state!)
@@ -145,7 +145,7 @@
       (k/reg-chain
         :test-event
         (fn [_ _] {})
-        [insert-marker]
+        [(insert-marker 43)]
         (fn [_ _] nil))
       (rf/dispatch [:test-event])
-      (is (= 69 @(rf/subscribe [:marker]))))))
+      (is (= 43 @(rf/subscribe [:marker]))))))
