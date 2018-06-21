@@ -83,6 +83,11 @@
                       first
                       :id))))
 
+  (testing "Wrong order of interceptors"
+    (is (thrown-with-msg? ExceptionInfo #"Invalid chain"
+                          (chain/collect-event-instructions :my/chain
+                                                            [[rf/debug][rf/debug]]))))
+
   (testing "Named chain"
     (let [instructions (chain/collect-named-event-instructions
                          [:step-1

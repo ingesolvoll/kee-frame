@@ -5,14 +5,14 @@
             [expound.alpha :as e]
             [kee-frame.api :as api]))
 
-(s/def ::params (s/or :path-vector vector? :fn ifn?))
-(s/def ::start (s/or :vector ::event-vector :fn ifn?))
-(s/def ::stop (s/or :vector ::event-vector :fn ifn?))
+(s/def ::params (s/or :path-vector vector? :fn fn?))
+(s/def ::start (s/or :vector ::event-vector :fn fn?))
+(s/def ::stop (s/or :vector ::event-vector :fn fn?))
 
 (s/def ::controller (s/keys :req-un [::params ::start]
                             :opt-un [::stop]))
 
-(s/def ::chain-handler (s/cat :interceptors (s/? vector?) :fn ifn?))
+(s/def ::chain-handler (s/cat :interceptors (s/? vector?) :fn fn?))
 (s/def ::chain-handlers (s/* ::chain-handler))
 (s/def ::named-chain-handlers (s/* (s/cat :id keyword? :event-handler ::chain-handler)))
 
