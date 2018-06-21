@@ -291,6 +291,46 @@ In compojure, the wildcard route would look like this:
                   :body    (index-handler req)})
 ```
 
+## Screen size breakpoints (since 0.2.4)
+
+Most web apps benefit from having direct access to information about the size and orientation of the screen. Kee-frame
+ships with the nice and simple [breaking-points](https://github.com/gadfly361/breaking-point) library that provides 
+subscriptions for the screen properties you're interested in.
+
+The screen breakpoints are completely configurable, you can pass your preferred ones to the `start` function. The ones
+listed in the example below are the defaults, so if you're happy with those you can skip this config.
+
+```clojure
+(k/start!  {:breakpoints [:mobile
+                          768
+                          :tablet
+                          992
+                          :small-monitor
+                          1200
+                          :large-monitor]
+              ;; Other settings here
+              })
+```
+
+The subscriptions available are:
+
+```clojure
+(rf/subscribe [:breaking-point.core/screen-width]) ;; will be an int
+(rf/subscribe [:breaking-point.core/screen-height]) ;; will be an int
+(rf/subscribe [:breaking-point.core/screen]) ;; will be one of the following: :mobile, :tablet, :small-monitor, :large-monitor
+
+(rf/subscribe [:breaking-point.core/orientation]) ;; will be either :portrait or :landscape
+(rf/subscribe [:breaking-point.core/landscape?]) ;; true if width is >= height
+(rf/subscribe [:breaking-point.core/portrait?]) ;; true if height > width
+
+;; these will be based on the breakpoint names that you provide
+(rf/subscribe [:breaking-point.core/mobile?]) ;; true if screen-width is < 768
+(rf/subscribe [:breaking-point.core/tablet?]) ;; true if screen-width is >= 768 and < 992
+(rf/subscribe [:breaking-point.core/small-monitor?]) ;; true if window width is >= 992 and < 1200
+(rf/subscribe [:breaking-point.core/large-monitor?]) ;; true if window width is >= 1200
+```
+
+
 ## Websockets (since 0.2.2)
 
 Websocket support is activated by requiring the websocket namespace 
