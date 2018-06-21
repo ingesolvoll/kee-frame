@@ -73,7 +73,10 @@
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))
 
-  (interop/set-breakpoints breakpoints)
+  (when @state/breakpoints-initialized?
+    (interop/set-breakpoint-subs breakpoints)
+    (do (interop/set-breakpoints breakpoints)
+        (reset! state/breakpoints-initialized? true)))
 
   (rf/reg-sub :kee-frame/route (fn [db] (:kee-frame/route db nil)))
   (interop/render-root root-component))

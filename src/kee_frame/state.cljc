@@ -10,6 +10,8 @@
 
 (def debug? (atom false))
 
+(def breakpoints-initialized? (atom false))
+
 (def default-links [{:effect-present? (fn [effects] (:http-xhrio effects))
                      :get-dispatch    (fn [effects] (get-in effects [:http-xhrio :on-success]))
                      :set-dispatch    (fn [effects dispatch] (assoc-in effects [:http-xhrio :on-success] dispatch))}])

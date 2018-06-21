@@ -22,4 +22,6 @@
   (when root-component
     (throw (ex-info "JVM can't render to the DOM" {:root root-component}))))
 
+(defn set-breakpoint-subs [_])
+
 (defn set-breakpoints [_])
