@@ -98,7 +98,7 @@
              (map :id instructions)))))
 
   (testing "Bad named chain gives good error message"
-    (is (thrown-with-msg? ExceptionInfo #""
+    (is (thrown-with-msg? ExceptionInfo #"Invalid named chain"
                           (chain/collect-named-event-instructions
                             [:step-1
                              identity
