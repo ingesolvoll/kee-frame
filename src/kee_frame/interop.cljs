@@ -37,14 +37,6 @@
                       app-element)
       (throw (ex-info "Could not find element with id 'app' to mount app into" {:component root-component})))))
 
-(rf/reg-event-db ::set-window-dimensions
-                 (fn [db [_ dimensions]]
-                   (assoc db :kee-frame.core/window-dimensions dimensions)))
-
-(rf/reg-sub :kee-frame.core/window-dimensions :kee-frame.core/window-dimensions)
-
-(rf/reg-sub :kee-frame.core/window-size (fn [db] :small))   ;;TODO
-
 (defn set-breakpoints [breakpoints]
   (rf/dispatch-sync [::bp/set-breakpoints
                      {:breakpoints (or breakpoints
