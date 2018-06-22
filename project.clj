@@ -5,14 +5,14 @@
   :url "https://github.com/ingesolvoll/kee-frame"
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.9.0"]
-                 [org.clojure/clojurescript "1.9.946"]
+                 [org.clojure/clojurescript "1.10.312"]
                  [re-frame "0.10.5"]
                  [bidi "2.1.3"]
                  [org.clojure/core.async "0.3.442"]
                  [jarohen/chord "0.8.1"]
                  [venantius/accountant "0.2.4"]
                  [org.clojure/core.match "0.3.0-alpha5"]
-                 [expound "0.5.0"]
+                 [expound "0.7.0"]
                  [day8.re-frame/test "0.1.5"]
                  [breaking-point "0.1.1"]
                  #_[sandbags/aido "0.3.5"]]
