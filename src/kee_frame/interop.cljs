@@ -39,18 +39,17 @@
 
 (defn breakpoints-or-defaults [breakpoints]
   (or breakpoints
-      [:mobile
-       768
-       :tablet
-       992
-       :small-monitor
-       1200
-       :large-monitor]))
+      {:debounce-ms 166
+       :breakpoints [:mobile
+                     768
+                     :tablet
+                     992
+                     :small-monitor
+                     1200
+                     :large-monitor]}))
 
 (defn set-breakpoint-subs [breakpoints]
-  (bp/register-subs (breakpoints-or-defaults breakpoints)))
+  (bp/register-subs (:breakpoints (breakpoints-or-defaults breakpoints))))
 
 (defn set-breakpoints [breakpoints]
-  (rf/dispatch-sync [::bp/set-breakpoints
-                     {:breakpoints (breakpoints-or-defaults breakpoints)
-                      :debounce-ms 166}]))
+  (rf/dispatch-sync [::bp/set-breakpoints (breakpoints-or-defaults breakpoints)]))

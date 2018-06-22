@@ -10,7 +10,7 @@
 
 (def kee-frame-interceptors [(spec-interceptor state/app-db-spec) (debug-interceptor state/debug?) rf/trim-v])
 
-(def valid-option-key? #{:router :routes :process-route :debug? :chain-links :app-db-spec :root-component :initial-db :breakpoints})
+(def valid-option-key? #{:router :routes :process-route :debug? :chain-links :app-db-spec :root-component :initial-db :screen})
 
 (defn extra-options [options]
   (->> options

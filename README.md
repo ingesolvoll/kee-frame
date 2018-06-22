@@ -301,13 +301,15 @@ The screen breakpoints are completely configurable, you can pass your preferred 
 listed in the example below are the defaults, so if you're happy with those you can skip this config.
 
 ```clojure
-(k/start!  {:breakpoints [:mobile
-                          768
-                          :tablet
-                          992
-                          :small-monitor
-                          1200
-                          :large-monitor]
+(k/start!  {:screen {:breakpoints 
+                        [:mobile
+                         768
+                         :tablet
+                         992
+                         :small-monitor
+                         1200
+                         :large-monitor]
+                     :debounce-ms 166}
               ;; Other settings here
               })
 ```
