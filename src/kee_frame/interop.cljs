@@ -52,4 +52,4 @@
   (bp/register-subs (:breakpoints (breakpoints-or-defaults breakpoints))))
 
 (defn set-breakpoints [breakpoints]
-  (rf/dispatch-sync [::bp/set-breakpoints (breakpoints-or-defaults breakpoints)]))
+  (rf/dispatch [::bp/set-breakpoints (breakpoints-or-defaults breakpoints)]))
