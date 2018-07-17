@@ -56,7 +56,7 @@ Add the following dependency to your `project.clj` file:
 in clojure. It comes with kee-frame if you do this:
 
 ```
-lein new luminus guestbook +kee-frame
+lein new luminus your-app-name-here +kee-frame
 ``` 
 
 ## Getting started
