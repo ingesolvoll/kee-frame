@@ -44,10 +44,20 @@ Feel free to clone the demo app and do some figwheelin' with it!
 Contact the author on [Twitter](https://twitter.com/ingesol) or join the discussion on [Slack](https://clojurians.slack.com/messages/kee-frame). Don't be afraid to create [issues](https://github.com/ingesolvoll/kee-frame/issues). Lack of user friendliness is also a bug!
 
 ## Installation
+There are 2 simple options for bootstrapping your project:
+
+### 1. Manual installation
 Add the following dependency to your `project.clj` file:
 ```clojure
 [kee-frame "0.2.4"]
 ```
+### 2. Luminus template
+[Luminus](http://www.luminusweb.net) is a framework that makes it easy to get started with web app development
+in clojure. It comes with kee-frame if you do this:
+
+```
+lein new luminus guestbook +kee-frame
+``` 
 
 ## Getting started
 
