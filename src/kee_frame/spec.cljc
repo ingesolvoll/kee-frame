@@ -26,9 +26,9 @@
 (s/def ::blacklist (s/coll-of keyword? :kind set?))
 (s/def ::debug? (s/nilable (s/or :boolean boolean?
                                  :config (s/keys :opt-un [::blacklist]))))
-(s/def :chain/present? fn?)
-(s/def :chain/dispatched? fn?)
-(s/def :chain/insert fn?)
+(s/def :chain/effect-present? fn?)
+(s/def :chain/get-dispatch fn?)
+(s/def :chain/set-dispatch fn?)
 (s/def ::chain-link (s/keys :req-un [:chain/effect-present? :chain/get-dispatch :chain/set-dispatch]))
 (s/def ::chain-links (s/nilable (s/coll-of ::chain-link)))
 (s/def ::breakpoints vector?)
