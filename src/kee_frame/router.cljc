@@ -4,7 +4,9 @@
             [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
             [kee-frame.state :as state]
             [kee-frame.controller :as controller]
-            [bidi.bidi :as bidi]))
+            [bidi.bidi :as bidi]
+            [reitit.core :as reitit]
+            [clojure.string :as str]))
 
 (defn url [data]
   (when-not @state/router
@@ -33,6 +35,20 @@
     (or (bidi/match-route routes url)
         (throw (ex-info "Not a valid url" {:url    url
                                            :routes routes})))))
+
+(defrecord ReititRouter [routes]
+  api/Router
+
+  (data->url [_ [route-name path-params]]
+    (str (:path (reitit/match-by-name routes route-name path-params))
+         (when-some [q (:query-string path-params)] (str "?" q))
+         (when-some [h (:hash path-params)] (str "#" h))))
+
+  (url->data [_ url]
+    (let [[path+query fragment] (-> url (str/replace #"^/#" "") (str/split #"#" 2))
+          [path query] (str/split path+query #"\?" 2)]
+      (some-> (reitit/match-by-path routes path)
+              (assoc :query-string query :hash fragment)))))
 
 (defn bootstrap-routes [routes router]
   (let [initialized? (boolean @state/navigator)
