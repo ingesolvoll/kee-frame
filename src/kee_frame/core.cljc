@@ -12,12 +12,16 @@
 
 (def valid-option-key? #{:router :hash-routing? :routes :process-route :debug? :chain-links :app-db-spec :root-component :initial-db :screen})
 
-(defn extra-options [options]
+(defn extra-options
+  "Complete listing of invalid options sent to the `start!` function."
+  [options]
   (->> options
        (filter (fn [[k]] (not (valid-option-key? k))))
        (into {})))
 
-(defn start! [options]
+(defn start!
+  ""
+  [options]
   (when-not (s/valid? ::spec/start-options options)
     (e/expound ::spec/start-options options)
     (throw (ex-info "Invalid options" (s/explain-data ::spec/start-options options))))
@@ -26,7 +30,9 @@
       (throw (ex-info (str "Uknown startup options. Valid keys are " valid-option-key?) extras))))
   (router/start! options))
 
-(defn reg-controller [id controller]
+(defn reg-controller
+  ""
+  [id controller]
   (when-not (s/valid? ::spec/controller controller)
     (e/expound ::spec/controller controller)
     (throw (ex-info "Invalid controller" (s/explain-data ::spec/controller controller))))
@@ -44,14 +50,22 @@
   ([id handler] (reg-event-db id nil handler))
   ([id interceptors handler] (rf/reg-event-db id (concat kee-frame-interceptors interceptors) handler)))
 
-(defn reg-chain-named [& handlers]
+(defn reg-chain-named
+  ""
+  [& handlers]
   (apply chain/reg-chain-named kee-frame-interceptors handlers))
 
-(defn reg-chain [id & handlers]
+(defn reg-chain
+  ""
+  [id & handlers]
   (apply chain/reg-chain id kee-frame-interceptors handlers))
 
-(defn path-for [handler & params]
+(defn path-for
+  ""
+  [handler & params]
   (apply router/url handler params))
 
-(defn switch-route [f & pairs]
+(defn switch-route
+  ""
+  [f & pairs]
   (apply router/switch-route f pairs))
