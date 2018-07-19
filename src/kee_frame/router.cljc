@@ -49,23 +49,24 @@
     (or (bidi/match-route routes url)
         (route-match-not-found routes url))))
 
-(defrecord ReititRouter [routes]
+(defrecord BidiHashRouter [routes]
   api/Router
-
-  (data->url [_ [route-name path-params]]
-    (str (:path (reitit/match-by-name routes route-name path-params))
-         (when-some [q (:query-string path-params)] (str "?" q))
-         (when-some [h (:hash path-params)] (str "#" h))))
-
+  (data->url [_ data]
+    (assert-route-data data)
+    (or (str "/#" (apply bidi/path-for routes data))
+        (url-not-found routes data)))
   (url->data [_ url]
     (let [[path+query fragment] (-> url (str/replace #"^/#" "") (str/split #"#" 2))
           [path query] (str/split path+query #"\?" 2)]
-      (some-> (reitit/match-by-path routes path)
+      (some-> (or (bidi/match-route routes path)
+                  (route-match-not-found routes url))
               (assoc :query-string query :hash fragment)))))
 
-(defn bootstrap-routes [routes router]
+(defn bootstrap-routes [routes router hash-routing?]
   (let [initialized? (boolean @state/navigator)
-        router (or router (->BidiBrowserRouter routes))]
+        router (or router (if hash-routing?
+                            (->BidiHashRouter routes)
+                            (->BidiBrowserRouter routes)))]
     (reset! state/router router)
     (rf/reg-fx :navigate-to goto)
 
@@ -84,7 +85,7 @@
                      (swap! state/controllers controller/apply-route ctx route)
                      {:db (assoc db :kee-frame/route route)})))
 
-(defn start! [{:keys [routes initial-db router app-db-spec debug? root-component chain-links screen]
+(defn start! [{:keys [routes initial-db router hash-routing? app-db-spec debug? root-component chain-links screen]
                :or   {debug? false}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
@@ -97,7 +98,7 @@
                     {:routes routes
                      :router router})))
   (when (or routes router)
-    (bootstrap-routes routes router))
+    (bootstrap-routes routes router hash-routing?))
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))

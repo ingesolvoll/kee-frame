@@ -20,6 +20,7 @@
 
 (s/def ::routes any?)
 (s/def ::router #(satisfies? api/Router %))
+(s/def ::hash-routing? (s/nilable boolean?))
 (s/def ::root-component (s/nilable vector?))
 (s/def ::initial-db (s/nilable map?))
 (s/def ::app-db-spec (s/nilable keyword?))
@@ -35,7 +36,7 @@
 (s/def ::debounce-ms number?)
 (s/def ::screen (s/keys :req-un [::breakpoints ::debounce-ms]))
 
-(s/def ::start-options (s/keys :opt-un [::routes ::router ::root-component ::initial-db ::app-db-spec ::debug? ::chain-links ::screen]))
+(s/def ::start-options (s/keys :opt-un [::routes ::router ::hash-routing? ::root-component ::initial-db ::app-db-spec ::debug? ::chain-links ::screen]))
 
 (defn log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")
