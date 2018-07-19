@@ -3,6 +3,7 @@
             [accountant.core :as accountant]
             [reagent.core :as reagent]
             [re-frame.core :as rf]
+            [day8.re-frame.http-fx]
             [chord.client :as chord]
             [breaking-point.core :as bp]))
 
