@@ -24,17 +24,30 @@
           (rf/console :error "No match found for path " path)
           (rf/console :groupEnd)))))
 
-(defrecord BidiRouter [routes]
+(defn assert-route-data [data]
+  (when-not (vector? data)
+    (throw (ex-info "Bidi route data is a vector consisting of handler and route params as kw args"
+                    {:route-data data}))))
+
+(defn url-not-found [routes data]
+  (throw (ex-info "Could not find url for the provided data"
+                  {:routes routes
+                   :data   data})))
+
+(defn route-match-not-found [routes url]
+  (throw (ex-info "No match for URL in routes"
+                  {:url    url
+                   :routes routes})))
+
+(defrecord BidiBrowserRouter [routes]
   api/Router
   (data->url [_ data]
-    (when-not (vector? data)
-      (throw (ex-info "Bidi route data is a vector consisting of handler and route params as kw args" {:route data})))
+    (assert-route-data data)
     (or (apply bidi/path-for routes data)
-        (throw (ex-info "Could not find path for " data {:routes routes}))))
+        (url-not-found routes data)))
   (url->data [_ url]
     (or (bidi/match-route routes url)
-        (throw (ex-info "Not a valid url" {:url    url
-                                           :routes routes})))))
+        (route-match-not-found routes url))))
 
 (defrecord ReititRouter [routes]
   api/Router
@@ -52,7 +65,7 @@
 
 (defn bootstrap-routes [routes router]
   (let [initialized? (boolean @state/navigator)
-        router (or router (->BidiRouter routes))]
+        router (or router (->BidiBrowserRouter routes))]
     (reset! state/router router)
     (rf/reg-fx :navigate-to goto)
 
