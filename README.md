@@ -305,7 +305,7 @@ In compojure, the wildcard route would look like this:
                   :body    (index-handler req)})
 ```
 
-## Screen size breakpoints (since 0.2.4)
+## Screen size breakpoints (since 0.2.5)
 
 Most web apps benefit from having direct access to information about the size and orientation of the screen. Kee-frame
 ships with the nice and simple [breaking-points](https://github.com/gadfly361/breaking-point) library that provides 
