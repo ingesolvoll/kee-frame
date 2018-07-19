@@ -49,7 +49,7 @@ There are 2 simple options for bootstrapping your project:
 ### 1. Manual installation
 Add the following dependency to your `project.clj` file:
 ```clojure
-[kee-frame "0.2.4"]
+[kee-frame "0.2.6"]
 ```
 ### 2. Luminus template
 [Luminus](http://www.luminusweb.net) is a framework that makes it easy to get started with web app development
