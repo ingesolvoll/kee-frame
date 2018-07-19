@@ -35,16 +35,12 @@
   (swap! state/controllers update id merge controller))
 
 (defn reg-event-fx
-  "Use this version instead the one in re-frame if you want these kee-frame features in your events:
-     - Enforce the app db spec on change
-     - Logging of db changes and side effects (extended version of `re-frame.core/debug`)"
+  "Exactly same signature as `re-frame.core/reg-event-fx`. Use this version if you want kee-frame logging and spec validation."
   ([id handler] (reg-event-fx id nil handler))
   ([id interceptors handler] (rf/reg-event-fx id (concat kee-frame-interceptors interceptors) handler)))
 
 (defn reg-event-db
-  "Use this version instead the one in re-frame if you want these kee-frame features in your events:
-     - Enforce the app db spec on change
-     - Logging of db changes and side effects (extended version of `re-frame.core/debug`)"
+  "Exactly same signature as `re-frame.core/reg-event-db`. Use this version if you want kee-frame logging and spec validation."
   ([id handler] (reg-event-db id nil handler))
   ([id interceptors handler] (rf/reg-event-db id (concat kee-frame-interceptors interceptors) handler)))
 
