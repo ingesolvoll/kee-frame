@@ -2,6 +2,7 @@
   (:require [kee-frame.state :as state]
             [kee-frame.router :as router]
             [kee-frame.chain :as chain]
+            [day8.re-frame.http-fx]
             [re-frame.core :as rf :refer [console]]
             [kee-frame.spec :as spec :refer [spec-interceptor]]
             [kee-frame.debug :refer [debug-interceptor]]

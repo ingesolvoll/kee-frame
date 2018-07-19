@@ -8,6 +8,8 @@
                  [org.clojure/clojurescript "1.10.312"]
                  [re-frame "0.10.5"]
                  [bidi "2.1.3"]
+                 [day8.re-frame/http-fx "0.1.6"]
+                 [cljs-ajax "0.7.3"]
                  [org.clojure/core.async "0.3.442"]
                  [jarohen/chord "0.8.1"]
                  [venantius/accountant "0.2.4"]
