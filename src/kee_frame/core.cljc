@@ -8,6 +8,7 @@
             [clojure.spec.alpha :as s]
             [expound.alpha :as e]))
 
+;; Interceptors used by all chains and events registered through kee-frame
 (def kee-frame-interceptors [(spec-interceptor state/app-db-spec) (debug-interceptor state/debug?) rf/trim-v])
 
 (def valid-option-key? #{:router :hash-routing? :routes :process-route :debug? :chain-links :app-db-spec :root-component :initial-db :screen})
