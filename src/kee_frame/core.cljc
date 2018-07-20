@@ -51,7 +51,23 @@
   ([id interceptors handler] (rf/reg-event-db id (concat kee-frame-interceptors interceptors) handler)))
 
 (defn reg-chain-named
-  ""
+  "Same as `reg-chain`, but with manually named event handlers.
+
+  Parameters:
+  `handlers`: pairs of id and event handler.
+
+  Usage:
+  ```
+  (k/reg-chain-named
+
+    :load-customer-data
+    (fn [ctx [customer-id]]
+      {:http-xhrio {:uri \"...\"}})
+
+    :receive-customer-data
+     (fn [ctx [customer-id customer-data]]
+      (assoc-in ctx [:db :customers customer-id] customer-data)))
+  ```"
   [& handlers]
   (apply chain/reg-chain-named kee-frame-interceptors handlers))
 
@@ -70,9 +86,11 @@
   ```
   (k/reg-chain
     :load-customer-data
-    (fn {ctx [customer-id]
+
+    (fn {ctx [customer-id]]
       {:http-xhrio {:uri    (str \"/customer/\" customer-id)
                     :method :get}})
+
     (fn [cxt [customer-id customer-data]
       (assoc-in ctx [:db :customers customer-id] customer-data)))
   ```"
