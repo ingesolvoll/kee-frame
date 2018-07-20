@@ -56,12 +56,37 @@
   (apply chain/reg-chain-named kee-frame-interceptors handlers))
 
 (defn reg-chain
-  ""
+  "Register a list of re-frame fx handlers, chained together.
+
+  The chaining is done through dispatch inference. https://github.com/Day8/re-frame-http-fx is supported by default,
+  you can easily add your own like this: https://github.com/ingesolvoll/kee-frame#configuring-chains-since-020
+
+  Parameters:
+  `id`: the id of the first re-frame event. The next events in the chain will get the same id followed by an index, so
+  if your id is `add-todo`, the next one in chain will be called `add-todo-1`.
+  `handlers`: re-frame event handler functions as registered with `re-frame.core/reg-event-fx`.
+
+  Usage:
+  ```
+  (k/reg-chain
+    :load-customer-data
+    (fn {ctx [customer-id]
+      {:http-xhrio {:uri    (str \"/customer/\" customer-id)
+                    :method :get}})
+    (fn [cxt [customer-id customer-data]
+      (assoc-in ctx [:db :customers customer-id] customer-data)))
+  ```"
   [id & handlers]
   (apply chain/reg-chain id kee-frame-interceptors handlers))
 
 (defn path-for
-  ""
+  "Make a uri from route data. Useful for avoiding hard coded links in your app.
+
+  Parameters:
+  `handler`: The bidi handler from route data
+  `params`: Bidi route params for the requested route
+
+  Usage: `[:a {:href (k/path-for [:orders :sort-by :date]} \"Orders sorted by date\"]`"
   [handler & params]
   (apply router/url handler params))
 
@@ -76,9 +101,9 @@
 
   Returns the first component with a matching dispatch value.
 
-  Usage example:
+  Usage:
 
-  [switch-route (fn [route] (:handler route))
+  [k/switch-route (fn [route] (:handler route))
     :index [:div \"This is index page\"]
     :about [:div \"This is the about page\"]
     nil    [:div \"Probably also the index page\"]]"
