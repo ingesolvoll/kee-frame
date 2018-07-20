@@ -66,6 +66,21 @@
   (apply router/url handler params))
 
 (defn switch-route
-  ""
+  "Reagent component that renders different components for different routes.
+
+  You might need to include a case for `nil`, since there are no route data before the first navigation.
+
+  Parameters:
+  `f`: A function that receives the route data on every route change, and returns the value to dispatch on.
+  `pairs`: A pair consists of the dispatch value and the reagent component to dispatch to.
+
+  Returns the first component with a matching dispatch value.
+
+  Usage example:
+
+  [switch-route (fn [route] (:handler route))
+    :index [:div \"This is index page\"]
+    :about [:div \"This is the about page\"]
+    nil    [:div \"Probably also the index page\"]]"
   [f & pairs]
   (apply router/switch-route f pairs))
