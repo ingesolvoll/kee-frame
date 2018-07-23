@@ -49,6 +49,7 @@
   "Put a controller config map into the global controller registry.
 
   Parameters:
+
   `id`: Must be unique in controllere registry. Will appear in logs.
 
   `controller`: A map with the following keys:
@@ -90,6 +91,7 @@
   event log.
 
   Parameters:
+
   `handlers`: pairs of id and event handler.
 
   Usage:
@@ -118,8 +120,10 @@
   to make all context available to the entire chain, without a complex framework or crazy scope tricks.
 
   Parameters:
+
   `id`: the id of the first re-frame event. The next events in the chain will get the same id followed by an index, so
   if your id is `add-todo`, the next one in chain will be called `add-todo-1`.
+
   `handlers`: re-frame event handler functions, registered with `kee-frame.core/reg-event-fx`.
 
 
@@ -142,7 +146,9 @@
   "Make a uri from route data. Useful for avoiding hard coded links in your app.
 
   Parameters:
+
   `handler`: The bidi handler from route data
+
   `params`: Bidi route params for the requested route
 
   Usage: `[:a {:href (k/path-for [:orders :sort-by :date]} \"Orders sorted by date\"]`"
@@ -155,16 +161,19 @@
   You might need to include a case for `nil`, since there are no route data before the first navigation.
 
   Parameters:
+
   `f`: A function that receives the route data on every route change, and returns the value to dispatch on.
+
   `pairs`: A pair consists of the dispatch value and the reagent component to dispatch to.
 
   Returns the first component with a matching dispatch value.
 
   Usage:
-
+  ```
   [k/switch-route (fn [route] (:handler route))
     :index [:div \"This is index page\"]
     :about [:div \"This is the about page\"]
-    nil    [:div \"Probably also the index page\"]]"
+    nil    [:div \"Probably also the index page\"]]
+  ```"
   [f & pairs]
   (apply router/switch-route f pairs))
