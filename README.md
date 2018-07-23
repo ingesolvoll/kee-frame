@@ -295,7 +295,11 @@ You may not like bidi, or you are already using a different router. In that case
 If you choose to use a different router than bidi, you also need to use the corresponding routing data format when using `path-for` and the `:navigate-to` effect.
 
 ## Server side routes
-Kee-frame does not use hash based routing (/#/some-route), URLs look like regular server URLs. I prefer this approach, but it requires a bit of server setup to work perfectly. A React SPA is typically loaded from the `"app"` element inside `index.html` served from the root `/` of your server. If the user navigates to some client route `/leagues/465` and then hits refresh, the server will be unable to match that route as it exists only on the client. We will get a 404 instead of the `index.html` that we need. We want this to work, so that URLs can still be deterministic, even if they exist only on the client.
+If you want to use links without hashes (`/some-route` instead of `/#/some-route`), you need a bit of server setup for it to work perfectly. 
+A React SPA is typically loaded from the `"app"` element inside `index.html` served from the root `/` of your server. 
+If the user navigates to some client route `/leagues/465` and then hits refresh, the server will be unable to match that 
+route as it exists only on the client. We will get a 404 instead of the `index.html` that we need. We want this to work, 
+so that URLs can still be deterministic, even if they exist only on the client.
 
 You can solve this in several ways, the simplest way is to include a wildcard route as the last route on the server. The server should serve `index.html` on any route not found on the server. This works, the downside is that you won't be able to serve a 404 page for non-matched URLs on the server. 
 
