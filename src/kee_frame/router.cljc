@@ -5,7 +5,6 @@
             [kee-frame.state :as state]
             [kee-frame.controller :as controller]
             [bidi.bidi :as bidi]
-            [reitit.core :as reitit]
             [clojure.string :as str]))
 
 (defn url [data]
@@ -109,7 +108,8 @@
         (reset! state/breakpoints-initialized? true)))
 
   (rf/reg-sub :kee-frame/route (fn [db] (:kee-frame/route db nil)))
-  (interop/render-root root-component))
+  (interop/render-root (or root-component
+                           [:h1 "No root component specified. Add one and send it to the start! function."])))
 
 (defn make-route-component [component route]
   (if (fn? component)
