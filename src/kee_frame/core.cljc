@@ -21,7 +21,21 @@
        (into {})))
 
 (defn start!
-  ""
+  "Starts your client application with the specified `options`.
+
+  This function is intentionally forgiving in certain ways:
+  - You can call it as often as you want. Figwheel should call it on each code change
+  - You can omit the `options` altogether. kee-frame chooses sensible defaults for you and leads the way.
+
+  Usage:
+  ```
+  (k/start! {:debug?         true
+             :routes         my-bidi-routes
+             :hash-routing?  true
+             :initial-db     {:some-property \"default value\"}
+             :root-component [my-reagent-root-component]
+             :app-db-spec    :spec/my-db-spec})
+  ```"
   [options]
   (when-not (s/valid? ::spec/start-options options)
     (e/expound ::spec/start-options options)
@@ -32,7 +46,23 @@
   (router/start! options))
 
 (defn reg-controller
-  ""
+  "Put a controller config map into the global controller registry.
+
+  Parameters:
+  `id`: Must be unique in controllere registry. Will appear in logs.
+
+  `controller`: A map with the following keys:
+  - `:params`: A function that receives the route data and returns the part that should be sent to the `start` function. A nil
+  return means that the controller should not run for this route.
+
+  - `:start`: A function or an event vector. Called when `params` returns a non-nil value different from the previous
+  invocation. The function receives whatever non-nil value that was returned from `params`,
+  and returns a re-frame event vector. If the function does nothing but returning the vector, the surrounding function
+  can be omitted.
+
+  - `:stop`: Optional. A function or an event vector. Called when previous invocation of `params` returned non-nil and the
+  current invocation returned nil. If the function does nothing but returning the vector, the surrounding function
+  can be omitted."
   [id controller]
   (when-not (s/valid? ::spec/controller controller)
     (e/expound ::spec/controller controller)
