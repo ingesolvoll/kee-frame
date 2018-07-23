@@ -1,4 +1,4 @@
-(ns kee-frame.spec
+(ns ^:no-doc kee-frame.spec
   (:require [re-frame.interceptor :refer [->interceptor get-effect get-coeffect assoc-coeffect assoc-effect]]
             [re-frame.core :refer [console]]
             [clojure.spec.alpha :as s]

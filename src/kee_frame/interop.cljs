@@ -1,4 +1,4 @@
-(ns kee-frame.interop
+(ns ^:no-doc kee-frame.interop
   (:require [kee-frame.api :as api]
             [accountant.core :as accountant]
             [reagent.core :as reagent]

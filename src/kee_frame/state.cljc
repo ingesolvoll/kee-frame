@@ -1,4 +1,4 @@
-(ns kee-frame.state)
+(ns ^:no-doc kee-frame.state)
 
 (def controllers (atom {}))
 

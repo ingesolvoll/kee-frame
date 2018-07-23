@@ -1,4 +1,4 @@
-(ns kee-frame.debug
+(ns ^:no-doc kee-frame.debug
   (:require [re-frame.core :refer [console]]
             [re-frame.interceptor :refer [->interceptor get-effect get-coeffect assoc-coeffect assoc-effect]]
             [clojure.data :as data]))

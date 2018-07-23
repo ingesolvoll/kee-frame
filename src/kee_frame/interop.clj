@@ -1,4 +1,4 @@
-(ns kee-frame.interop
+(ns ^:no-doc kee-frame.interop
   (:require [kee-frame.api :as api]))
 
 (defrecord TestNavigator [nav-handler path-exists?]

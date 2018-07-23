@@ -1,4 +1,4 @@
-(ns kee-frame.websocket
+(ns ^:no-doc kee-frame.websocket
   #?(:cljs
      (:require-macros
        [cljs.core.async.macros :refer [go go-loop]]))

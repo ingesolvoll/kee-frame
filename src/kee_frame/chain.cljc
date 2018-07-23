@@ -1,4 +1,4 @@
-(ns kee-frame.chain
+(ns ^:no-doc kee-frame.chain
   (:require [re-frame.core :as rf]
             [clojure.walk :as walk]
             [kee-frame.spec :as spec]

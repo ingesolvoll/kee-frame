@@ -1,4 +1,4 @@
-(ns kee-frame.controller
+(ns ^:no-doc kee-frame.controller
   (:require
     [re-frame.core :as rf]
     #?(:cljs

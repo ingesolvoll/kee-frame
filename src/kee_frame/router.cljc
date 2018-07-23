@@ -1,4 +1,4 @@
-(ns kee-frame.router
+(ns ^:no-doc kee-frame.router
   (:require [kee-frame.interop :as interop]
             [re-frame.core :as rf]
             [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
