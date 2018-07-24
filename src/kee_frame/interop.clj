@@ -20,7 +20,7 @@
 
 (defn render-root [root-component]
   (when root-component
-    (throw (ex-info "JVM can't render to the DOM" {:root root-component}))))
+    (println "JVM can't render to the DOM")))
 
 (defn set-breakpoint-subs [_])
 
