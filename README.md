@@ -1,6 +1,6 @@
 # kee-frame
 
-Micro framework on top of [re-frame](https://github.com/Day8/re-frame). Inspired by ideas from the [Keechma](https://keechma.com/) framework.
+[re-frame](https://github.com/Day8/re-frame) with batteries included.  
 
 [![Build Status](https://travis-ci.org/ingesolvoll/kee-frame.svg?branch=master)](https://travis-ci.org/ingesolvoll/kee-frame)
 
@@ -8,22 +8,78 @@ Micro framework on top of [re-frame](https://github.com/Day8/re-frame). Inspired
 
 [![cljdoc badge](https://cljdoc.xyz/badge/kee-frame/kee-frame)](https://cljdoc.xyz/d/kee-frame/kee-frame/CURRENT)
 
-## Rationale
-Re-frame events are very simple and generic, making them perfect building blocks for higher level abstractions. Kee-frame is leveraging this to implement the main ideas from the Keechma framework in re-frame. An opiniated out-of-the-box routing solution makes it easier to get started with re-frame. Controllers and event chains helps you scale in the long run.
+## Quick walkthrough
+- Require core namespace
+```clojure
+(require '[kee-frame.core :as k])
+```
 
-## Features
-* Automatic router setup
-* URL as the single source of truth
-* Route controllers for data loading.
-* Event chains for reducing callback ping pong.
-* Spec checking for your app DB
-* Figwheel-friendly.
+
+- Start your re-frame app and mount it into the DOM with sensible defaults for routing, logging, spec validation, etc.
+Call this function on figwheel reload.
+
+```clojure
+(k/start!  {:routes         ["" {"/"                      :index
+                                ["/league/" :id "/" :tab] :league}]
+            :app-db-spec    :my-app/db-spec
+            :initial-db     {:some-prop true}
+            :root-component [my-root-reagent-component]
+            :debug?         true})
+```
+
+- Declare that you want some data to be loaded when the user navigates to the league page
+```clojure      
+(k/reg-controller :league
+                  {:params (fn [route-data}]
+                             (when (-> route-data :handler (= :league))
+                                (:id route-params)))
+                   :start  (fn [ctx id] [:league/load id])})
+```
+
+- Declare how to get those data from the server
+```clojure      
+(k/reg-chain :league/load
+            
+             (fn [ctx [id]]
+               {:http-xhrio {:method          :get
+                             :uri             (str "/leagues/" id)}})
+            
+             (fn [{:keys [db]} [_ league-data]]
+               {:db (assoc db :league league-data)}))
+```
+
+- Make a URL for your `<a href="">` using nothing but data
+```clojure
+(k/path-for [:league :id 14 :tab :fixtures]) => "/league/14/fixtures"
+```
+
+- Let your event handler trigger browser navigation as a side effect, using nothing but data
+```clojure      
+(reg-event-fx :todo-added
+              (fn [_ [todo]]
+                {:navigate-to [:todo :id (:id todo)]]}))
+```
+
+- Let the route data decide what view to display
+```clojure
+(defn main-view []
+  [k/switch-route (fn [route] (:handler route))
+   :index [index-page] 
+   :orders [orders-page]])
+```
 
 ## Benefits of leaving the URL in charge
-* Back/forward and bookmarking in general just works
-* When figwheel reloads the code, you keep your state and stay on the same page.
-* No need for `component-did-mount` to trigger data loading from your view.
-* UI code is purely declarative
+
+Kee-frame wants you to focus on the URL and let it contain all data necessary to load a view. When you let 
+the URL guide you app architecture like this, strange things start to happen: 
+* Back/forward and bookmarking in general just works. The internet is back!
+* Figwheel reloading gets even better
+* UI code gets more declarative
+* Cohesion goes up, coupling goes down
+
+
+## That's it!
+You've reached the end of the quick summary. Keep reading for a more in-depth guide!
 
 ## Articles
 
