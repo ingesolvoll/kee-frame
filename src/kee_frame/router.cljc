@@ -102,10 +102,12 @@
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))
 
-  (if @state/breakpoints-initialized?
-    (interop/set-breakpoint-subs screen)
-    (do (interop/set-breakpoints screen)
-        (reset! state/breakpoints-initialized? true)))
+  (when screen
+    (let [config (when-not (boolean? screen) screen)]
+      (if @state/breakpoints-initialized?
+        (interop/set-breakpoint-subs config)
+        (do (interop/set-breakpoints config)
+            (reset! state/breakpoints-initialized? true)))))
 
   (rf/reg-sub :kee-frame/route (fn [db] (:kee-frame/route db nil)))
   (interop/render-root (or root-component
