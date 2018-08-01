@@ -34,7 +34,8 @@
 (s/def ::chain-links (s/nilable (s/coll-of ::chain-link)))
 (s/def ::breakpoints vector?)
 (s/def ::debounce-ms number?)
-(s/def ::screen (s/keys :req-un [::breakpoints ::debounce-ms]))
+(s/def ::screen (s/nilable (s/or :boolean boolean?
+                                 :config (s/keys :req-un [::breakpoints ::debounce-ms]))))
 
 (s/def ::start-options (s/keys :opt-un [::routes ::router ::hash-routing? ::root-component ::initial-db ::app-db-spec ::debug? ::chain-links ::screen]))
 
