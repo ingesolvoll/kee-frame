@@ -12,10 +12,6 @@
 (s/def ::controller (s/keys :req-un [::params ::start]
                             :opt-un [::stop]))
 
-(s/def ::chain-handler (s/cat :interceptors (s/? vector?) :fn fn?))
-(s/def ::chain-handlers (s/* ::chain-handler))
-(s/def ::named-chain-handlers (s/* (s/cat :id keyword? :event-handler ::chain-handler)))
-
 (s/def ::event-vector (s/cat :event-key keyword? :event-args (s/* any?)))
 
 (s/def ::routes any?)

@@ -1,11 +1,17 @@
 (ns ^:no-doc kee-frame.chain
   (:require [re-frame.core :as rf]
             [clojure.walk :as walk]
-            [kee-frame.spec :as spec]
             #?(:cljs [cljs.spec.alpha :as s]
                :clj  [clojure.spec.alpha :as s])
-            [kee-frame.state :as state]
             [expound.alpha :as e]))
+
+(s/def ::chain-handler (s/cat :interceptors (s/? vector?) :fn fn?))
+(s/def ::chain-handlers (s/* ::chain-handler))
+(s/def ::named-chain-handlers (s/* (s/cat :id keyword? :event-handler ::chain-handler)))
+
+(def links (atom [{:effect-present? (fn [effects] (:http-xhrio effects))
+                   :get-dispatch    (fn [effects] (get-in effects [:http-xhrio :on-success]))
+                   :set-dispatch    (fn [effects dispatch] (assoc-in effects [:http-xhrio :on-success] dispatch))}]))
 
 (defn step-id [event-id counter]
   (if (= 0 counter)
@@ -22,7 +28,7 @@
     effects))
 
 (defn single-valid-link [effects]
-  (let [links (->> @state/links
+  (let [links (->> @links
                    (filter (fn [{:keys [get-dispatch effect-present?]}]
                              (and (effect-present? effects)
                                   (not (get-dispatch effects))))))]
@@ -39,7 +45,7 @@
      :set-dispatch (fn [effects event] (assoc effects :dispatch event))}))
 
 (defn single-valid-next [next-event-id effects]
-  (let [xs (->> @state/links
+  (let [xs (->> @links
                 (filter (fn [{:keys [get-dispatch]}]
                           (= next-event-id
                              (-> effects get-dispatch first)))))]
@@ -55,7 +61,7 @@
       (ex-info "Not possible to select next in chain"
                {:next-id  next-event-id
                 :dispatch (:dispatch effects)
-                :links    @state/links}))))
+                :links    @links}))))
 
 (defn make-event [next-event-id previous-event-params [_ & params]]
   (into [next-event-id] (concat previous-event-params params)))
@@ -80,10 +86,10 @@
     :after (effect-postprocessor next-event-id)))
 
 (defn collect-named-event-instructions [step-fns]
-  (let [chain-handlers (s/conform ::spec/named-chain-handlers step-fns)]
+  (let [chain-handlers (s/conform ::named-chain-handlers step-fns)]
     (when (= ::s/invalid chain-handlers)
-      (e/expound ::spec/named-chain-handlers step-fns)
-      (throw (ex-info "Invalid named chain. Should be pairs of keyword and handler" (s/explain-data ::spec/named-chain-handlers step-fns))))
+      (e/expound ::named-chain-handlers step-fns)
+      (throw (ex-info "Invalid named chain. Should be pairs of keyword and handler" (s/explain-data ::named-chain-handlers step-fns))))
     (->> chain-handlers
          (partition 2 1 [nil])
          (map (fn [[{:keys [id event-handler] :as handler-1} handler-2]]
@@ -94,10 +100,10 @@
                                    :interceptor (chain-interceptor id next-id))))))))
 
 (defn collect-event-instructions [key step-fns]
-  (let [chain-handlers (s/conform ::spec/chain-handlers step-fns)]
+  (let [chain-handlers (s/conform ::chain-handlers step-fns)]
     (when (= ::s/invalid chain-handlers)
-      (e/expound ::spec/chain-handlers step-fns)
-      (throw (ex-info "Invalid chain. Should be functions or pairs of interceptor and function" (s/explain-data ::spec/chain-handlers step-fns))))
+      (e/expound ::chain-handlers step-fns)
+      (throw (ex-info "Invalid chain. Should be functions or pairs of interceptor and function" (s/explain-data ::chain-handlers step-fns))))
     (->> chain-handlers
          (partition 2 1 [nil])
          (map-indexed (fn [counter [current-handler next-handler]]
@@ -112,8 +118,6 @@
 
 (defn register-chain-handlers! [instructions kee-frame-interceptors]
   (doseq [{:keys [id event-handler interceptor interceptors]} instructions]
-    (when @state/debug?
-      (rf/console :log "Registering chain handler fn " id))
     (rf/reg-event-fx id (into [interceptor] (concat kee-frame-interceptors interceptors)) event-handler)))
 
 (defn reg-chain-named [interceptors & step-fns]
@@ -123,3 +127,9 @@
 (defn reg-chain [id interceptors & step-fns]
   (let [instructions (collect-event-instructions id step-fns)]
     (register-chain-handlers! instructions interceptors)))
+
+(defn add-configuration! [chain-links]
+  (swap! links concat chain-links))
+
+(defn reset-configuration! [chain-links]
+  (reset! links chain-links))

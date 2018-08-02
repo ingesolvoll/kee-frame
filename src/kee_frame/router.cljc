@@ -1,6 +1,7 @@
 (ns ^:no-doc kee-frame.router
   (:require [kee-frame.interop :as interop]
             [re-frame.core :as rf]
+            [kee-frame.chain :as chain]
             [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
             [kee-frame.state :as state]
             [kee-frame.controller :as controller]
@@ -89,7 +90,7 @@
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
   (when chain-links
-    (swap! state/links concat chain-links))
+    (chain/add-configuration! chain-links))
 
   (reg-route-event)
   (when (and routes router)
