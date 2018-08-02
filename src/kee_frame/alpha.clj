@@ -49,4 +49,4 @@
 (defmacro fn-assoc [k v]
   (let [db (gensym "db")
         params (gensym "params")]
-    `(fn [~db ~params] (assoc ~db k ~(walk-params params v)))))
+    `(fn [~db ~params] (assoc ~db ~k ~(walk-params params v)))))
