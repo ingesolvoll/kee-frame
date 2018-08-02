@@ -9,9 +9,11 @@
 (s/def ::chain-handlers (s/* ::chain-handler))
 (s/def ::named-chain-handlers (s/* (s/cat :id keyword? :event-handler ::chain-handler)))
 
-(def links (atom [{:effect-present? (fn [effects] (:http-xhrio effects))
-                   :get-dispatch    (fn [effects] (get-in effects [:http-xhrio :on-success]))
-                   :set-dispatch    (fn [effects dispatch] (assoc-in effects [:http-xhrio :on-success] dispatch))}]))
+(def default-links [{:effect-present? (fn [effects] (:http-xhrio effects))
+                     :get-dispatch    (fn [effects] (get-in effects [:http-xhrio :on-success]))
+                     :set-dispatch    (fn [effects dispatch] (assoc-in effects [:http-xhrio :on-success] dispatch))}])
+
+(def links (atom default-links))
 
 (defn step-id [event-id counter]
   (if (= 0 counter)

@@ -114,6 +114,7 @@
 (deftest integration
   (testing "Custom chain links"
     (state/reset-state!)
+    (chain/reset-configuration! chain/default-links)
 
     (rf-test/run-test-sync
       (k/start! {:routes      routes
