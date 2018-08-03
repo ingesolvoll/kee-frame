@@ -1,7 +1,7 @@
 (ns kee-frame.core
   (:require [kee-frame.state :as state]
             [kee-frame.router :as router]
-            [kee-frame.chain :as chain]
+            [re-chain.core :as chain]
             [re-frame.core :as rf :refer [console]]
             [kee-frame.spec :as spec :refer [spec-interceptor]]
             [kee-frame.debug :refer [debug-interceptor]]
@@ -107,7 +107,7 @@
       (assoc-in ctx [:db :customers customer-id] customer-data)))
   ```"
   [& handlers]
-  (apply chain/reg-chain-named kee-frame-interceptors handlers))
+  (apply chain/reg-chain-named* kee-frame-interceptors handlers))
 
 (defn reg-chain
   "Register a list of re-frame fx handlers, chained together.
@@ -140,7 +140,7 @@
       (assoc-in ctx [:db :customers customer-id] customer-data)))
   ```"
   [id & handlers]
-  (apply chain/reg-chain id kee-frame-interceptors handlers))
+  (apply chain/reg-chain* id kee-frame-interceptors handlers))
 
 (defn path-for
   "Make a uri from route data. Useful for avoiding hard coded links in your app.

@@ -1,12 +1,16 @@
 (ns ^:no-doc kee-frame.router
   (:require [kee-frame.interop :as interop]
             [re-frame.core :as rf]
-            [kee-frame.chain :as chain]
+            [re-chain.core :as chain]
             [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
             [kee-frame.state :as state]
             [kee-frame.controller :as controller]
             [bidi.bidi :as bidi]
             [clojure.string :as str]))
+
+(def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
+                           :get-dispatch    (fn [effects] (get-in effects [:http-xhrio :on-success]))
+                           :set-dispatch    (fn [effects dispatch] (assoc-in effects [:http-xhrio :on-success] dispatch))}])
 
 (defn url [data]
   (when-not @state/router
@@ -89,8 +93,8 @@
                :or   {debug? false}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
-  (when chain-links
-    (chain/add-configuration! chain-links))
+  (chain/configure! (concat default-chain-links
+                            chain-links))
 
   (reg-route-event)
   (when (and routes router)
@@ -109,8 +113,7 @@
         (reset! state/breakpoints-initialized? true)))
 
   (rf/reg-sub :kee-frame/route (fn [db] (:kee-frame/route db nil)))
-  (interop/render-root (or root-component
-                           [:h1 "No root component specified. Add one and send it to the start! function."])))
+  (interop/render-root root-component))
 
 (defn make-route-component [component route]
   (if (fn? component)
