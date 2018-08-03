@@ -2,7 +2,9 @@
   (:require [clojure.test :refer :all]
             [kee-frame.core :as kf]
             [re-frame.core :as rf]
-            [day8.re-frame.test :as rf-test])
+            [day8.re-frame.test :as rf-test]
+            [re-chain.core :as chain]
+            [kee-frame.router :as router])
   (:import (clojure.lang ExceptionInfo)))
 
 (rf/reg-fx
@@ -11,6 +13,9 @@
     (rf/dispatch (:on-success opts))))
 
 (deftest using-but-not-using-chain
+
+  (chain/configure! router/default-chain-links)
+
   (testing "Can explicitly dispatch to next id"
     (rf-test/run-test-sync
       (rf/reg-sub :test-prop :test-prop)
@@ -30,6 +35,7 @@
       (is (= [3 5] @(rf/subscribe [:test-prop]))))))
 
 (deftest base-cases
+  (chain/configure! router/default-chain-links)
   (testing "using :next and http"
     (rf-test/run-test-sync
       (rf/reg-sub :test-prop :test-prop)
