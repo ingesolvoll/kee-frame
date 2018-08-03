@@ -376,8 +376,9 @@ Most web apps benefit from having direct access to information about the size an
 ships with the nice and simple [breaking-points](https://github.com/gadfly361/breaking-point) library that provides 
 subscriptions for the screen properties you're interested in.
 
-The screen breakpoints are completely configurable, you can pass your preferred ones to the `start` function. The ones
-listed in the example below are the defaults, so if you're happy with those you can skip this config.
+The screen breakpoints are completely configurable, you can pass your preferred ones to the `start!` function. The ones
+listed in the example below are the defaults, so if you're happy with those you can just pass `true` to the `:screen`
+parameter. If you omit it altogether, or pass `false` - the screen breakpoints will be disabled.
 
 ```clojure
 (k/start!  {:screen {:breakpoints 
