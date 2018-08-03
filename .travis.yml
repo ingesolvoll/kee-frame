@@ -1,7 +1,3 @@
 language: clojure
 
 script: lein deploy!
-
-cache:
-  directories:
-  - $HOME/.m2
