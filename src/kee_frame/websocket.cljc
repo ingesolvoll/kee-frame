@@ -25,12 +25,13 @@
 
 (defn- send-messages!
   [path buffer-chan ws-chan wrap-message]
-  (go-loop []
-    (when-let [message (<! buffer-chan)]                    ;; buffer-chan may be closed
-      (if (>! ws-chan (wrap-message message))               ;; if ws-chan is closed put message back in buffer-chan
-        (do (when false (rf/dispatch [::log path :sent (date) message]))
-            (recur))
-        (>! buffer-chan message)))))
+  (let [wrap-message (or wrap-message identity)]
+    (go-loop []
+      (when-let [message (<! buffer-chan)]                  ;; buffer-chan may be closed
+        (if (>! ws-chan (wrap-message message))             ;; if ws-chan is closed put message back in buffer-chan
+          (do (when false (rf/dispatch [::log path :sent (date) message]))
+              (recur))
+          (>! buffer-chan message))))))
 
 (defn- socket-for [db path]
   (or
