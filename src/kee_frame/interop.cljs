@@ -5,7 +5,8 @@
             [re-frame.core :as rf]
             [day8.re-frame.http-fx]
             [chord.client :as chord]
-            [breaking-point.core :as bp]))
+            [breaking-point.core :as bp]
+            [clojure.string :as str]))
 
 (defrecord AccountantNavigator []
   api/Navigator
@@ -17,11 +18,14 @@
 (def create-socket chord/ws-ch)
 
 (defn websocket-url [path]
-  (str (if (= "https:" (-> js/document .-location .-protocol))
-         "wss://"
-         "ws://")
-       (-> js/document .-location .-host)
-       path))
+  (if (str/starts-with? path "/")
+    (str (if (= "https:" (-> js/document .-location .-protocol))
+           "wss://"
+           "ws://")
+         (-> js/document .-location .-host)
+         path)
+    ;; Consider this an url for now.
+    path))
 
 (defn accountant-router [opts]
   (accountant/configure-navigation! opts)
