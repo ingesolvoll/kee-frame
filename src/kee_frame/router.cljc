@@ -5,7 +5,7 @@
             [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
             [kee-frame.state :as state]
             [kee-frame.controller :as controller]
-            [bidi.bidi :as bidi]
+            [reitit.core :as reitit]
             [clojure.string :as str]))
 
 (def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
@@ -43,34 +43,30 @@
                   {:url    url
                    :routes routes})))
 
-(defrecord BidiBrowserRouter [routes]
-  api/Router
-  (data->url [_ data]
-    (assert-route-data data)
-    (or (apply bidi/path-for routes data)
-        (url-not-found routes data)))
-  (url->data [_ url]
-    (or (bidi/match-route routes url)
-        (route-match-not-found routes url))))
+(defn match-data [routes [route-name path-params] hash?]
+  (str (when hash? "/#") (:path (reitit/match-by-name routes route-name path-params))
+       (when-some [q (:query-string path-params)] (str "?" q))
+       (when-some [h (:hash path-params)] (str "#" h))))
 
-(defrecord BidiHashRouter [routes]
+(defn match-url [routes url]
+  (let [[path+query fragment] (-> url (str/replace #"^/#" "") (str/split #"#" 2))
+        [path query] (str/split path+query #"\?" 2)]
+    (some-> (reitit/match-by-path routes path)
+            (assoc :query-string query :hash fragment))))
+
+(defrecord ReititRouter [routes hash?]
   api/Router
   (data->url [_ data]
     (assert-route-data data)
-    (or (str "/#" (apply bidi/path-for routes data))
+    (or (match-data routes data hash?)
         (url-not-found routes data)))
   (url->data [_ url]
-    (let [[path+query fragment] (-> url (str/replace #"^/#" "") (str/split #"#" 2))
-          [path query] (str/split path+query #"\?" 2)]
-      (some-> (or (bidi/match-route routes path)
-                  (route-match-not-found routes url))
-              (assoc :query-string query :hash fragment)))))
+    (or (match-url routes url)
+        (route-match-not-found routes url))))
 
 (defn bootstrap-routes [routes router hash-routing?]
   (let [initialized? (boolean @state/navigator)
-        router (or router (if hash-routing?
-                            (->BidiHashRouter routes)
-                            (->BidiBrowserRouter routes)))]
+        router (or router (->ReititRouter (reitit/router routes) hash-routing?))]
     (reset! state/router router)
     (rf/reg-fx :navigate-to goto)
 
