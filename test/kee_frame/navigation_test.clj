@@ -1,7 +1,6 @@
 (ns kee-frame.navigation-test
   (:require [clojure.test :refer :all]
             [kee-frame.core :as k]
-            [kee-frame.api :as api]
             [re-frame.core :as rf]
             [day8.re-frame.test :as rf-test]
             [kee-frame.state :as state])
