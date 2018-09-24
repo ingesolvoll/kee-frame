@@ -11,20 +11,20 @@
   [url]
   (api/navigate! @state/navigator url))
 
-(def routes ["" {"/"               :index
-                 ["/testing/" :id] :some-route}])
+(def routes [["/" :index]
+             ["/testing/:id" :some-route]])
 
 (deftest can-navigate-through-events
   (testing "Good navigation"
     (state/reset-state!)
-    (k/reg-controller :test-controller {:params #(when (= (:handler %) :some-route)
-                                                   (:route-params %))
+    (k/reg-controller :test-controller {:params #(when (= (-> % :data :name) :some-route)
+                                                   (:path-params %))
                                         :start  [:test-event-2]})
     (rf-test/run-test-sync
       (k/start! {:routes routes})
       (rf/reg-sub :test-prop :test-prop)
       (k/reg-event-fx :test-event
-                      (fn [_ _] {:navigate-to [:some-route :id 1]}))
+                      (fn [_ _] {:navigate-to [:some-route {:id 1}]}))
       (k/reg-event-fx :test-event-2
                       (fn [_ [args]] {:db {:test-prop args}}))
       (rf/dispatch [:test-event])
@@ -42,5 +42,4 @@
   (testing "Regression for changed router api"
     (state/reset-state!)
     (k/start! {:routes routes})
-    (is (thrown-with-msg? ExceptionInfo #"Bidi route data is a vector"
-                          (k/path-for :some-route)))))
+    (is (thrown? ExceptionInfo (k/path-for :some-route)))))
