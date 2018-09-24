@@ -7,10 +7,6 @@
             [kee-frame.state :as state])
   (:import (clojure.lang ExceptionInfo)))
 
-(defn navigate!
-  [url]
-  (api/navigate! @state/navigator url))
-
 (def routes [["/" :index]
              ["/testing/:id" :some-route]])
 
