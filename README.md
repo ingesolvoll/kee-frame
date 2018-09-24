@@ -129,13 +129,11 @@ The `kee-frame.core` namespace contains the public API. It also contains wrapped
 ```
 
 ## Routes
-Kee-frame uses [bidi](https://github.com/juxt/bidi) for routing. I won't go into detail here about the bidi way of doing things, go read their docs if you're unfamiliar with the structure.
-
-Here are the routes from the demo app:
+Kee-frame uses [reitit](https://github.com/metosin/reitit) for routing (since 0.3.0). Read the reitit docs for more details on the syntax, here are the routes from the demo app:
 
 ```clojure
-(def my-routes ["" {"/"                       :index
-                    ["/league/" :id "/" :tab] :league}])
+(def routes [["/" :live]
+             ["/league/:id/:tab" :league]])
 ```
 
 ## Starting your app
@@ -218,11 +216,11 @@ page for details and documentation
 
 Using URL strings in your links and navigation is error prone and quickly becomes a maintenance problem. Therefore, kee-frame encourages you to only interact with route data instead of concrete URLs. It provides 2 abstractions to help you with that:
 
-The `kee-frame.core/path-for` function accepts a bidi route and returns a URL string:
+The `kee-frame.core/path-for` function accepts a reitit route and returns a URL string:
 
-`(k/path-for [:todos :id 14]) => "/todos/14"`
+`(k/path-for [:todos {:id 14}]) => "/todos/14"`
 
-Kee-frame also includes a re-frame effect for triggering a browser navigation, after all navigation is a side effect. The effect is `:navigate-to` and it accepts a bidi route. The example below shows a handler that receives some data and navigates to the view page for those data.
+Kee-frame also includes a re-frame effect for triggering a browser navigation, after all navigation is a side effect. The effect is `:navigate-to` and it accepts a reitit route. The example below shows a handler that receives some data and navigates to the view page for those data.
 
 ```clojure      
 (reg-event-fx :todo-added
@@ -266,24 +264,26 @@ It looks pretty much the same, only more concise. But it does help you with a fe
 Several parts of kee-frame are designed to be opt-in. This means that you can include kee-frame in your project and start using parts of it.
 
 If you want controllers and routes, you need to replace your current routing with kee-frame's routing. If your current routing requires a lot of work
-  to fit with the standard bidi routing solution, you may implement a custom router. See the next section for more details.
+  to fit with the standard reitit routing solution, you may implement a custom router. See the next section for more details.
 
 Alternatively, make your current router dispatch the event `[:kee-frame.router/route-changed route-data]` on every route change. That should enable what you need for the controllers.
 
 ## Using a different router implementation (since 0.2.0)
 
-You may not like bidi, or you are already using a different router. In that case, all you have to do is implement your own version of the protocol
+You may not like reitit, or you are already using a different router. In that case, all you have to do is implement your own version of the protocol
 `kee-frame.api/Router` and pass it in with the rest of your config:
 
 ```clojure
-(k/start!  {:router         (->ReititRouter reitit-routes)
+(k/start!  {:router         (->BidiRouter bidi-style-routes)
             :root-component [my-root-reagent-component]
             ...})
 ```
 
-[Here are some example (not fully tested) router implementations](https://github.com/ingesolvoll/kee-frame-sample/blob/master/src/cljs/kee_frame_sample/routers.cljs).
+[Here are some example (not fully tested) router implementations](https://github.com/ingesolvoll/kee-frame-sample/blob/master/src/cljs/kee_frame_sample/routers.cljs). If you are upgrading from a pre 0.3.0
+version of kee-frame, you probably want to keep your current bidi routes. The old bidi router implementation can be found here, just make a copy
+and use it as your `:router`.
 
-If you choose to use a different router than bidi, you also need to use the corresponding routing data format when using `path-for` and the `:navigate-to` effect.
+If you choose to use a different router than reitit, you also need to use the corresponding routing data format when using `path-for` and the `:navigate-to` effect.
 
 ## Server side routes
 If you want to use links without hashes (`/some-route` instead of `/#/some-route`), you need a bit of server setup for it to work perfectly. 
@@ -409,7 +409,7 @@ your main namespace:
 The implementation of kee-frame is quite simple, building on rock solid libraries and other people's ideas. The main influence is the [Keechma](https://keechma.com/) framework. It is a superb piece of thinking and work, go check it out! Apart from that, the following libraries make kee-frame possible:
 
 * [re-frame](https://github.com/Day8/re-frame) and [reagent](https://reagent-project.github.io/). The world needs to know about these 2 kings of frontend development, and we all need to contribute to their widespread use. This framework is an attempt in that direction.
-* [bidi](https://github.com/juxt/bidi). Simple and easy bidirectional routing. I love bidi and think it fits very well with kee-frame, but I'm considering adding support for more routing libraries.
+* [reitit](https://github.com/metosin/reitit). Simple and easy bidirectional routing, with very little noise in the syntax.
 * [accountant](https://github.com/venantius/accountant). A navigation library that hooks to any routing system. Made my life so much easier when I discovered it.
 * [chord](https://github.com/jarohen/chord). A server/client websocket library. Uses core.async as the main abstraction.
 * [etaoin](https://github.com/igrishaev/etaoin) and [lein-test-refresh](https://github.com/jakemcc/lein-test-refresh). 2 good examples of how powerful Clojure is. Etaoin makes browser integration testing fun again, while lein-test-refresh provides you with a development flow that no other platform will give you.
