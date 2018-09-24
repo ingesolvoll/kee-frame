@@ -6,7 +6,10 @@
             [kee-frame.state :as state]
             [kee-frame.controller :as controller]
             [reitit.core :as reitit]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clojure.spec.alpha :as s]
+            [kee-frame.spec :as spec]
+            [expound.alpha :as e]))
 
 (def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
                            :get-dispatch    (fn [effects] (get-in effects [:http-xhrio :on-success]))
@@ -29,9 +32,9 @@
           (rf/console :groupEnd)))))
 
 (defn assert-route-data [data]
-  (when-not (vector? data)
-    (throw (ex-info "Bidi route data is a vector consisting of handler and route params as kw args"
-                    {:route-data data}))))
+  (when-not (s/valid? ::spec/route-data data)
+    (e/expound ::spec/route-data data)
+    (throw (ex-info "Bad route data input" (s/explain-data ::spec/route-data data)))))
 
 (defn url-not-found [routes data]
   (throw (ex-info "Could not find url for the provided data"
