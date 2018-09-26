@@ -22,8 +22,8 @@
 Call this function on figwheel reload.
 
 ```clojure
-(k/start!  {:routes         ["" {"/"                      :index
-                                ["/league/" :id "/" :tab] :league}]
+(k/start!  {:routes         [["/" :live]
+                             ["/league/:id/:tab" :league]]
             :app-db-spec    :my-app/db-spec
             :initial-db     {:some-prop true}
             :root-component [my-root-reagent-component]
