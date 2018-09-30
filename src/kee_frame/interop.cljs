@@ -27,13 +27,10 @@
     ;; Consider this an url for now.
     path))
 
-(defn accountant-router [opts]
-  (accountant/configure-navigation! opts)
-  (->AccountantNavigator))
-
 (defn make-navigator
   [opts]
-  (accountant-router opts))
+  (accountant/configure-navigation! opts)
+  (->AccountantNavigator))
 
 (defn render-root [root-component]
   (when root-component
