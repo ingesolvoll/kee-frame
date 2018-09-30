@@ -120,6 +120,15 @@ in clojure. It comes with kee-frame if you do this:
 lein new luminus your-app-name-here +kee-frame
 ``` 
 
+## API stability
+This library tries hard conform to the high standards of many Clojure libraries, by not breaking backwards compatibility.
+I believe this is very important, an application made several years ago should be able to upgrade with close to zero effort.
+
+Given the experimental nature of the project, the initial
+API has proven to be surprisingly stable. It mimics the well proven API-style of re-frame, being data-driven and generic. 
+Hopefully this will enable an equally stable API for the years to come. See below for a list of breaking changes introduced so far:
+* 0.3.0: Reitit replaces Bidi as the default routing library. Causes a breaking change in the data structures of routes and route matches. [The bidi router implementation can be found here, it's easy to fit back in.](https://github.com/ingesolvoll/kee-frame-sample/blob/master/src/cljs/kee_frame_sample/routers.cljs)
+
 ## Getting started
 
 The `kee-frame.core` namespace contains the public API. It also contains wrapped versions of `reg-event-db` and `reg-event-fx`.
