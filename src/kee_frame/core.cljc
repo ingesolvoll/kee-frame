@@ -30,7 +30,7 @@
   Usage:
   ```
   (k/start! {:debug?         true
-             :routes         my-bidi-routes
+             :routes         my-reitit-routes
              :hash-routing?  true
              :initial-db     {:some-property \"default value\"}
              :root-component [my-reagent-root-component]
@@ -147,9 +147,9 @@
 
   Parameters:
 
-  `handler`: The bidi handler from route data
+  `handler`: The reitit handler from route data
 
-  `params`: Bidi route params for the requested route
+  `params`: Reitit route params for the requested route
 
   Usage: `[:a {:href (k/path-for [:orders :sort-by :date]} \"Orders sorted by date\"]`"
   [handler & params]
