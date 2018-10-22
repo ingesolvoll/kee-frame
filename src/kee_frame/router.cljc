@@ -46,10 +46,11 @@
                   {:url    url
                    :routes routes})))
 
-(defn match-data [routes [route-name path-params] hash?]
-  (str (when hash? "/#") (:path (reitit/match-by-name routes route-name path-params))
-       (when-some [q (:query-string path-params)] (str "?" q))
-       (when-some [h (:hash path-params)] (str "#" h))))
+(defn match-data [routes route hash?]
+  (let [[_ path-params] route]
+    (str (when hash? "/#") (:path (apply reitit/match-by-name routes route))
+         (when-some [q (:query-string path-params)] (str "?" q))
+         (when-some [h (:hash path-params)] (str "#" h)))))
 
 (defn match-url [routes url]
   (let [[path+query fragment] (-> url (str/replace #"^/#" "") (str/split #"#" 2))
