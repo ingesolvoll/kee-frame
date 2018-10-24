@@ -1,7 +1,8 @@
 (ns ^:no-doc kee-frame.scroll
   (:require [re-frame.core :as rf]
             [ajax.core :as ajax]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [clerk.core :as clerk]))
 
 (rf/reg-event-db ::connection-balance
                  (fn [db [_ route inc-or-dec]]
@@ -9,6 +10,7 @@
 
 (defn monitor-requests! [route]
   ;; TODO: Clerk navigate here
+  (clerk/navigate-page! (:path route))
   (swap! ajax/default-interceptors
          (fn [interceptors]
            (conj (filter #(not= "route-interceptor" (:name %)) interceptors)
@@ -23,7 +25,7 @@
 (rf/reg-event-fx ::restore-scroll
                  (fn [_ _]
                    ;; TODO Clerk after render here.
-                   (r/after-render nil)
+                   (r/after-render clerk/after-render!)
                    nil))
 
 (rf/reg-event-fx ::poll

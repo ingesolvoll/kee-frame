@@ -10,9 +10,7 @@
             [clojure.string :as str]
             [clojure.spec.alpha :as s]
             [kee-frame.spec :as spec]
-            [ajax.core :as ajax]
             [expound.alpha :as e]
-            [reagent.core :as reagent]
             [clerk.core :as clerk]))
 
 (def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
@@ -30,10 +28,7 @@
 (defn nav-handler [router]
   (fn [path]
     (if-let [route (url->data router path)]
-      (do
-        (reagent/after-render clerk/after-render!)
-        (rf/dispatch [::route-changed route])
-        (clerk/navigate-page! path))
+      (rf/dispatch [::route-changed route])
       (do (rf/console :group "No route match found")
           (rf/console :error "No match found for path " path)
           (rf/console :groupEnd)))))
@@ -95,11 +90,11 @@
   (rf/reg-event-fx ::route-changed
                    (if @state/debug? [rf/debug])
                    (fn [{:keys [db] :as ctx} [_ route]]
-                     ;(scroll/monitor-requests! route)
+                     (scroll/monitor-requests! route)
                      (swap! state/controllers controller/apply-route ctx route)
                      {:db             (assoc db :kee-frame/route route)
                       :dispatch-later [{:ms       100
-                                        :dispatch [:poll-scroll route 0]}]})))
+                                        :dispatch [:kee-frame.scroll/poll route 0]}]})))
 
 (defn start! [{:keys [routes initial-db router hash-routing? app-db-spec debug? root-component chain-links screen]
                :or   {debug? false}}]
