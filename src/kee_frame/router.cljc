@@ -4,11 +4,13 @@
             [re-chain.core :as chain]
             [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
             [kee-frame.state :as state]
+            [kee-frame.scroll :as scroll]
             [kee-frame.controller :as controller]
             [reitit.core :as reitit]
             [clojure.string :as str]
             [clojure.spec.alpha :as s]
             [kee-frame.spec :as spec]
+            [ajax.core :as ajax]
             [expound.alpha :as e]
             [reagent.core :as reagent]
             [clerk.core :as clerk]))
@@ -88,12 +90,16 @@
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
+
 (defn reg-route-event []
   (rf/reg-event-fx ::route-changed
                    (if @state/debug? [rf/debug])
                    (fn [{:keys [db] :as ctx} [_ route]]
+                     ;(scroll/monitor-requests! route)
                      (swap! state/controllers controller/apply-route ctx route)
-                     {:db (assoc db :kee-frame/route route)})))
+                     {:db             (assoc db :kee-frame/route route)
+                      :dispatch-later [{:ms       100
+                                        :dispatch [:poll-scroll route 0]}]})))
 
 (defn start! [{:keys [routes initial-db router hash-routing? app-db-spec debug? root-component chain-links screen]
                :or   {debug? false}}]
