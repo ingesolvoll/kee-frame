@@ -18,6 +18,7 @@
                  [expound "0.7.0"]
                  [day8.re-frame/test "0.1.5"]
                  [breaking-point "0.1.2"]
+                 [pez/clerk "1.0.0"]
                  #_[sandbags/aido "0.3.5"]]
 
   :plugins [[com.jakemccrary/lein-test-refresh "0.20.0"]

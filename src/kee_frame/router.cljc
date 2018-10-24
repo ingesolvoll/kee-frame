@@ -9,7 +9,9 @@
             [clojure.string :as str]
             [clojure.spec.alpha :as s]
             [kee-frame.spec :as spec]
-            [expound.alpha :as e]))
+            [expound.alpha :as e]
+            [reagent.core :as reagent]
+            [clerk.core :as clerk]))
 
 (def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
                            :get-dispatch    (fn [effects] (get-in effects [:http-xhrio :on-success]))
@@ -26,7 +28,10 @@
 (defn nav-handler [router]
   (fn [path]
     (if-let [route (url->data router path)]
-      (rf/dispatch [::route-changed route])
+      (do
+        (reagent/after-render clerk/after-render!)
+        (rf/dispatch [::route-changed route])
+        (clerk/navigate-page! path))
       (do (rf/console :group "No route match found")
           (rf/console :error "No match found for path " path)
           (rf/console :groupEnd)))))
@@ -75,6 +80,7 @@
     (rf/reg-fx :navigate-to goto)
 
     (when-not initialized?
+      (clerk/initialize!)
       (reset! state/navigator
               (interop/make-navigator {:nav-handler  (nav-handler router)
                                        :path-exists? #(boolean (url->data router %))})))
