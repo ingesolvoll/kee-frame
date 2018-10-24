@@ -17,21 +17,21 @@
                                                    (rf/dispatch [::connection-balance route inc])
                                                    request)
                                        :response (fn [response]
-
                                                    (rf/dispatch [::connection-balance route dec])
                                                    response)})))))
 
-(rf/reg-event-fx :clerk/after-render
+(rf/reg-event-fx ::restore-scroll
                  (fn [_ _]
                    ;; TODO Clerk after render here.
-                   (r/after-render nil)))
+                   (r/after-render nil)
+                   nil))
 
 (rf/reg-event-fx ::poll
                  (fn [{:keys [db]} [_ active-route counter]]
                    (let [{:keys [route balance]} (:route-counter db)]
                      (when (= route active-route)
                        (cond
-                         (not (pos? balance)) {:dispatch [:clerk/after-render]}
+                         (not (pos? balance)) {:dispatch [::restore-scroll]}
                          (pos? balance) {:dispatch-later [{:ms       100
                                                            :dispatch [:poll-scroll active-route (inc counter)]}]}
                          (< 10 counter) {:db (assoc db :route-counter nil)})))))
