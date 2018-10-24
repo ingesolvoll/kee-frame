@@ -10,8 +10,7 @@
             [clojure.string :as str]
             [clojure.spec.alpha :as s]
             [kee-frame.spec :as spec]
-            [expound.alpha :as e]
-            [clerk.core :as clerk]))
+            [expound.alpha :as e]))
 
 (def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
                            :get-dispatch    (fn [effects] (get-in effects [:http-xhrio :on-success]))
@@ -77,7 +76,7 @@
     (rf/reg-fx :navigate-to goto)
 
     (when-not initialized?
-      (clerk/initialize!)
+      (scroll/start!)
       (reset! state/navigator
               (interop/make-navigator {:nav-handler  (nav-handler router)
                                        :path-exists? #(boolean (url->data router %))})))

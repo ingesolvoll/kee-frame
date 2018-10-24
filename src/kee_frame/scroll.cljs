@@ -8,8 +8,10 @@
                  (fn [db [_ route inc-or-dec]]
                    (assoc-in db [:route-counter] {:route route :balance (inc-or-dec (get-in db [:route-counter :balance]))})))
 
+(defn start! []
+  (clerk/initialize!))
+
 (defn monitor-requests! [route]
-  ;; TODO: Clerk navigate here
   (clerk/navigate-page! (:path route))
   (swap! ajax/default-interceptors
          (fn [interceptors]
@@ -22,9 +24,8 @@
                                                    (rf/dispatch [::connection-balance route dec])
                                                    response)})))))
 
-(rf/reg-event-fx ::restore-scroll
+(rf/reg-event-fx ::scroll
                  (fn [_ _]
-                   ;; TODO Clerk after render here.
                    (r/after-render clerk/after-render!)
                    nil))
 
@@ -33,7 +34,7 @@
                    (let [{:keys [route balance]} (:route-counter db)]
                      (when (= route active-route)
                        (cond
-                         (not (pos? balance)) {:dispatch [::restore-scroll]}
+                         (not (pos? balance)) {:dispatch [::scroll]}
                          (pos? balance) {:dispatch-later [{:ms       100
                                                            :dispatch [::poll active-route (inc counter)]}]}
                          (< 10 counter) {:db (assoc db :route-counter nil)})))))
