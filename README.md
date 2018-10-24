@@ -53,14 +53,14 @@ Call this function on figwheel reload.
 
 - Make a URL for your `<a href="">` using nothing but data
 ```clojure
-(k/path-for [:league :id 14 :tab :fixtures]) => "/league/14/fixtures"
+(k/path-for [:league {:id 14 :tab :fixtures}]) => "/league/14/fixtures"
 ```
 
 - Let your event handler trigger browser navigation as a side effect, using nothing but data
 ```clojure      
 (reg-event-fx :todo-added
               (fn [_ [todo]]
-                {:navigate-to [:todo :id (:id todo)]]}))
+                {:navigate-to [:todo {:id (:id todo)}]]}))
 ```
 
 - Let the route data decide what view to display
@@ -110,7 +110,7 @@ There are 2 simple options for bootstrapping your project:
 ### 1. Manual installation
 Add the following dependency to your `project.clj` file:
 ```clojure
-[kee-frame "0.3.0"]
+[kee-frame "0.3.1"]
 ```
 ### 2. Luminus template
 [Luminus](http://www.luminusweb.net) is a framework that makes it easy to get started with web app development
