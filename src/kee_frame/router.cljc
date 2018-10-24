@@ -89,7 +89,7 @@
   (rf/reg-event-fx ::route-changed
                    (if @state/debug? [rf/debug])
                    (fn [{:keys [db] :as ctx} [_ route]]
-                     (scroll/monitor-requests! route)
+                     ;(scroll/monitor-requests! route)
                      (swap! state/controllers controller/apply-route ctx route)
                      {:db             (assoc db :kee-frame/route route)
                       :dispatch-later [{:ms       100
