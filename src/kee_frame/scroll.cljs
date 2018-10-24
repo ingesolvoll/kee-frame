@@ -33,6 +33,6 @@
                        (cond
                          (not (pos? balance)) {:dispatch [::restore-scroll]}
                          (pos? balance) {:dispatch-later [{:ms       100
-                                                           :dispatch [:poll-scroll active-route (inc counter)]}]}
+                                                           :dispatch [::poll active-route (inc counter)]}]}
                          (< 10 counter) {:db (assoc db :route-counter nil)})))))
 
