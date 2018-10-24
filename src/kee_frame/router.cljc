@@ -9,6 +9,7 @@
             [clojure.string :as str]
             [clojure.spec.alpha :as s]
             [kee-frame.spec :as spec]
+            [ajax.core :as ajax]
             [expound.alpha :as e]))
 
 (def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
@@ -81,12 +82,44 @@
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
+(rf/reg-event-db :connection-balance
+                 (fn [db [_ route inc-or-dec]]
+                   (if route
+                     (assoc-in db [:route-counter] {:route route :balance (inc-or-dec (get-in db [:route-counter :balance]))})
+                     db)))
+
+(defn route-interceptors! [route]
+  (swap! ajax/default-interceptors
+         (fn [interceptors]
+           (conj (filter #(not= "route-interceptor" (:name %)) interceptors)
+                 (ajax/to-interceptor {:name     "route-interceptor"
+                                       :request  (fn [request]
+                                                   (rf/dispatch [:connection-balance route inc])
+                                                   request)
+                                       :response (fn [response]
+
+                                                   (rf/dispatch [:connection-balance route dec])
+                                                   response)})))))
+
+(rf/reg-event-fx :poll-scroll
+                 (fn [{:keys [db]} [_ active-route counter]]
+                   (let [{:keys [route balance]} (:route-counter db)]
+                     (when (= route active-route)
+                       (cond
+                         (not (pos? balance)) {:dispatch [:scroll-it-now-clerk!!]}
+                         (pos? balance) {:dispatch-later [{:ms       100
+                                                           :dispatch [:poll-scroll active-route (inc counter)]}]}
+                         (< 10 counter) {:db (assoc db :route-counter nil)})))))
+
 (defn reg-route-event []
   (rf/reg-event-fx ::route-changed
                    (if @state/debug? [rf/debug])
                    (fn [{:keys [db] :as ctx} [_ route]]
+                     (route-interceptors! route)
                      (swap! state/controllers controller/apply-route ctx route)
-                     {:db (assoc db :kee-frame/route route)})))
+                     {:db             (assoc db :kee-frame/route route)
+                      :dispatch-later [{:ms       100
+                                        :dispatch [:poll-scroll route 0]}]})))
 
 (defn start! [{:keys [routes initial-db router hash-routing? app-db-spec debug? root-component chain-links screen]
                :or   {debug? false}}]
