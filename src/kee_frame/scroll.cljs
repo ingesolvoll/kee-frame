@@ -35,7 +35,7 @@
                      (when (= route active-route)
                        (cond
                          (not (pos? balance)) {:dispatch [::scroll]}
-                         (pos? balance) {:dispatch-later [{:ms       100
+                         (pos? balance) {:dispatch-later [{:ms       50
                                                            :dispatch [::poll active-route (inc counter)]}]}
-                         (< 10 counter) {:db (assoc db :route-counter nil)})))))
+                         (< 20 counter) {:db (assoc db :route-counter nil)})))))
 
