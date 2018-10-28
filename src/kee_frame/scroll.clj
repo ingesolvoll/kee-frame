@@ -2,6 +2,4 @@
 
 (defn start! [])
 
-(defn monitor-requests! [_]
-  ;; TODO: Clerk navigate here
-  (throw (ex-info "No scrolling on JVM" {})))
+(defn monitor-requests! [_])
