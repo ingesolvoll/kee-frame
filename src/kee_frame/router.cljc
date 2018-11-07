@@ -69,14 +69,14 @@
     (or (match-url routes url)
         (route-match-not-found routes url))))
 
-(defn bootstrap-routes [routes router hash-routing?]
+(defn bootstrap-routes [routes router hash-routing? scroll]
   (let [initialized? (boolean @state/navigator)
         router (or router (->ReititRouter (reitit/router routes) hash-routing?))]
     (reset! state/router router)
     (rf/reg-fx :navigate-to goto)
 
     (when-not initialized?
-      (scroll/start!)
+      (when scroll (scroll/start!))
       (reset! state/navigator
               (interop/make-navigator {:nav-handler  (nav-handler router)
                                        :path-exists? #(boolean (url->data router %))})))
@@ -85,30 +85,32 @@
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
 
-(defn reg-route-event []
+(defn reg-route-event [scroll]
   (rf/reg-event-fx ::route-changed
                    (if @state/debug? [rf/debug])
                    (fn [{:keys [db] :as ctx} [_ route]]
-                     (scroll/monitor-requests! route)
+                     (when scroll
+                       (scroll/monitor-requests! route))
                      (swap! state/controllers controller/apply-route ctx route)
                      {:db             (assoc db :kee-frame/route route)
                       :dispatch-later [{:ms       50
                                         :dispatch [:kee-frame.scroll/poll route 0]}]})))
 
-(defn start! [{:keys [routes initial-db router hash-routing? app-db-spec debug? root-component chain-links screen]
-               :or   {debug? false}}]
+(defn start! [{:keys [routes initial-db router hash-routing? app-db-spec debug? root-component chain-links screen scroll]
+               :or   {debug? false
+                      scroll true}}]
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
   (chain/configure! (concat default-chain-links
                             chain-links))
 
-  (reg-route-event)
+  (reg-route-event scroll)
   (when (and routes router)
     (throw (ex-info "Both routes and router specified. If you want to use these routes, pass them to your router constructor."
                     {:routes routes
                      :router router})))
   (when (or routes router)
-    (bootstrap-routes routes router hash-routing?))
+    (bootstrap-routes routes router hash-routing? scroll))
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))

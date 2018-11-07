@@ -27,10 +27,13 @@
 (s/def ::chain-links ::chain/links)
 (s/def ::breakpoints vector?)
 (s/def ::debounce-ms number?)
+(s/def ::scroll (s/nilable (s/or :boolean boolean?
+                                 :config (s/keys :opt-un [:scroll/timeout]))))
 (s/def ::screen (s/nilable (s/or :boolean boolean?
                                  :config (s/keys :req-un [::breakpoints ::debounce-ms]))))
 
-(s/def ::start-options (s/keys :opt-un [::routes ::router ::hash-routing? ::root-component ::initial-db ::app-db-spec ::debug? ::chain-links ::screen]))
+(s/def ::start-options (s/keys :opt-un [::routes ::router ::hash-routing? ::root-component ::initial-db
+                                        ::app-db-spec ::debug? ::chain-links ::screen ::scroll]))
 
 (s/def ::route-data (s/cat :route-name keyword? :path-params (s/* (s/map-of keyword? any?))))
 
