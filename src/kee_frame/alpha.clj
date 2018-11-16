@@ -50,3 +50,27 @@
   (let [db (gensym "db")
         params (gensym "params")]
     `(fn [~db ~params] (assoc ~db ~k ~(walk-params params v)))))
+
+
+(def fsm {:aliases #{::value ::busy?}
+          :states  {:initial {:events {:start {:handler      (fn [this]
+                                                               (assoc this ::value default-load-dir
+                                                                           ::busy? false))
+                                               :target-state :filling}}}
+                    :filling {:events {:on-change {:handler (fn [this [value]]
+                                                              (assoc this ::value value
+                                                                          :valid? #(-> % ::value seq)))}
+                                       :submit    {:predicate    (fn [this] (-> this ::value seq))
+                                                   :handler      (fn [this]
+                                                                   {::busy?   true
+                                                                    :timeout  {:ms    3000
+                                                                               :event :submit-timed-out}
+                                                                    :dispatch [::controller/load (::value this)]})
+                                                   :target-state :loading}}}
+                    :loading {:events {:submit-timed-out {:handler (fn [this]
+                                                                     (assoc this ::busy? false))}}}}})
+
+(defn start-fsm [id machine config])
+
+(start-fsm :config-loader fsm {::value [:config-dir]
+                               ::busy? [:loading-config?]})
