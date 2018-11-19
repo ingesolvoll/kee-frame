@@ -54,7 +54,7 @@
 
 (def fsm {:aliases #{::value ::busy?}
           :states  {:initial {:events {:start {:handler      (fn [this]
-                                                               (assoc this ::value default-load-dir
+                                                               (assoc this ::value "/home/username/myconfig"
                                                                            ::busy? false))
                                                :target-state :filling}}}
                     :filling {:events {:on-change {:handler (fn [this [value]]
@@ -65,7 +65,7 @@
                                                                    {::busy?   true
                                                                     :timeout  {:ms    3000
                                                                                :event :submit-timed-out}
-                                                                    :dispatch [::controller/load (::value this)]})
+                                                                    :dispatch [::submit-it (::value this)]})
                                                    :target-state :loading}}}
                     :loading {:events {:submit-timed-out {:handler (fn [this]
                                                                      (assoc this ::busy? false))}}}}})
