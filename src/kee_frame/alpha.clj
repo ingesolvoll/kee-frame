@@ -53,22 +53,27 @@
 
 
 (def fsm {:aliases #{::value ::busy?}
-          :states  {:initial {:events {:start {:handler      (fn [this]
-                                                               (assoc this ::value "/home/username/myconfig"
-                                                                           ::busy? false))
-                                               :target-state :filling}}}
-                    :filling {:events {:on-change {:handler (fn [this [value]]
-                                                              (assoc this ::value value
-                                                                          :valid? #(-> % ::value seq)))}
-                                       :submit    {:predicate    (fn [this] (-> this ::value seq))
-                                                   :handler      (fn [this]
-                                                                   {::busy?   true
-                                                                    :timeout  {:ms    3000
-                                                                               :event :submit-timed-out}
-                                                                    :dispatch [::submit-it (::value this)]})
-                                                   :target-state :loading}}}
-                    :loading {:events {:submit-timed-out {:handler (fn [this]
-                                                                     (assoc this ::busy? false))}}}}})
+          :states  {:fsm/initial {:fsm/events {:fsm/start {:fsm/handler      (fn [this]
+                                                                               (assoc this ::value "/home/username/myconfig"
+                                                                                           ::busy? false))
+                                                           :fsm/target-state :filling}}}
+                    :filling     {:fsm/events {:on-change {:fsm/handler (fn [this [value]]
+                                                                          (assoc this ::value value
+                                                                                      :valid? #(-> % ::value seq)))}
+                                               :submit    {:predicate        (fn [this] (-> this ::value seq))
+                                                           :fsm/handler      (fn [this]
+                                                                               {::busy?   true
+                                                                                :timeout  {:ms    3000
+                                                                                           :event :submit-timed-out}
+                                                                                :dispatch [::submit-it (::value this)]})
+                                                           :fsm/target-state :loading}}}
+                    :loading     {:fsm/events {:submit-timed-out {:fsm/target-state :filling
+                                                                  :fsm/handler      (fn [this]
+                                                                                      (assoc this ::busy? false
+                                                                                                  ::error-message "Did not quite make it"))}
+                                               :http-success     {:fsm/target-state :fsm/exit
+                                                                  :fsm/handler      (fn [this]
+                                                                                      (assoc this ::busy? false))}}}}})
 
 (defn start-fsm [id machine config])
 
