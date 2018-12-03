@@ -94,7 +94,7 @@
                      (swap! state/controllers controller/apply-route ctx route)
                      {:db             (assoc db :kee-frame/route route)
                       :dispatch-later [{:ms       50
-                                        :dispatch [:kee-frame.scroll/poll route 0]}]})))
+                                        :dispatch [::scroll/poll route 0]}]})))
 
 (defn start! [{:keys [routes initial-db router hash-routing? app-db-spec debug? root-component chain-links screen scroll]
                :or   {debug? false
