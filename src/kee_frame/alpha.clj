@@ -57,23 +57,33 @@
                                                                                (assoc this ::value "/home/username/myconfig"
                                                                                            ::busy? false))
                                                            :fsm/target-state :filling}}}
+
                     :filling     {:fsm/events {:on-change {:fsm/handler (fn [this [value]]
                                                                           (assoc this ::value value
                                                                                       :valid? #(-> % ::value seq)))}
+
                                                :submit    {:predicate        (fn [this] (-> this ::value seq))
                                                            :fsm/handler      (fn [this]
-                                                                               {::busy?   true
-                                                                                :timeout  {:ms    3000
-                                                                                           :event :submit-timed-out}
-                                                                                :dispatch [::submit-it (::value this)]})
+                                                                               {::busy?      true
+                                                                                :fsm/timeout {:ms    3000
+                                                                                              :event ::submit-timed-out}
+                                                                                :effects     {:http-xhrio {:url        "/load/config"
+                                                                                                           :method     :get
+                                                                                                           :on-success [::http-success]
+                                                                                                           :on-failure [::http-failure]}}})
                                                            :fsm/target-state :loading}}}
-                    :loading     {:fsm/events {:submit-timed-out {:fsm/target-state :filling
-                                                                  :fsm/handler      (fn [this]
-                                                                                      (assoc this ::busy? false
-                                                                                                  ::error-message "Did not quite make it"))}
-                                               :http-success     {:fsm/target-state :fsm/exit
-                                                                  :fsm/handler      (fn [this]
-                                                                                      (assoc this ::busy? false))}}}}})
+
+                    :loading     {:fsm/events {::submit-timed-out {:fsm/target-state :filling
+                                                                   :fsm/handler      (fn [this]
+                                                                                       (assoc this ::busy? false
+                                                                                                   ::error-message "Too  late baby!"))}
+                                               ::http-success     {:fsm/target-state :fsm/exit
+                                                                   :fsm/handler      (fn [this]
+                                                                                       (assoc this ::busy? false))}
+                                               ::http-failure     {:fsm/target-state :filling
+                                                                   :fsm/handler      (fn [this]
+                                                                                       (assoc this ::busy? false
+                                                                                                   ::error-message "No good that HTTP"))}}}}})
 
 (defn start-fsm [id machine config])
 
