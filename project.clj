@@ -1,4 +1,4 @@
-(defproject kee-frame "0.3.2-SNAPSHOT"
+(defproject kee-frame "0.3.2"
   :description "A micro-framework on top of re-frame"
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
@@ -18,8 +18,7 @@
                  [expound "0.7.0"]
                  [day8.re-frame/test "0.1.5"]
                  [breaking-point "0.1.2"]
-                 [pez/clerk "1.0.0"]
-                 #_[sandbags/aido "0.3.5"]]
+                 [pez/clerk "1.0.0"]]
 
   :plugins [[com.jakemccrary/lein-test-refresh "0.20.0"]
             [venantius/ultra "0.5.2"]]

@@ -110,7 +110,7 @@ There are 2 simple options for bootstrapping your project:
 ### 1. Manual installation
 Add the following dependency to your `project.clj` file:
 ```clojure
-[kee-frame "0.3.1"]
+[kee-frame "0.3.2"]
 ```
 ### 2. Luminus template
 [Luminus](http://www.luminusweb.net) is a framework that makes it easy to get started with web app development
@@ -256,7 +256,7 @@ Kee-frame provides a simple helper to do this:
 
 ```clojure
 (defn main-view []
-  [k/switch-route (fn [route] (:handler route))
+  [k/switch-route (fn [route] (-> route :data :name))
    :index [index-page] ;; Explicit call to reagent component, ignoring route data
    :orders orders-page]) ;; Orders page will receive the route data as its parameter because of missing []
 ```
