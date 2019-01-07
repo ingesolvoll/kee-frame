@@ -36,10 +36,8 @@
 (defn- socket-for [db path]
   (or
     (get-in db [::sockets path])
-    (let [buffer-chan (chan)
-          ref {:buffer-chan buffer-chan}]
-      (rf/dispatch [::created path buffer-chan])
-      ref)))
+    {:buffer-chan (chan)
+     :state       :initializing}))
 
 (defn start-websocket [create-socket {:keys [path format]
                                       :as   socket-config}]
@@ -49,15 +47,6 @@
       (if error
         (rf/dispatch [::error path error])
         (rf/dispatch [::connected ws-channel socket-config])))))
-
-(defn- socket-not-found [path websockets]
-  (throw (ex-info (str "No socket registered for path " path) websockets)))
-
-(k/reg-event-db
-  ::created
-  (fn [db [path buffer-chan]]
-    (assoc-in db [::sockets path] {:buffer-chan buffer-chan
-                                   :state       :initializing})))
 
 (k/reg-event-db
   ::log
@@ -89,24 +78,24 @@
     (let [{:keys [buffer-chan]} (socket-for db path)]
       (send-messages! path buffer-chan ws-chan wrap-message)
       (receive-messages! ws-chan socket-config)
-      {:db (update-in db [::sockets path] merge {:ws-channel ws-chan
-                                                 :state      :connected})})))
+      {:db (update-in db [::sockets path] merge {:ws-channel  ws-chan
+                                                 :buffer-chan buffer-chan
+                                                 :state       :connected})})))
 
 (rf/reg-fx ::open (partial start-websocket interop/create-socket))
 
 (k/reg-event-fx ::close (fn [{:keys [db]} [path]]
-                          (if-let [{:keys [buffer-chan ws-channel]} (socket-for db path)]
-                            (do
-                              (close! ws-channel)
-                              (close! buffer-chan))
-                            (socket-not-found path (::sockets db)))
+                          (let [{:keys [buffer-chan ws-channel]} (socket-for db path)]
+                            (when ws-channel (close! ws-channel))
+                            (when buffer-chan (close! buffer-chan)))
                           {:db (assoc-in db [::sockets path] nil)}))
 
 (k/reg-event-fx ::send (fn [{:keys [db]} [path message]]
-                         (if-let [buffer-chan (:buffer-chan (socket-for db path))]
-                           (do (go (>! buffer-chan message))
-                               (when false {:dispatch [::log path :buffered (date) message]}))
-                           (socket-not-found path (::sockets db)))))
+                         (let [{:keys [buffer-chan state] :as socket-config} (socket-for db path)]
+                           (go (>! buffer-chan message))
+                           (when false {:dispatch [::log path :buffered (date) message]})
+                           (when (= :initializing state)
+                             {:db (update-in db [::sockets path] merge socket-config)}))))
 
 (rf/reg-sub ::state (fn [db [_ path]]
                       (get-in db [::sockets path])))
