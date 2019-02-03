@@ -134,7 +134,7 @@
   (k/reg-chain
     :load-customer-data
 
-    (fn {ctx [customer-id]]
+    (fn [ctx [customer-id]]
       {:http-xhrio {:uri    (str \"/customer/\" customer-id)
                     :method :get}})
 
