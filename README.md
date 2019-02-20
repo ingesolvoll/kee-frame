@@ -33,9 +33,11 @@ Call this function on figwheel reload.
 - Declare that you want some data to be loaded when the user navigates to the league page
 ```clojure      
 (k/reg-controller :league
-                  {:params (fn [route-data}]
-                             (when (-> route-data :handler (= :league))
-                                (:id route-params)))
+                  {:params (fn [route-data]
+                             (when (-> route-data :data :name (= :league))
+                               (-> route-data
+                                   :path-params
+                                   :id)))
                    :start  (fn [ctx id] [:league/load id])})
 ```
 
