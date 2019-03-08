@@ -9,6 +9,11 @@
 [![cljdoc badge](https://cljdoc.xyz/badge/kee-frame/kee-frame)](https://cljdoc.xyz/d/kee-frame/kee-frame/CURRENT)
 
 
+## Project status (March 2019)
+
+The API and functionality of kee-frame is stable and working. Currently, nothing is done to expand or fix it, as it is not broken.
+Reported bugs and inconsistencies will be fixed on demand. Pull requests are welcome.
+ 
 ## Quick walkthrough
 - If you prefer, you can go straight to some [articles](http://ingesolvoll.github.io/tags/kee-frame/) or the [demo app](https://github.com/ingesolvoll/kee-frame-sample)
 
@@ -126,9 +131,7 @@ lein new luminus your-app-name-here +kee-frame
 This library tries hard conform to the high standards of many Clojure libraries, by not breaking backwards compatibility.
 I believe this is very important, an application made several years ago should be able to upgrade with close to zero effort.
 
-Given the experimental nature of the project, the initial
-API has proven to be surprisingly stable. It mimics the well proven API-style of re-frame, being data-driven and generic. 
-Hopefully this will enable an equally stable API for the years to come. See below for a list of breaking changes introduced so far:
+The kee-frame API has remained stable since the launch in early 2018. Here is a list of important/breaking changes:
 * 0.3.0: Reitit replaces Bidi as the default routing library. Causes a breaking change in the data structures of routes and route matches. [The bidi router implementation can be found here, it's easy to fit back in.](https://github.com/ingesolvoll/kee-frame-sample/blob/master/src/cljs/kee_frame_sample/routers.cljs)
 
 ## Getting started
@@ -279,7 +282,7 @@ If you want controllers and routes, you need to replace your current routing wit
 
 Alternatively, make your current router dispatch the event `[:kee-frame.router/route-changed route-data]` on every route change. That should enable what you need for the controllers.
 
-## Using a different router implementation (since 0.2.0)
+## Using a different router implementation
 
 You may not like reitit, or you are already using a different router. In that case, all you have to do is implement your own version of the protocol
 `kee-frame.api/Router` and pass it in with the rest of your config:
@@ -313,7 +316,7 @@ In compojure, the wildcard route would look like this:
                   :body    (index-handler req)})
 ```
 
-## Screen size breakpoints (since 0.2.5)
+## Screen size breakpoints
 
 Most web apps benefit from having direct access to information about the size and orientation of the screen. Kee-frame
 ships with the nice and simple [breaking-points](https://github.com/gadfly361/breaking-point) library that provides 
@@ -356,7 +359,7 @@ The subscriptions available are:
 ```
 
 
-## Websockets (since 0.2.2)
+## Websockets (experimental)
 
 Websocket support is activated by requiring the websocket namespace 
 ```clojure
@@ -400,12 +403,13 @@ You might want to track the status of your socket. There's a subscription for th
 
 ```
 
+Websockets in kee-frame should be considered experimental, but might very well work for you. Help or bug reports would be highly appreciated.
 
 ## Error messages
 
 Helpful error messages are important to kee-frame. You should not get stuck because of "undefined is not a function". If you make a mistake, kee-frame should make it very clear to you what you did wrong and how you can fix it. If you find pain spots, please post an issue so we can find better solutions.
 
-## Scroll behavior on navigation (since 0.2.3)
+## Scroll behavior on navigation
 In a traditional static website, the browser handles the scrolling for you nicely. Meaning that when you navigate back
 and forward, the browser "remembers" how far down you scrolled on the last visit. This is convenient for many websites,
 so Kee-frame utilizes a third-party JS lib to get this behavior for a SPA. The only thing you need to do is this in
