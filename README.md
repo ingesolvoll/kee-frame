@@ -182,7 +182,7 @@ A controller is a connection between the route data and your event handlers. It 
 
 The `params` function receives the route data every time the URL changes. Its only job is to return the part of the route that it's interested in. This value combined with the previous value decides the next state of the controller. I'll come back to that in more detail.
 
-The `start` function accepts the full re-frame context and the value returned from `params`. It should return nil or an event vector to be dispatched.
+The `start` function accepts the full re-frame context and the value returned from `params`. It should return nil or an event vector to be dispatched. The route parameters will be added as the first parameter to the event vector.
 
 The `stop` function receives the re-frame context and also returns nil or an event vector.
 
