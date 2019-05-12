@@ -245,6 +245,8 @@ Kee-frame also includes a re-frame effect for triggering a browser navigation, a
                  :navigate-to [:todo :id (:id todo)]]})) ;; "/todos/14"
 ```
 
+See [this issue](https://github.com/ingesolvoll/kee-frame/issues/64) for some hints on how to use query parameters in your browser navigation.
+
 ## Routing in your views
 
 Most apps need to different views for different URLs. This isn't too hard to solve in re-frame, just subscribe to your route and implement your dispatch logic like this:
