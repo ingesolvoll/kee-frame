@@ -24,10 +24,10 @@
 (defn goto [data]
   (navigate! @state/navigator (url data)))
 
-(defn nav-handler [router]
+(defn nav-handler [router route-start]
   (fn [path]
     (if-let [route (url->data router path)]
-      (rf/dispatch [::route-changed route])
+      (rf/dispatch [route-start route])
       (do (rf/console :group "No route match found")
           (rf/console :error "No match found for path " path)
           (rf/console :groupEnd)))))
@@ -69,7 +69,7 @@
     (or (match-url routes url)
         (route-match-not-found routes url))))
 
-(defn bootstrap-routes [routes router hash-routing? scroll]
+(defn bootstrap-routes [routes router hash-routing? scroll route-start]
   (let [initialized? (boolean @state/navigator)
         router (or router (->ReititRouter (reitit/router routes) hash-routing?))]
     (reset! state/router router)
@@ -78,7 +78,7 @@
     (when-not initialized?
       (when scroll (scroll/start!))
       (reset! state/navigator
-              (interop/make-navigator {:nav-handler  (nav-handler router)
+              (interop/make-navigator {:nav-handler  (nav-handler router route-start)
                                        :path-exists? #(boolean (url->data router %))})))
     (dispatch-current! @state/navigator)))
 
@@ -97,7 +97,7 @@
                               {:dispatch-later [{:ms       50
                                                  :dispatch [::scroll/poll route 0]}]})))))
 
-(defn start! [{:keys [routes initial-db router hash-routing? app-db-spec debug? root-component chain-links screen scroll]
+(defn start! [{:keys [routes initial-db router hash-routing? route-start app-db-spec debug? root-component chain-links screen scroll]
                :or   {debug? false
                       scroll true}}]
   (reset! state/app-db-spec app-db-spec)
@@ -111,7 +111,7 @@
                     {:routes routes
                      :router router})))
   (when (or routes router)
-    (bootstrap-routes routes router hash-routing? scroll))
+    (bootstrap-routes routes router hash-routing? scroll (or route-start ::route-changed)))
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))

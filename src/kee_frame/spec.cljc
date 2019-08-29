@@ -18,6 +18,7 @@
 (s/def ::routes any?)
 (s/def ::router #(satisfies? api/Router %))
 (s/def ::hash-routing? (s/nilable boolean?))
+(s/def ::route-start (s/nilable keyword?))
 (s/def ::root-component (s/nilable vector?))
 (s/def ::initial-db (s/nilable map?))
 (s/def ::app-db-spec (s/nilable keyword?))
@@ -32,7 +33,7 @@
 (s/def ::screen (s/nilable (s/or :boolean boolean?
                                  :config (s/keys :req-un [::breakpoints ::debounce-ms]))))
 
-(s/def ::start-options (s/keys :opt-un [::routes ::router ::hash-routing? ::root-component ::initial-db
+(s/def ::start-options (s/keys :opt-un [::routes ::router ::hash-routing? ::route-start ::root-component ::initial-db
                                         ::app-db-spec ::debug? ::chain-links ::screen ::scroll]))
 
 (s/def ::route-data (s/cat :route-name keyword? :path-params (s/* (s/map-of keyword? any?))))

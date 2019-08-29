@@ -13,7 +13,7 @@
 
 (def valid-option-key? #{:router :hash-routing? :routes :process-route :debug?
                          :chain-links :app-db-spec :root-component :initial-db
-                         :screen :scroll})
+                         :screen :scroll :route-start})
 
 (defn extra-options
   "Complete listing of invalid options sent to the `start!` function."
