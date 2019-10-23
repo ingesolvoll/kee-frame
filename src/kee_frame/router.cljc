@@ -54,7 +54,7 @@
          (when-some [h (:hash path-params)] (str "#" h)))))
 
 (defn match-url [routes url]
-  (let [[path+query fragment] (-> url (str/replace #"^/#" "") (str/split #"#" 2))
+  (let [[path+query fragment] (-> url (str/replace #"^/#/" "/") (str/split #"#" 2))
         [path query] (str/split path+query #"\?" 2)]
     (some-> (reitit/match-by-path routes path)
             (assoc :query-string query :hash fragment))))
