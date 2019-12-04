@@ -8,8 +8,6 @@
 
 [![cljdoc badge](https://cljdoc.xyz/badge/kee-frame/kee-frame)](https://cljdoc.xyz/d/kee-frame/kee-frame/CURRENT)
 
-[Patreon](https://www.patreon.com/ingesolvoll/)
-
 
 ## Project status (March 2019)
 
