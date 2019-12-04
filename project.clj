@@ -5,7 +5,7 @@
   :url "https://github.com/ingesolvoll/kee-frame"
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.10.0"]
-                 [org.clojure/clojurescript "1.10.520"]
+                 [org.clojure/clojurescript "1.10.597"]
                  [re-frame "0.10.6"]
                  [re-chain "1.0"]
                  [metosin/reitit-core "0.2.13"]
@@ -20,8 +20,7 @@
                  [breaking-point "0.1.2"]
                  [pez/clerk "1.0.0"]]
 
-  :plugins [[com.jakemccrary/lein-test-refresh "0.20.0"]
-            [venantius/ultra "0.5.2"]]
+  :plugins [[com.jakemccrary/lein-test-refresh "0.20.0"]]
   :deploy-repositories [["clojars" {:sign-releases false
                                     :url           "https://clojars.org/repo"
                                     :username      :env/clojars_username
