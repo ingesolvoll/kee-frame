@@ -79,7 +79,7 @@
   (when (and (debug-enabled?)
              (get @state/controllers id))
     (console :warn "Overwriting controller with id " id))
-  (swap! state/controllers update id merge controller))
+  (swap! state/controllers assoc id controller))
 
 (defn reg-event-fx
   "Exactly same signature as `re-frame.core/reg-event-fx`. Use this version if you want kee-frame logging and spec validation.
