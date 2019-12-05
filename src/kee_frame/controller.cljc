@@ -23,9 +23,15 @@
                       (s/explain-data ::spec/event-vector dispatch))))
     (rf/dispatch dispatch)))
 
+(defn debug-enabled? []
+  (let [{:keys [controllers?]
+         :or   {controllers? true}} @state/debug-config]
+    (and @state/debug?
+         controllers?)))
+
 (defn start! [id ctx start params]
   (when start
-    (when @state/debug?
+    (when (debug-enabled?)
       (rf/console :log "Starting controller " id " with params " params))
     (cond
       (vector? start) (rf/dispatch (conj start params))
@@ -33,7 +39,7 @@
 
 (defn stop! [id ctx stop]
   (when stop
-    (when @state/debug?
+    (when (debug-enabled?)
       (rf/console :log "Stopping controller " id))
     (cond
       (vector? stop) (rf/dispatch stop)

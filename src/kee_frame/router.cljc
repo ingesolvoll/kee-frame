@@ -10,7 +10,8 @@
             [clojure.string :as str]
             [clojure.spec.alpha :as s]
             [kee-frame.spec :as spec]
-            [expound.alpha :as e]))
+            [expound.alpha :as e]
+            [re-frame.loggers :as rf.log]))
 
 (def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
                            :get-dispatch    (fn [effects] (get-in effects [:http-xhrio :on-success]))
@@ -87,9 +88,15 @@
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
 
+(defn debug-enabled? []
+  (let [{:keys [routes?]
+         :or   {routes? true}}  @state/debug-config]
+    (and @state/debug?
+         routes?)))
+
 (defn reg-route-event [scroll]
   (rf/reg-event-fx ::route-changed
-                   (if @state/debug? [rf/debug])
+                   (when (debug-enabled?) [rf/debug])
                    (fn [{:keys [db] :as ctx} [_ route]]
                      (when scroll
                        (scroll/monitor-requests! route))
@@ -99,11 +106,22 @@
                               {:dispatch-later [{:ms       50
                                                  :dispatch [::scroll/poll route 0]}]})))))
 
-(defn start! [{:keys [routes initial-db router hash-routing? app-db-spec debug? root-component chain-links screen scroll]
+(defn set-log-level! [{:keys [overwrites?]
+                       :or   {overwrites? false}}]
+  (when-not overwrites?
+    (rf.log/set-loggers!
+     {:warn (fn [& args]
+              (when-not (re-find #"^re-frame: overwriting" (first args))
+                (apply js/console.warn args)))})))
+
+(defn start! [{:keys [routes initial-db router hash-routing? app-db-spec debug? root-component chain-links
+                      screen scroll debug-config]
                :or   {debug? false
                       scroll true}}]
+  (set-log-level! debug-config)
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
+  (reset! state/debug-config debug-config)
   (chain/configure! (concat default-chain-links
                             chain-links))
 

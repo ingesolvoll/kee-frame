@@ -11,7 +11,7 @@
 ;; Interceptors used by all chains and events registered through kee-frame
 (def kee-frame-interceptors [(spec-interceptor state/app-db-spec) (debug-interceptor state/debug?) rf/trim-v])
 
-(def valid-option-key? #{:router :hash-routing? :routes :process-route :debug?
+(def valid-option-key? #{:router :hash-routing? :routes :process-route :debug? :debug-config
                          :chain-links :app-db-spec :root-component :initial-db
                          :screen :scroll})
 
@@ -47,6 +47,12 @@
       (throw (ex-info (str "Uknown startup options. Valid keys are " valid-option-key?) extras))))
   (router/start! options))
 
+(defn debug-enabled? []
+  (let [{:keys [overwrites?]
+         :or   {:overwrites? false}} @state/debug-config]
+    (and @state/debug?
+         overwrites?)))
+
 (defn reg-controller
   "Put a controller config map into the global controller registry.
 
@@ -70,7 +76,8 @@
   (when-not (s/valid? ::spec/controller controller)
     (e/expound ::spec/controller controller)
     (throw (ex-info "Invalid controller" (s/explain-data ::spec/controller controller))))
-  (when (get @state/controllers id)
+  (when (and (debug-enabled?)
+             (get @state/controllers id))
     (console :warn "Overwriting controller with id " id))
   (swap! state/controllers update id merge controller))
 

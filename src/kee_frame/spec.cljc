@@ -22,8 +22,12 @@
 (s/def ::initial-db (s/nilable map?))
 (s/def ::app-db-spec (s/nilable keyword?))
 (s/def ::blacklist (s/coll-of keyword? :kind set?))
-(s/def ::debug? (s/nilable (s/or :boolean boolean?
-                                 :config (s/keys :opt-un [::blacklist]))))
+(s/def ::skip-events? boolean?)
+(s/def ::skip-controllers? boolean?)
+(s/def ::skip-routes? boolean?)
+(s/def ::skip-overwrites? boolean?)
+(s/def ::debug?  boolean?)
+(s/def ::debug-config (s/nilable (s/keys :opt-un [::blacklist ::events? ::controllers? ::routes? ::overwrites?])))
 (s/def ::chain-links ::chain/links)
 (s/def ::breakpoints vector?)
 (s/def ::debounce-ms number?)
@@ -33,7 +37,7 @@
                                  :config (s/keys :req-un [::breakpoints ::debounce-ms]))))
 
 (s/def ::start-options (s/keys :opt-un [::routes ::router ::hash-routing? ::root-component ::initial-db
-                                        ::app-db-spec ::debug? ::chain-links ::screen ::scroll]))
+                                        ::app-db-spec ::debug? ::debug-config ::chain-links ::screen ::scroll]))
 
 (defn log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")
