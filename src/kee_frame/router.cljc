@@ -32,6 +32,13 @@
           (rf/console :error "No match found for path " path)
           (rf/console :groupEnd)))))
 
+(s/def ::reitit-route-data (s/cat :route-name keyword? :path-params (s/* (s/map-of keyword? any?))))
+
+(defn assert-route-data [data]
+  (when-not (s/valid? ::reitit-route-data data)
+    (e/expound ::reitit-route-data data)
+    (throw (ex-info "Bad route data input" (s/explain-data ::reitit-route-data data)))))
+
 (defn url-not-found [routes data]
   (throw (ex-info "Could not find url for the provided data"
                   {:routes routes
@@ -57,6 +64,7 @@
 (defrecord ReititRouter [routes hash?]
   api/Router
   (data->url [_ data]
+    (assert-route-data data)
     (or (match-data routes data hash?)
         (url-not-found routes data)))
   (url->data [_ url]
