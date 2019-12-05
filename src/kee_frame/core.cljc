@@ -49,7 +49,7 @@
 
 (defn debug-enabled? []
   (let [{:keys [overwrites?]
-         :or   {:overwrites? false}} @state/debug-config]
+         :or   {overwrites? false}} @state/debug-config]
     (and @state/debug?
          overwrites?)))
 
