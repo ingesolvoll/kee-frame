@@ -6,7 +6,9 @@
 
 (rf/reg-event-db ::connection-balance
                  (fn [db [_ route inc-or-dec]]
-                   (assoc-in db [:route-counter] {:route route :balance (inc-or-dec (get-in db [:route-counter :balance]))})))
+                   (-> db
+                       (assoc-in [:route-counter :route] route)
+                       (update-in  [:route-counter :balance] inc-or-dec))))
 
 (defn start! []
   (clerk/initialize!))
