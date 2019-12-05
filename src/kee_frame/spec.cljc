@@ -35,8 +35,6 @@
 (s/def ::start-options (s/keys :opt-un [::routes ::router ::hash-routing? ::root-component ::initial-db
                                         ::app-db-spec ::debug? ::chain-links ::screen ::scroll]))
 
-(s/def ::route-data (s/cat :route-name keyword? :path-params (s/* (s/map-of keyword? any?))))
-
 (defn log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")
   (e/expound spec new-db)
