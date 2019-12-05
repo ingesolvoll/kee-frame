@@ -25,3 +25,5 @@
 (defn set-breakpoint-subs [_])
 
 (defn set-breakpoints [_])
+
+(defn set-log-level! [_])

@@ -6,7 +6,8 @@
             [day8.re-frame.http-fx]
             [chord.client :as chord]
             [breaking-point.core :as bp]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [re-frame.loggers :as rf.log]))
 
 (defrecord AccountantNavigator []
   api/Navigator
@@ -55,3 +56,11 @@
 
 (defn set-breakpoints [breakpoints]
   (rf/dispatch-sync [::bp/set-breakpoints (breakpoints-or-defaults breakpoints)]))
+
+(defn set-log-level! [{:keys [overwrites?]
+                       :or   {overwrites? false}}]
+  (when-not overwrites?
+    (rf.log/set-loggers!
+     {:warn (fn [& args]
+              (when-not (re-find #"^re-frame: overwriting" (first args))
+                (apply js/console.warn args)))})))

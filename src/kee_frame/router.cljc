@@ -3,6 +3,7 @@
             [re-frame.core :as rf]
             [re-chain.core :as chain]
             [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
+            [kee-frame.interop :as interop]
             [kee-frame.state :as state]
             [kee-frame.scroll :as scroll]
             [kee-frame.controller :as controller]
@@ -10,8 +11,7 @@
             [clojure.string :as str]
             [clojure.spec.alpha :as s]
             [kee-frame.spec :as spec]
-            [expound.alpha :as e]
-            [re-frame.loggers :as rf.log]))
+            [expound.alpha :as e]))
 
 (def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
                            :get-dispatch    (fn [effects] (get-in effects [:http-xhrio :on-success]))
@@ -106,19 +106,11 @@
                               {:dispatch-later [{:ms       50
                                                  :dispatch [::scroll/poll route 0]}]})))))
 
-(defn set-log-level! [{:keys [overwrites?]
-                       :or   {overwrites? false}}]
-  (when-not overwrites?
-    (rf.log/set-loggers!
-     {:warn (fn [& args]
-              (when-not (re-find #"^re-frame: overwriting" (first args))
-                (apply js/console.warn args)))})))
-
 (defn start! [{:keys [routes initial-db router hash-routing? app-db-spec debug? root-component chain-links
                       screen scroll debug-config]
                :or   {debug? false
                       scroll true}}]
-  (set-log-level! debug-config)
+  (interop/set-log-level! debug-config)
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
   (reset! state/debug-config debug-config)
