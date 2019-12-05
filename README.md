@@ -171,7 +171,10 @@ the route.
 
 If you provide `:root-component`, kee-frame will render that component in the DOM element with id "app". Make sure you have such an element in your index.html. You are free to do the initial rendering yourself if you want, just skip this setting. If you use this feature, make sure that `k/start!` is called every time figwheel reloads your code. 
 
-The `debug` boolean option is for enabling debug interceptors on all your events, as well as traces from the activities of controllers. 
+The `debug?` boolean option is for enabling debug interceptors on all your events, as well as traces from the activities of controllers. 
+
+For further control of debug output, use the `debug-config` option. Valid boolean keys are `:routes?`, `events?`, `:controllers?` and `:overwrites?`. All default to true,
+except `:overwrites?`. That one also removes the re-frame warnings about overwriting subs and events, which many find annoying.
 
 If you provide an `app-db-spec`, the framework will let you know when a bug in your event handler is trying to corrupt your DB structure. This is incredibly useful, so you should put down the effort to spec up your db!
 
