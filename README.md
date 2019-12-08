@@ -368,6 +368,9 @@ I believe it was a mistake to introduce websockets into kee-frame. It's not what
 about. The code has been put in a separate repo, and can be used as before. See docs at
 https://github.com/ingesolvoll/kee-frame-sockets
 
+If you are a user of the websocket code and you find that the new lib has bugs, 
+please downgrade to kee-frame 0.3.4 and submit an issue.
+
 ## Error messages
 
 Helpful error messages are important to kee-frame. You should not get stuck because of "undefined is not a function". If you make a mistake, kee-frame should make it very clear to you what you did wrong and how you can fix it. If you find pain spots, please post an issue so we can find better solutions.
