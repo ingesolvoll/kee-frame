@@ -4,9 +4,7 @@
             [reagent.core :as reagent]
             [re-frame.core :as rf]
             [day8.re-frame.http-fx]
-            [chord.client :as chord]
             [breaking-point.core :as bp]
-            [clojure.string :as str]
             [re-frame.loggers :as rf.log]))
 
 (defrecord AccountantNavigator []
@@ -15,18 +13,6 @@
     (accountant/dispatch-current!))
   (navigate! [_ url]
     (accountant/navigate! url)))
-
-(def create-socket chord/ws-ch)
-
-(defn websocket-url [path]
-  (if (str/starts-with? path "/")
-    (str (if (= "https:" (-> js/document .-location .-protocol))
-           "wss://"
-           "ws://")
-         (-> js/document .-location .-host)
-         path)
-    ;; Consider this an url for now.
-    path))
 
 (defn make-navigator
   [opts]
