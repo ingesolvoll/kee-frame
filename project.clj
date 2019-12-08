@@ -11,8 +11,6 @@
                  [metosin/reitit-core "0.2.13"]
                  [day8.re-frame/http-fx "0.1.6"]
                  [cljs-ajax "0.8.0"]
-                 [org.clojure/core.async "0.3.442"]
-                 [jarohen/chord "0.8.1"]
                  [venantius/accountant "0.2.4"]
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [expound "0.7.2"]
