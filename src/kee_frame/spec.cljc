@@ -26,7 +26,7 @@
 (s/def ::skip-controllers? boolean?)
 (s/def ::skip-routes? boolean?)
 (s/def ::skip-overwrites? boolean?)
-(s/def ::debug?  boolean?)
+(s/def ::debug? boolean?)
 (s/def ::debug-config (s/nilable (s/keys :opt-un [::blacklist ::events? ::controllers? ::routes? ::overwrites?])))
 (s/def ::chain-links ::chain/links)
 (s/def ::breakpoints vector?)
@@ -45,15 +45,14 @@
   (console :groupEnd "*****************************"))
 
 (defn rollback [context new-db db-spec]
-  (do
-    (log-spec-error new-db db-spec)
-    (assoc-effect context :db (get-coeffect context :db))))
+  (log-spec-error new-db db-spec)
+  (assoc-effect context :db (get-coeffect context :db)))
 
 (defn spec-interceptor [db-spec-atom]
   (->interceptor
-    :id :spec
-    :after (fn [context]
-             (let [new-db (get-effect context :db)]
-               (if (and @db-spec-atom new-db (not (s/valid? @db-spec-atom new-db)))
-                 (rollback context new-db @db-spec-atom)
-                 context)))))
+   :id :spec
+   :after (fn [context]
+            (let [new-db (get-effect context :db)]
+              (if (and @db-spec-atom new-db (not (s/valid? @db-spec-atom new-db)))
+                (rollback context new-db @db-spec-atom)
+                context)))))
