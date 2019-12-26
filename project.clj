@@ -13,7 +13,7 @@
                  [cljs-ajax "0.8.0"]
                  [venantius/accountant "0.2.4"]
                  [org.clojure/core.match "0.3.0-alpha5"]
-                 [expound "0.7.2"]
+                 [expound "0.8.2"]
                  [day8.re-frame/test "0.1.5"]
                  [breaking-point "0.1.2"]
                  [pez/clerk "1.0.0"]]
