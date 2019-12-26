@@ -24,5 +24,5 @@
 
 (defn set-log-level! [_])
 
-(defn set-timeout [_])
-(defn clear-timeout [_])
+(defn set-timeout [_ _])
+(defn clear-timeout [_ _])
