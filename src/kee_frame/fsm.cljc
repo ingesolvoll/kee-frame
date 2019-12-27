@@ -31,6 +31,10 @@
           (f/dispatch e)))
       next-state)))
 
+(defn foreign-event? [fsm-id [event-id _ event-fsm-id]]
+  (and (#{::on-enter ::after} event-id)
+       (not= fsm-id event-fsm-id)))
+
 (defn next-state
   "Returns next state if there is a valid transition, `nil` otherwise."
   [fsm db event]
@@ -38,7 +42,8 @@
          :or {state-attr ::state}} fsm
         current-state (get-in db [id state-attr] start)
         transitions   (get transition-map current-state)]
-    (event-transition! transitions event)))
+    (when-not (foreign-event? id event)
+      (event-transition! transitions event))))
 
 ;;;;;;;;;;;; Timeout implementation ;;;;;;;;;;;;;;;;;;;
 
@@ -79,7 +84,7 @@
 
 (defn advance
   "Given a parsed fsm, a db, and an event, advances the fsm. Else,
-  no-op. Do not write to unmounted transient entities."
+  no-op."
   [fsm timeouts* state->timeouts db event]
   (let [{:keys [id state-attr stop start] :or {state-attr ::state}} fsm
         current-state (get-in db [id state-attr])
@@ -108,14 +113,12 @@
 (f/reg-event-fx ::start
                 ;; Starts the interceptor for the given fsm.
                 (fn [_ [_ fsm]]
-                  (println "Starting fsm " (:id fsm))
                   {::start   fsm
                    :dispatch [::fsm-started]}))
 
 (f/reg-event-fx ::stop
                 ;; Stops the interceptor for the given fsm.
                 (fn [_ [_ fsm]]
-                  (println "stopping fsm " (:id fsm))
                   {::stop fsm}))
 
 (f/reg-sub ::state
