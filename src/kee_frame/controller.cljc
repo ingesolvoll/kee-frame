@@ -1,14 +1,15 @@
 (ns ^:no-doc kee-frame.controller
   (:require
-    [re-frame.core :as rf]
-    #?(:cljs
-       [cljs.core.match :refer [match]])
-    #?(:clj
-    [clojure.core.match :refer [match]])
-    [kee-frame.state :as state]
-    [kee-frame.spec :as spec]
-    [clojure.spec.alpha :as s]
-    [expound.alpha :as e]))
+   [re-frame.core :as rf]
+   #?(:cljs
+      [cljs.core.match :refer [match]])
+   #?(:clj
+      [clojure.core.match :refer [match]])
+   [kee-frame.state :as state]
+   [kee-frame.spec :as spec]
+   [kee-frame.fsm :as fsm]
+   [clojure.spec.alpha :as s]
+   [expound.alpha :as e]))
 
 (defn process-params [params route]
   (cond
@@ -17,11 +18,14 @@
 
 (defn validate-and-dispatch! [dispatch]
   (when dispatch
-    (when-not (s/valid? ::spec/event-vector dispatch)
-      (e/expound ::spec/event-vector dispatch)
-      (throw (ex-info "Invalid dispatch value"
-                      (s/explain-data ::spec/event-vector dispatch))))
-    (rf/dispatch dispatch)))
+    (if (map? dispatch)
+      (rf/dispatch [::fsm/start dispatch])
+      (do
+        (when-not (s/valid? ::spec/event-vector dispatch)
+          (e/expound ::spec/event-vector dispatch)
+          (throw (ex-info "Invalid dispatch value"
+                          (s/explain-data ::spec/event-vector dispatch))))
+        (rf/dispatch dispatch)))))
 
 (defn debug-enabled? []
   (let [{:keys [controllers?]

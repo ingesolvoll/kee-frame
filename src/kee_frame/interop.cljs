@@ -50,3 +50,9 @@
      {:warn (fn [& args]
               (when-not (re-find #"^re-frame: overwriting" (first args))
                 (apply js/console.warn args)))})))
+
+(defn set-timeout [f ms]
+  (js/setTimeout f ms))
+
+(defn clear-timeout [t]
+  (js/clearTimeout t))

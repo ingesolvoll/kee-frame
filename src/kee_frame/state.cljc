@@ -12,10 +12,13 @@
 
 (def debug-config (atom nil))
 
+(def fsm-interceptors (atom {}))
+
 (def breakpoints-initialized? (atom false))
 
 ;; Test utility
 (defn reset-state! []
   (reset! controllers {})
+  (reset! fsm-interceptors {})
   (reset! router nil)
   (reset! navigator nil))

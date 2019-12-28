@@ -5,11 +5,12 @@
             [re-frame.core :as rf :refer [console]]
             [kee-frame.spec :as spec :refer [spec-interceptor]]
             [kee-frame.debug :refer [debug-interceptor]]
+            [kee-frame.interceptors :as i]
             [clojure.spec.alpha :as s]
             [expound.alpha :as e]))
 
 ;; Interceptors used by all chains and events registered through kee-frame
-(def kee-frame-interceptors [(spec-interceptor state/app-db-spec) (debug-interceptor state/debug?) rf/trim-v])
+(def kee-frame-interceptors [i/add-global-interceptors (spec-interceptor state/app-db-spec) (debug-interceptor state/debug?) rf/trim-v])
 
 (def valid-option-key? #{:router :hash-routing? :routes :process-route :debug? :debug-config
                          :chain-links :app-db-spec :root-component :initial-db
