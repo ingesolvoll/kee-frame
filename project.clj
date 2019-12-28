@@ -7,7 +7,7 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.597"]
                  [re-frame "0.10.6"]
-                 [re-chain "1.0"]
+                 [re-chain "1.1-SNAPSHOT"]
                  [metosin/reitit-core "0.2.13"]
                  [day8.re-frame/http-fx "0.1.6"]
                  [cljs-ajax "0.8.0"]
