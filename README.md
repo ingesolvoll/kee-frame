@@ -9,10 +9,9 @@
 [![cljdoc badge](https://cljdoc.xyz/badge/kee-frame/kee-frame)](https://cljdoc.xyz/d/kee-frame/kee-frame/CURRENT)
 
 
-## Project status (March 2019)
+## Project status (December 2019)
 
-The API and functionality of kee-frame is stable and working. Currently, nothing is done to expand or fix it, as it is not broken.
-Reported bugs and inconsistencies will be fixed on demand. Pull requests are welcome.
+The API and functionality of kee-frame is stable and proven to work. Pull requests are welcome.
  
 ## Quick walkthrough
 - If you prefer, you can go straight to some [articles](http://ingesolvoll.github.io/tags/kee-frame/) or the [demo app](https://github.com/ingesolvoll/kee-frame-sample)
@@ -387,6 +386,8 @@ in kee-frame. Usage:
 
 This will print JS errors inside the component on screen instead of breaking the whole rendering tree.
 You can optionally include your own error-handling component function as the first param.
+
+[Example usage from demo app](https://github.com/ingesolvoll/kee-frame-sample/blob/master/src/cljs/kee_frame_sample/core.cljs#L26)
 
 ## Scroll behavior on navigation
 In a traditional static website, the browser handles the scrolling for you nicely. Meaning that when you navigate back
