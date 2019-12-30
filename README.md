@@ -316,6 +316,10 @@ with the vector provided in the FSM.
 If an event is matched, the right-side map decides what happens next. It can transition into a new state,
 or dispatch re-frame events. Both are optional.
 
+There are 2 special "events" here:
+- `:kee-frame.fsm/after` triggers the specified number of ms after entering that state. Will not trigger if state has changed.
+- `:kee-frame.fsm/on-enter` triggers immediately when entering that state.
+
 FSMs can be started and stopped like this:
 
 ```clojure
