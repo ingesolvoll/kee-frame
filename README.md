@@ -319,15 +319,15 @@ If an event is matched, the right-side map decides what happens next. It can tra
 or dispatch re-frame events. Both are optional.
 
 There are 2 special "events" here:
-- `:kee-frame.fsm/after` triggers the specified number of ms after entering that state. Will not trigger if state has changed.
-- `:kee-frame.fsm/on-enter` triggers immediately when entering that state.
+- `:kee-frame.fsm.alpha/after` triggers the specified number of ms after entering that state. Will not trigger if state has changed.
+- `:kee-frame.fsm.alpha/on-enter` triggers immediately when entering that state.
 
 FSMs can be started and stopped like this:
 
 ```clojure
-(rf/dispatch [:kee-frame.fsm/start my-http-request-fsm])
+(rf/dispatch [:kee-frame.fsm.alpha/start my-http-request-fsm])
 
-(rf/dispatch [:kee-frame.fsm/stop my-http-request-fsm])
+(rf/dispatch [:kee-frame.fsm.alpha/stop my-http-request-fsm])
 ```
 
 Controllers have been extended to support returning FSM maps instead of event vectors. Like this:
