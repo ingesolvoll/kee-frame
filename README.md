@@ -284,6 +284,8 @@ It looks pretty much the same, only more concise. But it does help you with a fe
 
 ## Finite State Machines (alpha since 0.4.0)
 
+#### FSM API is marked as alpha, as it is more likely to receive breaking changes for the coming months.
+
 Most people are not using state machines in their daily programming tasks. Or actually they are, it's just that the state machines are hidden
 inside normal code, incomplete and filled with fresh custom made bugs. A `{:loading true}` here, a missing `:on-failure` there. You may get
 it right eventually, but it's hard to read the distributed state logic and it is easy to mess it up later.
