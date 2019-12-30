@@ -57,6 +57,8 @@ Call this function on figwheel reload.
                {:db (assoc db :league league-data)}))
 ```
 
+- You can use a Finite State Machine to handle error paths and complexity, with or without controllers and chains. See FSM doc section for details.
+
 - Make a URL for your `<a href="">` using nothing but data
 ```clojure
 (k/path-for [:league {:id 14 :tab :fixtures}]) => "/league/14/fixtures"
@@ -132,6 +134,9 @@ I believe this is very important, an application made several years ago should b
 
 The kee-frame API has remained stable since the launch in early 2018. Here is a list of important/breaking changes:
 * 0.3.0: Reitit replaces Bidi as the default routing library. Causes a breaking change in the data structures of routes and route matches. [The bidi router implementation can be found here, it's easy to fit back in.](https://github.com/ingesolvoll/kee-frame-sample/blob/master/src/cljs/kee_frame_sample/routers.cljs)
+* 0.3.4: Changes in log configuration, might render unexpected results in more/less logging for existing projects.
+* 0.4.0: FSM API introduced. No breaking API change, additions only.
+* 0.4.0: Websocket API moved out to separate library, to reduce bundle size. Requires separate dependency.
 
 ## Getting started
 
@@ -276,6 +281,62 @@ It looks pretty much the same, only more concise. But it does help you with a fe
 * No explicit reference to the route. The first argument to `switch-route` is a function that accepts the route and returns the value you are dispatching on
 * If you pass only a function reference to your reagent components (no surrounding []), kee-frame will invoke them with the route as the first parameter.
 * It will give you nice error messages when you make a mistake.
+
+## Finite State Machines (alpha since 0.4.0)
+
+Most people are not using state machines in their daily programming tasks. Or actually they are, it's just that the state machines are hidden
+inside normal code, incomplete and filled with fresh custom made bugs. A `{:loading true}` here, a missing `:on-failure` there. You may get
+it right eventually, but it's hard to read the distributed state logic and it is easy to mess it up later.
+
+A kee-frame event chain is a kind of state machine. But in the examples, it only handles the
+happy path of successful HTTP requests. It does not have a good answer to error handling, and you have to make custom solutions for displaying
+the state of an ongoing process (retrying, loading, sending, failed etc).
+
+Here's the structure of an FSM in kee-frame:
+
+```clojure
+(def my-http-request-fsm
+   {:id    :my-http-request
+    :start ::loading
+    :stop  ::loaded
+    :fsm   {::loading        {[::fsm/on-enter]      {:dispatch [[:contact-the-server]]}
+                              [:server-responded]   {:to ::loaded}
+                              [:default-on-failure] {:to ::loading-failed}}
+            ::loading-failed {[::fsm/after 10000]   {:to ::loading}}}})
+```
+
+The `:start` param (required) identifies the initial state of the FSM. 
+If you specify a `:stop` state, the machine will halt when it enters that state.
+
+The `:fsm` param is the interesting part. It's a map from states to available transitions. A transition key/value pair
+consists of a re-frame event and information about what happens to the FSM state when that event is seen.
+The actual event vector will usually contain more items, the FSM considers it a match if the event starts
+with the vector provided in the FSM.
+
+If an event is matched, the right-side map decides what happens next. It can transition into a new state,
+or dispatch re-frame events. Both are optional.
+
+FSMs can be started and stopped like this:
+
+```clojure
+(rf/dispatch [:kee-frame.fsm/start my-http-request-fsm])
+
+(rf/dispatch [:kee-frame.fsm/stop my-http-request-fsm])
+```
+
+Controllers have been extended to support returning FSM maps instead of event vectors. Like this:
+
+```clojure      
+(defn league-fsm [id]
+  {:id :league-fsm
+   ....})
+
+(k/reg-controller :league
+                  {:params (fn [route-data] ...)
+                   :start  (fn [ctx id] (league-fsm id)})
+```
+
+This FSM will be started and stopped by the controller start/stop lifecycle. See the demo app for extended examples.
 
 ## Introducing kee-frame into an existing app
 
