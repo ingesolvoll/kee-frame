@@ -7,7 +7,7 @@
       [clojure.core.match :refer [match]])
    [kee-frame.state :as state]
    [kee-frame.spec :as spec]
-   [kee-frame.fsm :as fsm]
+   [kee-frame.fsm.alpha :as fsm]
    [clojure.spec.alpha :as s]
    [expound.alpha :as e]))
 

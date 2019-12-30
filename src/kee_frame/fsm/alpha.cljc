@@ -1,4 +1,4 @@
-(ns kee-frame.fsm
+(ns kee-frame.fsm.alpha
   (:require [clojure.spec.alpha :as s]
             [re-frame.core :as f]
             [kee-frame.interop :as interop]

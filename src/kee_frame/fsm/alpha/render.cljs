@@ -1,4 +1,4 @@
-(ns kee-frame.fsm.render
+(ns kee-frame.fsm.alpha.render
   (:require [re-frame.core :as f]
             [reagent.core :as r]))
 
