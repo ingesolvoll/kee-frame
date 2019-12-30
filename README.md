@@ -375,6 +375,19 @@ please downgrade to kee-frame 0.3.4 and submit an issue.
 
 Helpful error messages are important to kee-frame. You should not get stuck because of "undefined is not a function". If you make a mistake, kee-frame should make it very clear to you what you did wrong and how you can fix it. If you find pain spots, please post an issue so we can find better solutions.
 
+## React error boundaries
+
+If you are unfamiliar with error boundaries, you can read the [docs](https://reactjs.org/docs/error-boundaries.html). After reading [this](https://lilac.town/writing/modern-react-in-cljs-error-boundaries/), I decided to include Will's code snippet
+in kee-frame. Usage:
+
+```clojure
+[kee-frame.error/boundary
+  [your-badly-behaving-component-here props]]
+```
+
+This will print JS errors inside the component on screen instead of breaking the whole rendering tree.
+You can optionally include your own error-handling component function as the first param.
+
 ## Scroll behavior on navigation
 In a traditional static website, the browser handles the scrolling for you nicely. Meaning that when you navigate back
 and forward, the browser "remembers" how far down you scrolled on the last visit. This is convenient for many websites,
