@@ -25,10 +25,10 @@
 (defn goto [data]
   (navigate! @state/navigator (url data)))
 
-(defn nav-handler [router]
+(defn nav-handler [router route-change-event]
   (fn [path]
     (if-let [route (url->data router path)]
-      (rf/dispatch [::route-changed route])
+      (rf/dispatch [(or route-change-event ::route-changed) route])
       (do (rf/console :group "No route match found")
           (rf/console :error "No match found for path " path)
           (rf/console :groupEnd)))))
@@ -72,7 +72,7 @@
     (or (match-url routes url)
         (route-match-not-found routes url))))
 
-(defn bootstrap-routes [routes router hash-routing? scroll]
+(defn bootstrap-routes [routes router hash-routing? scroll route-change-event]
   (let [initialized? (boolean @state/navigator)
         router (or router (->ReititRouter (reitit/router routes) hash-routing?))]
     (reset! state/router router)
@@ -81,7 +81,7 @@
     (when-not initialized?
       (when scroll (scroll/start!))
       (reset! state/navigator
-              (interop/make-navigator {:nav-handler  (nav-handler router)
+              (interop/make-navigator {:nav-handler  (nav-handler router route-change-event)
                                        :path-exists? #(boolean (url->data router %))})))
     (dispatch-current! @state/navigator)))
 
@@ -107,7 +107,7 @@
                                                  :dispatch [::scroll/poll route 0]}]})))))
 
 (defn start! [{:keys [routes initial-db router hash-routing? app-db-spec debug? root-component chain-links
-                      screen scroll debug-config]
+                      screen scroll debug-config route-change-event]
                :or   {debug? false
                       scroll true}}]
   (interop/set-log-level! debug-config)
@@ -123,7 +123,7 @@
                     {:routes routes
                      :router router})))
   (when (or routes router)
-    (bootstrap-routes routes router hash-routing? scroll))
+    (bootstrap-routes routes router hash-routing? scroll route-change-event))
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))

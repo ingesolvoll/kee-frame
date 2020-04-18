@@ -182,6 +182,11 @@ except `:overwrites?`. That one also removes the re-frame warnings about overwri
 
 If you provide an `app-db-spec`, the framework will let you know when a bug in your event handler is trying to corrupt your DB structure. This is incredibly useful, so you should put down the effort to spec up your db!
 
+You can override kee-frame's behaviour on route change through the `:route-change-event` option.
+Just specify the id of the event you want to use. One possible case is to perform some gatekeeping
+before executing the controllers for that route. If route execution is ok, 
+the event could dispatch to kee-frame's built in `:kee-frame.router/route-changed`.
+
 ## Controllers
 A controller is a connection between the route data and your event handlers. It is a map with two required keys (`params` and `start`), and one optional (`stop`).
 
