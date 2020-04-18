@@ -62,7 +62,7 @@
     (some-> (reitit/match-by-path routes path)
             (assoc :query-string query :hash fragment))))
 
-(defrecord ReititRouter [routes hash?]
+(defrecord ReititRouter [routes hash? not-found]
   api/Router
   (data->url [_ data]
     (assert-route-data data)
@@ -70,11 +70,12 @@
         (url-not-found routes data)))
   (url->data [_ url]
     (or (match-url routes url)
+        (some->> not-found (match-url routes))
         (route-match-not-found routes url))))
 
-(defn bootstrap-routes [routes router hash-routing? scroll route-change-event]
+(defn bootstrap-routes [{:keys [routes router hash-routing? scroll route-change-event not-found]}]
   (let [initialized? (boolean @state/navigator)
-        router (or router (->ReititRouter (reitit/router routes) hash-routing?))]
+        router (or router (->ReititRouter (reitit/router routes) hash-routing? not-found))]
     (reset! state/router router)
     (rf/reg-fx :navigate-to goto)
 
@@ -106,10 +107,11 @@
                               {:dispatch-later [{:ms       50
                                                  :dispatch [::scroll/poll route 0]}]})))))
 
-(defn start! [{:keys [routes initial-db router hash-routing? app-db-spec debug? root-component chain-links
-                      screen scroll debug-config route-change-event]
+(defn start! [{:keys [routes initial-db router app-db-spec debug? root-component chain-links
+                      screen scroll debug-config]
                :or   {debug? false
-                      scroll true}}]
+                      scroll true}
+               :as   config}]
   (interop/set-log-level! debug-config)
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
@@ -123,7 +125,7 @@
                     {:routes routes
                      :router router})))
   (when (or routes router)
-    (bootstrap-routes routes router hash-routing? scroll route-change-event))
+    (bootstrap-routes config))
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))

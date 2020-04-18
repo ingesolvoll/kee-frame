@@ -173,6 +173,9 @@ You can set the `hash-routing?` property to `true` for `/#/todos/1` style urls. 
 history without the hash. The hash bit should not be included in your route definition, kee-frame strips it off before matching
 the route.
 
+By default an unknown URL/route causes an error. You can provide a string URL under config key `:not-found` 
+as your default 404 when no route is found.
+
 If you provide `:root-component`, kee-frame will render that component in the DOM element with id "app". Make sure you have such an element in your index.html. You are free to do the initial rendering yourself if you want, just skip this setting. If you use this feature, make sure that `k/start!` is called every time figwheel reloads your code. 
 
 The `debug?` boolean option is for enabling debug interceptors on all your events, as well as traces from the activities of controllers. 

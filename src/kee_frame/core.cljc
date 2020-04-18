@@ -14,7 +14,7 @@
 
 (def valid-option-key? #{:router :hash-routing? :routes :process-route :debug? :debug-config
                          :chain-links :app-db-spec :root-component :initial-db
-                         :screen :scroll :route-change-event})
+                         :screen :scroll :route-change-event :not-found})
 
 (defn extra-options
   "Complete listing of invalid options sent to the `start!` function."
