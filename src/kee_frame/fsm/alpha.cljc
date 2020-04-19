@@ -2,7 +2,8 @@
   (:require [clojure.spec.alpha :as s]
             [re-frame.core :as f]
             [kee-frame.interop :as interop]
-            [kee-frame.interceptors :as i]))
+            [kee-frame.interceptors :as i]
+            #?(:cljs [reagent.core :as r])))
 
 (defn reg-no-op
   "Convenience function for declaring no-op events."
@@ -32,7 +33,7 @@
       next-state)))
 
 (defn foreign-event? [fsm-id [event-id _ event-fsm-id]]
-  (and (#{::on-enter ::after} event-id)
+  (and (#{::on-enter ::timeout} event-id)
        (not= fsm-id event-fsm-id)))
 
 (defn next-state
@@ -47,7 +48,7 @@
 
 ;;;;;;;;;;;; Timeout implementation ;;;;;;;;;;;;;;;;;;;
 
-(reg-no-op ::after)
+(reg-no-op ::timeout)
 (reg-no-op ::on-enter)
 (reg-no-op ::fsm-started)
 
@@ -60,7 +61,7 @@
        (map (fn [[state transitions]]
               [state (->> transitions
                           (filter (fn [[[event-id]] _]
-                                    (#{::after ::on-enter} event-id)))
+                                    (#{::timeout ::on-enter} event-id)))
                           (mapv (fn [[[event-id timeout]] _]
                                   (let [timeout (or timeout 0)]
                                     {:ms timeout :dispatch [event-id timeout (:id fsm)]}))))]))
@@ -112,16 +113,64 @@
 
 (f/reg-event-fx ::start
                 ;; Starts the interceptor for the given fsm.
-                (fn [_ [_ fsm]]
-                  {::start   fsm
-                   :dispatch [::fsm-started]}))
+  (fn [_ [_ fsm]]
+    {::start   fsm
+     :dispatch [::fsm-started]}))
 
 (f/reg-event-fx ::stop
-                ;; Stops the interceptor for the given fsm.
-                (fn [_ [_ fsm]]
-                  {::stop fsm}))
+  ;; Stops the interceptor for the given fsm.
+  (fn [_ [_ fsm]]
+    {::stop fsm}))
 
 (f/reg-sub ::state
-           (fn [db [_ {:keys [id state-attr start]
-                       :or   {state-attr ::state}}]]
-             (get-in db [id state-attr] start)))
+  (fn [db [_ {:keys [id state-attr start]
+              :or   {state-attr ::state}}]]
+    (get-in db [id state-attr] start)))
+
+(s/def ::binding (s/and vector?
+                        (s/cat :fsm-symbol symbol? :fsm any?)))
+
+(defmacro with-fsm [binding & body]
+  (let [parsed (s/conform ::binding binding)]
+    (when (= ::s/invalid parsed)
+      (throw (ex-info "with-fsm accepts exactly one binding pair, the symbol and the value containing the fsm."
+                      (s/explain-data ::binding binding))))
+    (let [{:keys [:fsm-symbol :fsm]} parsed]
+      `(reagent.core/with-let [~fsm-symbol ~fsm
+                               _# (f/dispatch [::start ~fsm-symbol])]
+         ~@body
+         ~(list
+           'finally
+           `(re-frame.core/dispatch [::stop ~fsm-symbol]))))))
+
+(defmulti step
+  "Materialized view of the current fsm state. A `step` method must
+  exist for each state defined in the fsm transition map. States are
+  globally defined, and namespaced keywords are required. It is a good
+  idea to define the fsm in the same namespace as the steps."
+  (fn [fsm & _]
+    @(f/subscribe [::state fsm])))
+
+(defmethod step :default
+  [fsm & _]
+  [:h2 (str "Undefined step: " @(f/subscribe [::state fsm]))])
+
+#?(:cljs
+   (defn- render*
+     [fsm args]
+     (r/with-let [_ (f/dispatch [::start fsm])]
+       [apply step fsm args]
+       (finally
+        (f/dispatch [::stop fsm])))))
+
+#?(:cljs
+   (defn render
+     "Given an fsm function and arguments, renders a materialized view of
+     the fsm state. A `step` method must exist for each state defined in
+     the fsm transition map. The args passed to `render` must match the
+     args expected by the fsm's `step` methods. There should be a one to
+     one match bretween the fsm id and component identity, which
+     guarantees that each unique fsm is started and stopped correctly."
+     [fsm-fn & args]
+     (let [fsm (apply fsm-fn args)]
+       ^{:key (:id fsm)} [render* fsm args])))
