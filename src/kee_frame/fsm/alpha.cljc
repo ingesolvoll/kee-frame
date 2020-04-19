@@ -168,9 +168,7 @@
      "Given an fsm function and arguments, renders a materialized view of
      the fsm state. A `step` method must exist for each state defined in
      the fsm transition map. The args passed to `render` must match the
-     args expected by the fsm's `step` methods. There should be a one to
-     one match bretween the fsm id and component identity, which
-     guarantees that each unique fsm is started and stopped correctly."
+     args expected by the fsm's `step` methods."
      [fsm-fn & args]
      (let [fsm (apply fsm-fn args)]
        ^{:key (:id fsm)} [render* fsm args])))
