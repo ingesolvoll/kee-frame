@@ -374,10 +374,10 @@ The `fsm/step` multimethod must be implemented for all possible states of the FS
 Here's an example:
 
 ```clojure
-(defn light-switch-fsm [] {:id    :switch
-                           :start ::off
-                           :fsm   {::off {[::turn-on]  {:to ::on}}
-                                   ::on  {[::turn-off] {:to ::off}}}})
+(defn light-switch-fsm [city] {:id    (str "switch-for-" city)
+                               :start ::off
+                               :fsm   {::off {[::turn-on]  {:to ::on}}
+                                       ::on  {[::turn-off] {:to ::off}}}})
 
 (defmethod fsm/step ::off
   [fsm city]
