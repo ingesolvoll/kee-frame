@@ -296,6 +296,8 @@ It looks pretty much the same, only more concise. But it does help you with a fe
 
 #### FSM API is marked as alpha, as it is more likely to receive breaking changes for the coming months.
 
+Initial source code and design of API by https://github.com/zalky
+
 Most people are not using state machines in their daily programming tasks. Or actually they are, it's just that the state machines are hidden
 inside normal code, incomplete and filled with fresh custom made bugs. A `{:loading true}` here, a missing `:on-failure` there. You may get
 it right eventually, but it's hard to read the distributed state logic and it is easy to mess it up later.
