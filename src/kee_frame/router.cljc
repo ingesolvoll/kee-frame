@@ -2,6 +2,7 @@
   (:require [kee-frame.interop :as interop]
             [re-frame.core :as rf]
             [re-chain.core :as chain]
+            [kee-frame.debug :as debug]
             [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
             [kee-frame.interop :as interop]
             [kee-frame.state :as state]
@@ -90,22 +91,24 @@
 
 
 (defn debug-enabled? []
-  (let [{:keys [routes?]
-         :or   {routes? true}}  @state/debug-config]
-    (and @state/debug?
-         routes?)))
+  @state/debug?)
 
 (defn reg-route-event [scroll]
   (rf/reg-event-fx ::route-changed
-                   (when (debug-enabled?) [rf/debug])
-                   (fn [{:keys [db] :as ctx} [_ route]]
-                     (when scroll
-                       (scroll/monitor-requests! route))
-                     (swap! state/controllers controller/apply-route ctx route)
-                     (merge {:db (assoc db :kee-frame/route route)}
-                            (when scroll
-                              {:dispatch-later [{:ms       50
-                                                 :dispatch [::scroll/poll route 0]}]})))))
+    (when (debug-enabled?) [debug/debug-interceptor])
+    (fn [{:keys [db] :as ctx} [_ route]]
+      (when scroll
+        (scroll/monitor-requests! route))
+      (let [controller-updates (controller/apply-route @state/controllers ctx route)
+            dispatch-n         (->> controller-updates
+                                    (map :dispatch-n)
+                                    (apply concat))]
+        {:db                 (assoc db :kee-frame/route route)
+         :update-controllers controller-updates
+         :dispatch-n         dispatch-n
+         :dispatch-later     [(when scroll
+                                {:ms       50
+                                 :dispatch [::scroll/poll route 0]})]}))))
 
 (defn start! [{:keys [routes initial-db router app-db-spec debug? root-component chain-links
                       screen scroll debug-config]

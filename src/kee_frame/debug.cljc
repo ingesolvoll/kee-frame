@@ -1,42 +1,35 @@
 (ns ^:no-doc kee-frame.debug
-  (:require [re-frame.core :refer [console]]
-            [re-frame.interceptor :refer [->interceptor get-effect get-coeffect assoc-coeffect assoc-effect]]
+  (:require [re-frame.interceptor :as i]
             [clojure.data :as data]
-            [kee-frame.state :as state]))
+            [kee-frame.interop :refer [log]]))
 
-(defn debug-enabled? [[event-key]]
-  (let [{:keys [blacklist events?]
-         :or   {events? true}} @state/debug-config]
-    (and @state/debug?
-         events?
-         (not (and blacklist
-                   (blacklist event-key))))))
-
-(defn debug-interceptor [debug?]
-  (->interceptor
-    :id :debug
-    :before (fn debug-before
-              [context]
-              (let [event (get-coeffect context :event)]
-                (when (debug-enabled? event)
-                  (console :log "Handling event " event))
-                context))
-    :after (fn debug-after
+(def debug-interceptor
+  (i/->interceptor
+   :id :debug
+   :before (fn debug-before
              [context]
-             (let [event (get-coeffect context :event)
-                   orig-db (get-coeffect context :db)
-                   new-db (get-effect context :db ::not-found)
-                   effects (dissoc (get-effect context) :db)]
+             (let [event (i/get-coeffect context :event)]
+               (println :debug :event (first event))
+               (log :debug :event (first event))
+               context))
+   :after (fn debug-after
+            [context]
+            (let [event   (i/get-coeffect context :event)
+                  orig-db (i/get-coeffect context :db)
+                  new-db  (i/get-effect context :db ::not-found)
+                  effects (dissoc (i/get-effect context) :db)]
 
-               (when (and (debug-enabled? event) (seq effects))
-                 (console :log "Side effects caused by event " (first event) ": " effects))
+              (when (seq effects)
+                (log :debug :side-effects {:event   (first event)
+                                           :effects effects}))
 
-               (when (and (debug-enabled? event) (not= new-db ::not-found))
-                 (let [[only-before only-after] (data/diff orig-db new-db)
-                       db-changed? (or (some? only-before) (some? only-after))]
-                   (when db-changed?
-                     (console :group "db clojure.data/diff for:" (first event))
-                     (console :log "only before:" only-before)
-                     (console :log "only after :" only-after)
-                     (console :groupEnd))))
-               context))))
+              (when (not= new-db ::not-found)
+                (let [[only-before only-after] (data/diff orig-db new-db)
+                      db-changed? (or (some? only-before) (some? only-after))]
+                  (when db-changed?
+                    (log :debug
+                         :db-diff
+                         {:event       (first event)
+                          :only-before only-before
+                          :only-after  only-after}))))
+              context))))

@@ -4,6 +4,8 @@
             [reagent.dom :as reagent-dom]
             [re-frame.core :as rf]
             [day8.re-frame.http-fx]
+            [lambdaisland.glogi :as log :refer-macros [debug]]
+            [lambdaisland.glogi.console :as glogi-console]
             [breaking-point.core :as bp]
             [re-frame.loggers :as rf.log]))
 
@@ -57,3 +59,20 @@
 
 (defn clear-timeout [t]
   (js/clearTimeout t))
+
+(glogi-console/install!)
+
+(defn set-log-levels [config]
+  (log/set-levels
+   {:glogi/root :debug}))
+
+(set-log-level! nil)
+
+(defn log [level key message]
+  (case level
+    :debug (log/debug key message)
+    :info (log/info key message)))
+
+(rf/reg-fx :log
+  (fn [[level key message]]
+    (log level key message)))
