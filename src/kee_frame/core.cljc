@@ -3,7 +3,6 @@
             [kee-frame.router :as router]
             [re-chain.core :as chain]
             [re-frame.core :as rf :refer [console]]
-            [kee-frame.log]
             [kee-frame.spec :as spec :refer [spec-interceptor]]
             [kee-frame.debug :refer [debug-interceptor]]
             [kee-frame.interceptors :as i]
