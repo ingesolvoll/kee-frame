@@ -36,7 +36,7 @@
 (s/def ::screen (s/nilable (s/or :boolean boolean?
                                  :config (s/keys :req-un [::breakpoints ::debounce-ms]))))
 
-(s/def ::start-options (s/keys :opt-un [::routes ::router ::hash-routing? ::root-component ::initial-db
+(s/def ::start-options (s/keys :opt-un [::routes ::router ::hash-routing? ::root-component ::initial-db ::log
                                         ::app-db-spec ::debug? ::debug-config ::chain-links ::screen ::scroll]))
 
 (defn log-spec-error [new-db spec]

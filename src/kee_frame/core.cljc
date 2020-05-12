@@ -3,6 +3,7 @@
             [kee-frame.router :as router]
             [re-chain.core :as chain]
             [re-frame.core :as rf :refer [console]]
+            [kee-frame.log :as log]
             [kee-frame.spec :as spec :refer [spec-interceptor]]
             [kee-frame.debug :refer [debug-interceptor]]
             [kee-frame.interceptors :as i]
@@ -14,7 +15,7 @@
 
 (def valid-option-key? #{:router :hash-routing? :routes :process-route :debug? :debug-config
                          :chain-links :app-db-spec :root-component :initial-db
-                         :screen :scroll :route-change-event :not-found})
+                         :screen :scroll :route-change-event :not-found :log})
 
 (defn extra-options
   "Complete listing of invalid options sent to the `start!` function."
@@ -46,7 +47,8 @@
   (let [extras (extra-options options)]
     (when (seq extras)
       (throw (ex-info (str "Uknown startup options. Valid keys are " valid-option-key?) extras))))
-  (router/start! options))
+  (router/start! options)
+  (log/init! (:log options)))
 
 (defn debug-enabled? []
   (let [{:keys [overwrites?]

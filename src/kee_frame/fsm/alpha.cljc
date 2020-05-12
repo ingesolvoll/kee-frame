@@ -3,6 +3,7 @@
             [re-frame.core :as f]
             [kee-frame.interop :as interop]
             [kee-frame.interceptors :as i]
+            [taoensso.timbre :as log]
             #?(:cljs [reagent.core :as r])))
 
 (defn reg-no-op
@@ -91,6 +92,9 @@
         current-state (get-in db [id state-attr])
         next-state    (next-state fsm db event)]
     (when (state-changed? current-state next-state)
+      (log/debug {:type           :fsm-transition
+                  :previous-state current-state
+                  :next-state     next-state})
       (clear-timeouts! timeouts*)
       (dispatch-timeouts! timeouts* (state->timeouts (or next-state start))))
     (when (and stop (= next-state stop))
