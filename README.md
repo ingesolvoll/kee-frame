@@ -180,10 +180,9 @@ as your default 404 when no route is found.
 
 If you provide `:root-component`, kee-frame will render that component in the DOM element with id "app". Make sure you have such an element in your index.html. You are free to do the initial rendering yourself if you want, just skip this setting. If you use this feature, make sure that `k/start!` is called every time figwheel reloads your code. 
 
-The `debug?` boolean option is for enabling debug interceptors on all your events, as well as traces from the activities of controllers. 
+The `:log` option accepts a timbre log configuration map. See the #logging section for more details.
 
-For further control of debug output, use the `debug-config` option. Valid boolean keys are `:routes?`, `events?`, `:controllers?` and `:overwrites?`. All default to true,
-except `:overwrites?`. That one also removes the re-frame warnings about overwriting subs and events, which many find annoying.
+The `debug?` and `debug-config` options were replaced by the `:log` option in 0.4.1. 
 
 If you provide an `app-db-spec`, the framework will let you know when a bug in your event handler is trying to corrupt your DB structure. This is incredibly useful, so you should put down the effort to spec up your db!
 
@@ -394,7 +393,22 @@ Here's an example:
 [fsm/render light-switch-fsm "London"]
 ```
 
+## Logging
 
+https://github.com/ptaoussanis/timbre is included for logging. The `kee-frame.core/start!` function accepts an optional timbre config map. The default
+config logs to browser console at level `:info`. Here's an example config you could pass in:
+
+```clojure
+{:log {:level        :debug
+       :ns-blacklist ["kee-frame.event-logger"]}
+...
+}
+```
+
+Kee-frame uses debug logging as an aid in debugging applications. This means that turning on all logging
+will get quite noisy. You might want to include some of these namespaces in your blacklist if you don't need them:
+- `kee-frame.event-logger`
+- `kee-frame.fsm.alpha`
 
 ## Introducing kee-frame into an existing app
 
