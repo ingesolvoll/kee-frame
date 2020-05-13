@@ -9,6 +9,7 @@
    [kee-frame.fsm.alpha :as fsm]
    [clojure.spec.alpha :as s]
    [expound.alpha :as e]
+   [taoensso.timbre :as log]
    [re-frame.core :as rf]))
 
 (defn process-params [params route]
@@ -27,37 +28,40 @@
                           (s/explain-data ::spec/event-vector dispatch))))
         dispatch))))
 
-(defn start! [ctx start params]
-  (when start
-    (cond
-      (vector? start) start
-      (ifn? start) (validate-and-dispatch! (start ctx params)))))
-
-(defn stop! [ctx stop]
+(defn stop-controller [ctx {:keys [stop]}]
   (cond
     (vector? stop) stop
     (ifn? stop) (validate-and-dispatch! (stop ctx))))
 
-(defn process-controller [id {:keys [last-params params start stop]} ctx route]
-  (let [current-params (process-params params route)]
-    {:id         id
-     :params     current-params
-     :dispatch-n (match [last-params current-params (= last-params current-params)]
-                        [_ _ true] []
-                        [nil _ false] [(start! ctx start current-params)]
-                        [_ nil false] [(stop! ctx stop)]
-                        [_ _ false] [(stop! ctx stop)
-                                     (start! ctx start current-params)])}))
+(defn start-controller [ctx {:keys [last-params start]}]
+  (when start
+    (cond
+      (vector? start) start
+      (ifn? start) (validate-and-dispatch! (start ctx last-params)))))
 
-(defn apply-route [controllers ctx route]
-  (map (fn [[id controller]]
-         (process-controller id controller ctx route))
-       controllers))
+(defn controller-actions [controllers route]
+  (reduce (fn [actions [id {:keys [last-params params start stop]}]]
+            (let [current-params (process-params params route)
+                  controller     {:id          id
+                                  :start       start
+                                  :stop        stop
+                                  :last-params current-params}]
+              (match [last-params current-params (= last-params current-params)]
+                     [_ _ true] actions
+                     [nil _ false] (update actions :start conj controller)
+                     [_ nil false] (update actions :stop conj controller)
+                     [_ _ false] (-> actions
+                                     (update :stop conj controller)
+                                     (update :start conj controller)))))
+          {}
+          controllers))
+
+(defn update-controllers [controllers new-controllers]
+  (reduce (fn [result {:keys [id last-params]}]
+            (assoc-in result [id :last-params] last-params))
+          controllers
+          new-controllers))
 
 (rf/reg-fx :update-controllers
-  (fn [updates]
-    (swap! state/controllers (fn [controllers]
-                               (->> updates
-                                    (reduce (fn [controllers {:keys [id params]}]
-                                              (assoc-in controllers [id :last-params] params))
-                                            controllers))))))
+  (fn [new-controllers]
+    (swap! state/controllers update-controllers new-controllers)))

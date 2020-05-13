@@ -12,7 +12,8 @@
             [clojure.string :as str]
             [clojure.spec.alpha :as s]
             [kee-frame.spec :as spec]
-            [expound.alpha :as e]))
+            [expound.alpha :as e]
+            [taoensso.timbre :as log]))
 
 (def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
                            :get-dispatch    (fn [effects] (get-in effects [:http-xhrio :on-success]))
@@ -89,19 +90,24 @@
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
+(rf/reg-event-fx ::start-controllers
+  (fn [_ [_ dispatches]]
+    ;; Another dispatch to make sure all controller stop commands are processed before the starts
+    {:dispatch-n dispatches}))
+
 (defn reg-route-event [scroll]
   (rf/reg-event-fx ::route-changed
     [event-logger/interceptor]
     (fn [{:keys [db] :as ctx} [_ route]]
       (when scroll
         (scroll/monitor-requests! route))
-      (let [controller-updates (controller/apply-route @state/controllers ctx route)
-            dispatch-n         (->> controller-updates
-                                    (map :dispatch-n)
-                                    (apply concat))]
+      (let [{:keys [start stop]} (controller/controller-actions @state/controllers route)
+            start-dispatches (map #(controller/start-controller ctx %) start)
+            stop-dispatches  (map #(controller/stop-controller ctx %) stop)]
         {:db                 (assoc db :kee-frame/route route)
-         :update-controllers controller-updates
-         :dispatch-n         dispatch-n
+         :update-controllers (concat start stop)
+         :dispatch-n         (conj stop-dispatches
+                                   [::start-controllers start-dispatches])
          :dispatch-later     [(when scroll
                                 {:ms       50
                                  :dispatch [::scroll/poll route 0]})]}))))
