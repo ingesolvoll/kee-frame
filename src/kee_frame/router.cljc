@@ -2,7 +2,7 @@
   (:require [kee-frame.interop :as interop]
             [re-frame.core :as rf]
             [re-chain.core :as chain]
-            [kee-frame.debug :as debug]
+            [kee-frame.event-logger :as event-logger]
             [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
             [kee-frame.interop :as interop]
             [kee-frame.state :as state]
@@ -95,7 +95,7 @@
 
 (defn reg-route-event [scroll]
   (rf/reg-event-fx ::route-changed
-    (when (debug-enabled?) [debug/debug-interceptor])
+    (when (debug-enabled?) [event-logger/interceptor])
     (fn [{:keys [db] :as ctx} [_ route]]
       (when scroll
         (scroll/monitor-requests! route))
