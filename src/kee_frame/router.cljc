@@ -108,10 +108,10 @@
 
 (defn deprecations [{:keys [debug? debug-config]}]
   (when (not (nil? debug?))
-    (console :warn "Kee-frame option :debug? is deprecated. Configure timbre logger through :log option instead. Example: {:level :debug :ns-blacklist [\"kee-frame.event-logger\"]}"))
+    (console :warn "Kee-frame option :debug? has been removed. Configure timbre logger through :log option instead. Example: {:level :debug :ns-blacklist [\"kee-frame.event-logger\"]}"))
 
   (when (not (nil? debug-config))
-    (console :warn "Kee-frame option :debug-config is deprecated. Configure timbre logger through :log option instead. Example: {:level :debug :ns-blacklist [\"kee-frame.event-logger\"]}")))
+    (console :warn "Kee-frame option :debug-config has been removed. Configure timbre logger through :log option instead. Example: {:level :debug :ns-blacklist [\"kee-frame.event-logger\"]}")))
 
 (defn start! [{:keys [routes initial-db router app-db-spec debug? root-component chain-links
                       screen scroll debug-config]
