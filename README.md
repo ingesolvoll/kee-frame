@@ -180,7 +180,7 @@ as your default 404 when no route is found.
 
 If you provide `:root-component`, kee-frame will render that component in the DOM element with id "app". Make sure you have such an element in your index.html. You are free to do the initial rendering yourself if you want, just skip this setting. If you use this feature, make sure that `k/start!` is called every time figwheel reloads your code. 
 
-The `:log` option accepts a timbre log configuration map. See the #logging section for more details.
+The `:log` option accepts a timbre log configuration map. See the [Logging](#logging) section for more details.
 
 The `debug?` and `debug-config` options were replaced by the `:log` option in 0.4.1. 
 
