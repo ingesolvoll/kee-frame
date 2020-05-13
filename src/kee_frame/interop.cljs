@@ -44,14 +44,6 @@
 (defn set-breakpoints [breakpoints]
   (rf/dispatch-sync [::bp/set-breakpoints (breakpoints-or-defaults breakpoints)]))
 
-(defn set-log-level! [{:keys [overwrites?]
-                       :or   {overwrites? false}}]
-  (when-not overwrites?
-    (rf.log/set-loggers!
-     {:warn (fn [& args]
-              (when-not (re-find #"^re-frame: overwriting" (first args))
-                (apply js/console.warn args)))})))
-
 (defn set-timeout [f ms]
   (js/setTimeout f ms))
 

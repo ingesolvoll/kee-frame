@@ -119,7 +119,6 @@
                       scroll true}
                :as   config}]
   (deprecations config)
-  (interop/set-log-level! debug-config)
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
   (reset! state/debug-config debug-config)

@@ -22,9 +22,5 @@
 
 (defn set-breakpoints [_])
 
-(defn set-log-level! [_])
-(defn log [level key message]
-  (println level key message))
-
 (defn set-timeout [_ _])
 (defn clear-timeout [_])
