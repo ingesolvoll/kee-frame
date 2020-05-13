@@ -50,12 +50,6 @@
   (router/start! options)
   (log/init! (:log options)))
 
-(defn debug-enabled? []
-  (let [{:keys [overwrites?]
-         :or   {overwrites? false}} @state/debug-config]
-    (and @state/debug?
-         overwrites?)))
-
 (defn reg-controller
   "Put a controller config map into the global controller registry.
 
@@ -79,9 +73,6 @@
   (when-not (s/valid? ::spec/controller controller)
     (e/expound ::spec/controller controller)
     (throw (ex-info "Invalid controller" (s/explain-data ::spec/controller controller))))
-  (when (and (debug-enabled?)
-             (get @state/controllers id))
-    (console :warn "Overwriting controller with id " id))
   (swap! state/controllers assoc id controller))
 
 (defn reg-event-fx
