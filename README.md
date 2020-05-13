@@ -410,6 +410,9 @@ will get quite noisy. You might want to include some of these namespaces in your
 - `kee-frame.event-logger`
 - `kee-frame.fsm.alpha`
 
+IMPORTANT: For debug logging to show up in Chrome you need to enable "Verbose" logging in Chrome dev tools. See https://github.com/ptaoussanis/timbre/issues/249
+
+
 ## Introducing kee-frame into an existing app
 
 Several parts of kee-frame are designed to be opt-in. This means that you can include kee-frame in your project and start using parts of it.
