@@ -1,6 +1,6 @@
 (ns ^:no-doc kee-frame.router
   (:require [kee-frame.interop :as interop]
-            [re-frame.core :as rf]
+            [re-frame.core :as rf :refer [console]]
             [re-chain.core :as chain]
             [kee-frame.event-logger :as event-logger]
             [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
@@ -89,13 +89,9 @@
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
-
-(defn debug-enabled? []
-  @state/debug?)
-
 (defn reg-route-event [scroll]
   (rf/reg-event-fx ::route-changed
-    (when (debug-enabled?) [event-logger/interceptor])
+    [event-logger/interceptor]
     (fn [{:keys [db] :as ctx} [_ route]]
       (when scroll
         (scroll/monitor-requests! route))
@@ -110,11 +106,19 @@
                                 {:ms       50
                                  :dispatch [::scroll/poll route 0]})]}))))
 
+(defn deprecations [{:keys [debug? debug-config]}]
+  (when (not (nil? debug?))
+    (console :warn "Kee-frame option :debug? is deprecated. Configure timbre logger through :log option instead. Example: {:level :debug :ns-blacklist [\"kee-frame.event-logger\"]}"))
+
+  (when (not (nil? debug-config))
+    (console :warn "Kee-frame option :debug-config is deprecated. Configure timbre logger through :log option instead. Example: {:level :debug :ns-blacklist [\"kee-frame.event-logger\"]}")))
+
 (defn start! [{:keys [routes initial-db router app-db-spec debug? root-component chain-links
                       screen scroll debug-config]
                :or   {debug? false
                       scroll true}
                :as   config}]
+  (deprecations config)
   (interop/set-log-level! debug-config)
   (reset! state/app-db-spec app-db-spec)
   (reset! state/debug? debug?)
