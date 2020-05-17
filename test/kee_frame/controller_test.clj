@@ -28,11 +28,14 @@
 
 (deftest fn-syntax
   (testing "Can start and stop"
-    (is (= [[:start/event]] (:dispatch-n (c/controller-effects {:my-controller {:params (constantly true)
-                                                                  :start                (fn [ctx params]
-                                                                            [:start/event])}}
-                                                               {}
-                                                               {:handler :some-page}))))))
+    (is (= [[:start/event]]
+           (:dispatch-n
+            (c/controller-effects
+             {:my-controller {:params (constantly true)
+                              :start  (fn [ctx params]
+                                        [:start/event])}}
+             {}
+             {:handler :some-page}))))))
 
 (deftest invalid-start-return
   (is (thrown-with-msg?
