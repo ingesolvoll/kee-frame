@@ -1,7 +1,6 @@
 (ns kee-frame.controller-test
   (:require [clojure.test :refer :all]
-            [kee-frame.controller :as c]
-            [re-frame.core :as rf])
+            [kee-frame.controller :as c])
   (:import (clojure.lang ExceptionInfo)))
 
 (deftest compact-syntax
