@@ -33,10 +33,10 @@
     (vector? stop) stop
     (ifn? stop) (validate-and-dispatch! (stop ctx))))
 
-(defn start-controller [ctx {:keys [last-params start]}]
+(defn start-controller [ctx {:keys [id last-params start]}]
   (when start
     (cond
-      (vector? start) start
+      (vector? start) (conj start last-params)
       (ifn? start) (validate-and-dispatch! (start ctx last-params)))))
 
 (defn controller-actions [controllers route]
@@ -61,6 +61,18 @@
             (assoc-in result [id :last-params] last-params))
           controllers
           new-controllers))
+
+(defn controller-effects [controllers ctx route]
+  (let [{:keys [start stop]} (controller-actions controllers route)
+        start-dispatches (map #(start-controller ctx %) start)
+        stop-dispatches  (map #(stop-controller ctx %) stop)
+        dispatch-n       (cond
+                           (and (seq start) (seq stop)) (conj stop-dispatches
+                                                              [::start-controllers start-dispatches])
+                           (seq start) start-dispatches
+                           (seq stop) stop-dispatches)]
+    {:update-controllers (concat start stop)
+     :dispatch-n         dispatch-n}))
 
 (rf/reg-fx :update-controllers
   (fn [new-controllers]

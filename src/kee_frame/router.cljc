@@ -101,16 +101,12 @@
     (fn [{:keys [db] :as ctx} [_ route]]
       (when scroll
         (scroll/monitor-requests! route))
-      (let [{:keys [start stop]} (controller/controller-actions @state/controllers route)
-            start-dispatches (map #(controller/start-controller ctx %) start)
-            stop-dispatches  (map #(controller/stop-controller ctx %) stop)]
-        {:db                 (assoc db :kee-frame/route route)
-         :update-controllers (concat start stop)
-         :dispatch-n         (conj stop-dispatches
-                                   [::start-controllers start-dispatches])
-         :dispatch-later     [(when scroll
-                                {:ms       50
-                                 :dispatch [::scroll/poll route 0]})]}))))
+      (let [controller-effects (controller/controller-effects @state/controllers ctx route)]
+        (merge controller-effects
+               {:db             (assoc db :kee-frame/route route)
+                :dispatch-later [(when scroll
+                                   {:ms       50
+                                    :dispatch [::scroll/poll route 0]})]})))))
 
 (defn deprecations [{:keys [debug? debug-config]}]
   (when (not (nil? debug?))
@@ -119,15 +115,12 @@
   (when (not (nil? debug-config))
     (console :warn "Kee-frame option :debug-config has been removed. Configure timbre logger through :log option instead. Example: {:level :debug :ns-blacklist [\"kee-frame.event-logger\"]}")))
 
-(defn start! [{:keys [routes initial-db router app-db-spec debug? root-component chain-links
-                      screen scroll debug-config]
-               :or   {debug? false
-                      scroll true}
+(defn start! [{:keys [routes initial-db router app-db-spec root-component chain-links
+                      screen scroll]
+               :or   {scroll true}
                :as   config}]
   (deprecations config)
   (reset! state/app-db-spec app-db-spec)
-  (reset! state/debug? debug?)
-  (reset! state/debug-config debug-config)
   (chain/configure! (concat default-chain-links
                             chain-links))
 

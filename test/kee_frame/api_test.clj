@@ -40,7 +40,7 @@
     (rf-test/run-test-sync
       (rf/reg-sub :test-prop :test-prop)
       (kf/reg-chain :test-chain
-                    (fn [_ [one two]] {:dispatch [::kf/next one two]})
+                    (fn [_ [one two]] {:dispatch [:chain/next one two]})
                     (fn [_ _] {:http-xhrio {:uri "vg.no"}})
                     (fn [_ [& one-two-twice]] {:db {:test-prop one-two-twice}}))
       (rf/dispatch [:test-chain 1 2])

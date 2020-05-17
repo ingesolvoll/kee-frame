@@ -6,40 +6,41 @@
 
 (deftest compact-syntax
   (testing "Can start and stop"
-    (let [events (atom [])]
-      (with-redefs [rf/dispatch #(swap! events conj %)]
-        (-> {:my-controller {:params #(-> % :handler (= :some-page) (or nil))
-                             :start  [:start/event]
-                             :stop   [:stop/event]}}
-            (c/apply-route {} {:handler :some-page})
-            (c/apply-route {} {:handler :other-page}))
-        (is (= [[:start/event true]
-                [:stop/event]] @events)))))
+    (let [controllers      {:my-controller {:params #(-> % :handler (= :some-page) (or nil))
+                                            :start  [:start/event]
+                                            :stop   [:stop/event]}}
+          {:keys [:update-controllers :dispatch-n]} (c/controller-effects controllers {} {:handler :some-page})
+          next-controllers (c/update-controllers controllers update-controllers)
+          actions-2        (c/controller-effects next-controllers {} {:handler :other-page})]
+      (is (= [[:start/event true]] dispatch-n))
+      (is (= [[:stop/event]] (:dispatch-n actions-2)))))
+
+
 
   (testing "Will trigger only once when always on"
-    (let [events (atom [])]
-      (with-redefs [rf/dispatch #(swap! events conj %)]
-        (-> {:always-on-controller {:params (constantly true)
-                                    :start  [:start/event]}}
-            (c/apply-route {} {:handler :some-page})
-            (c/apply-route {} {:handler :other-page})
-            (c/apply-route {} {:handler :third-page}))
-        (is (= [[:start/event true]] @events))))))
+    (let [controllers      {:always-on-controller {:params (constantly true)
+                                                   :start  [:start/event]}}
+          {:keys [:update-controllers :dispatch-n]} (c/controller-effects controllers {} {:handler :some-page})
+          next-controllers (c/update-controllers controllers update-controllers)
+          actions-2        (c/controller-effects next-controllers {} {:handler :other-page})]
+      (is (= [[:start/event true]] dispatch-n))
+      (is (= {:update-controllers [] :dispatch-n nil} actions-2)))))
 
 (deftest fn-syntax
   (testing "Can start and stop"
-    (let [events (atom [])]
-      (with-redefs [rf/dispatch #(swap! events conj %)]
-        (-> {:my-controller {:params (constantly true)
-                             :start  (fn [ctx params]
-                                       [:start/event])}}
-            (c/apply-route {} {:handler :some-page}))
-        (is (= [[:start/event]] @events)))))
+    (is (= [[:start/event]] (:dispatch-n (c/controller-effects {:my-controller {:params (constantly true)
+                                                                  :start                (fn [ctx params]
+                                                                            [:start/event])}}
+                                                               {}
+                                                               {:handler :some-page}))))))
 
-  (testing "Error handling"
-    (is (thrown-with-msg? ExceptionInfo #"Invalid dispatch value"
-                          (c/apply-route {:my-controller {:params (constantly true)
-                                                          :start  (fn [ctx params]
-                                                                    "heisann")}}
-                                         {}
-                                         {:handler :some-page})))))
+(deftest invalid-start-return
+  (is (thrown-with-msg?
+       ExceptionInfo #"Invalid dispatch value"
+       (->> (c/controller-effects {:invalid-controller {:params (constantly true)
+                                          :start                (fn [ctx params]
+                                                    "heisann")}}
+                                  {}
+                                  {:handler :some-page})
+            :dispatch-n
+            doall))))
