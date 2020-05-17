@@ -90,11 +90,6 @@
 
 (rf/reg-event-db :init (fn [db [_ initial]] (merge initial db)))
 
-(rf/reg-event-fx ::start-controllers
-  (fn [_ [_ dispatches]]
-    ;; Another dispatch to make sure all controller stop commands are processed before the starts
-    {:dispatch-n dispatches}))
-
 (defn reg-route-event [scroll]
   (rf/reg-event-fx ::route-changed
     [event-logger/interceptor]

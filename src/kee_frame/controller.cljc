@@ -28,12 +28,14 @@
                           (s/explain-data ::spec/event-vector dispatch))))
         dispatch))))
 
-(defn stop-controller [ctx {:keys [stop]}]
+(defn stop-controller [ctx {:keys [id stop]}]
+  (log/debug "Stopping controller: " id)
   (cond
     (vector? stop) stop
     (ifn? stop) (validate-and-dispatch! (stop ctx))))
 
 (defn start-controller [ctx {:keys [id last-params start]}]
+  (log/debug "Starting controller: " id)
   (when start
     (cond
       (vector? start) (conj start last-params)
@@ -61,6 +63,11 @@
             (assoc-in result [id :last-params] last-params))
           controllers
           new-controllers))
+
+(rf/reg-event-fx ::start-controllers
+  (fn [_ [_ dispatches]]
+    ;; Another dispatch to make sure all controller stop commands are processed before the starts
+    {:dispatch-n dispatches}))
 
 (defn controller-effects [controllers ctx route]
   (let [{:keys [start stop]} (controller-actions controllers route)
