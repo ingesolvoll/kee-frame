@@ -76,7 +76,7 @@ Call this function on figwheel reload.
 - Let the route data decide what view to display
 ```clojure
 (defn main-view []
-  [k/switch-route (comp :name :data)
+  [k/switch-route (fn [route] (-> route :data :name))
    :index [index-page] 
    :orders [orders-page]
    nil [:div "Loading..."])
