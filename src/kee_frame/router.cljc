@@ -137,7 +137,7 @@
         (do (interop/set-breakpoints config)
             (reset! state/breakpoints-initialized? true)))))
 
-  (rf/reg-sub :kee-frame/route (fn [db] (:kee-frame/route db nil)))
+  (rf/reg-sub :kee-frame/route (fn [db _] (:kee-frame/route db nil)))
   (interop/render-root root-component))
 
 (defn make-route-component [component route]
