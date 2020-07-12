@@ -93,8 +93,10 @@
         next-state    (next-state fsm db event)]
     (when (state-changed? current-state next-state)
       (log/debug {:type           :fsm-transition
-                  :previous-state current-state
-                  :next-state     next-state})
+                  :event          event
+
+                  :leaving-state  current-state
+                  :entering-state next-state})
       (clear-timeouts! timeouts*)
       (dispatch-timeouts! timeouts* (state->timeouts (or next-state start))))
     (when (and stop (= next-state stop))
