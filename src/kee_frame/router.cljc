@@ -11,9 +11,8 @@
             [reitit.core :as reitit]
             [clojure.string :as str]
             [clojure.spec.alpha :as s]
-            [kee-frame.spec :as spec]
             [expound.alpha :as e]
-            [taoensso.timbre :as log]))
+            [clojure.set :as set]))
 
 (def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
                            :get-dispatch    (fn [effects] (get-in effects [:http-xhrio :on-success]))
@@ -52,11 +51,16 @@
                   {:url    url
                    :routes routes})))
 
+(defn valid? [{:keys [path-params required]}]
+  (set/subset? required (set (keys path-params))))
+
 (defn match-data [routes route hash?]
-  (let [[_ path-params] route]
-    (str (when hash? "/#") (:path (apply reitit/match-by-name routes route))
-         (when-some [q (:query-string path-params)] (str "?" q))
-         (when-some [h (:hash path-params)] (str "#" h)))))
+  (let [[_ path-params] route
+        {:keys [path] :as match} (apply reitit/match-by-name routes route)]
+    (when (valid? match)
+      (str (when hash? "/#") path
+           (when-some [q (:query-string path-params)] (str "?" q))
+           (when-some [h (:hash path-params)] (str "#" h))))))
 
 (defn match-url [routes url]
   (let [[path+query fragment] (-> url (str/replace #"^/#/" "/") (str/split #"#" 2))
