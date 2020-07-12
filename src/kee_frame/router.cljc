@@ -13,7 +13,8 @@
             [clojure.spec.alpha :as s]
             [kee-frame.spec :as spec]
             [expound.alpha :as e]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [re-frame.core :as f]))
 
 (def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
                            :get-dispatch    (fn [effects] (get-in effects [:http-xhrio :on-success]))
@@ -115,7 +116,8 @@
                :or   {scroll true}
                :as   config}]
   (deprecations config)
-  (reset! state/app-db-spec app-db-spec)
+  (when app-db-spec
+    (f/reg-global-interceptor (spec/spec-interceptor app-db-spec)))
   (chain/configure! (concat default-chain-links
                             chain-links))
 
