@@ -219,7 +219,11 @@ For `start` and `stop` it's very common to ignore the parameters and just return
 ```
 
 ## Controller state transitions
-This rules of controller states are stolen entirely from Keechma. They are:
+This rules of controller states are stolen entirely from Keechma. 
+
+NOTE: `false` is not treated as falsy in controllers, it is considered as any other value. The explicitly negative value that stops controllers is `nil`.
+
+The controller rules are:
 * When previous and current parameter values are the same, do nothing
 * When previous parameter was nil and current is not nil, call `start`.
 * When previous parameter was not nil and current is nil, call `stop`.
