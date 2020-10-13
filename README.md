@@ -9,9 +9,9 @@
 [![cljdoc badge](https://cljdoc.xyz/badge/kee-frame/kee-frame)](https://cljdoc.xyz/d/kee-frame/kee-frame/CURRENT)
 
 
-## Project status (April 2020)
+## Project status (October 2020)
 
-The API and functionality of kee-frame is stable and proven to work. FSM feature has been introduced and will hopefully mature and develop further in 2020.
+The API and functionality of kee-frame is stable and proven to work. Current efforts aimed at releasing 1.0.0 based on re-frame 1.0.
 
 Pull requests are welcome!
  
