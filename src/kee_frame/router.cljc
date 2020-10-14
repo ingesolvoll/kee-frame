@@ -5,6 +5,7 @@
             [kee-frame.event-logger :as event-logger]
             [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
             [kee-frame.interop :as interop]
+            [kee-frame.spec :as spec]
             [kee-frame.state :as state]
             [kee-frame.scroll :as scroll]
             [kee-frame.controller :as controller]
@@ -12,7 +13,6 @@
             [clojure.string :as str]
             [clojure.spec.alpha :as s]
             [expound.alpha :as e]
-            [taoensso.timbre :as log]
             [re-frame.core :as f]
             [clojure.set :as set]))
 
