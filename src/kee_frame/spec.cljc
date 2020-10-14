@@ -45,11 +45,11 @@
     (log-spec-error new-db db-spec)
     (assoc-effect context :db (get-coeffect context :db))))
 
-(defn spec-interceptor [db-spec-atom]
+(defn spec-interceptor [db-spec]
   (->interceptor
     :id :spec
     :after (fn [context]
              (let [new-db (get-effect context :db)]
-               (if (and @db-spec-atom new-db (not (s/valid? @db-spec-atom new-db)))
-                 (rollback context new-db @db-spec-atom)
+               (if (and new-db (not (s/valid? db-spec new-db)))
+                 (rollback context new-db db-spec)
                  context)))))

@@ -5,6 +5,7 @@
             [kee-frame.event-logger :as event-logger]
             [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
             [kee-frame.interop :as interop]
+            [kee-frame.spec :as spec]
             [kee-frame.state :as state]
             [kee-frame.scroll :as scroll]
             [kee-frame.controller :as controller]
@@ -12,6 +13,7 @@
             [clojure.string :as str]
             [clojure.spec.alpha :as s]
             [expound.alpha :as e]
+            [re-frame.core :as f]
             [clojure.set :as set]))
 
 (def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
@@ -119,7 +121,8 @@
                :or   {scroll true}
                :as   config}]
   (deprecations config)
-  (reset! state/app-db-spec app-db-spec)
+  (when app-db-spec
+    (f/reg-global-interceptor (spec/spec-interceptor app-db-spec)))
   (chain/configure! (concat default-chain-links
                             chain-links))
 

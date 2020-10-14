@@ -2,16 +2,13 @@
   (:require [clojure.spec.alpha :as s]
             [re-frame.core :as f]
             [kee-frame.interop :as interop]
-            [kee-frame.interceptors :as i]
             [taoensso.timbre :as log]
             #?(:cljs [reagent.core :as r])))
 
 (defn reg-no-op
   "Convenience function for declaring no-op events."
   [id]
-  (f/reg-event-fx id
-                  [i/add-global-interceptors]
-                  (constantly nil)))
+  (f/reg-event-fx id (constantly nil)))
 
 (defn find-transition
   "Try to find a transition that matches some subset of the received event"
@@ -25,13 +22,16 @@
   there is a valid transition, `nil` otherwise. Event transition
   `:when` clause is optionally applied."
   [transitions event]
-  (when-let [transition (find-transition transitions event)]
+  (if-let [transition (find-transition transitions event)]
     (let [{next-state :to
            dispatch   :dispatch} transition]
       (when dispatch
         (doseq [e dispatch]
           (f/dispatch e)))
-      next-state)))
+      next-state)
+    (log/trace {:type        :fsm-transition-missed
+                :transitions transitions
+                :event       event})))
 
 (defn foreign-event? [fsm-id [event-id _ event-fsm-id]]
   (and (#{::on-enter ::timeout} event-id)
@@ -103,19 +103,19 @@
       (f/dispatch [::stop fsm]))
     (assoc-in db [id state-attr] (or next-state current-state start))))
 
-
 (f/reg-fx ::start
-          (fn [{:keys [id] :as fsm}]
-            (let [timeouts*       (atom nil)
-                  state->timeouts (compile-timeouts fsm)]
-              (->> (partial advance fsm timeouts* state->timeouts)
-                   f/enrich
-                   (i/reg-global-interceptor id)))))
+  (fn [{:keys [id] :as fsm}]
+    (let [timeouts*       (atom nil)
+          state->timeouts (compile-timeouts fsm)]
+      (-> (partial advance fsm timeouts* state->timeouts)
+          f/enrich
+          (assoc :id id)
+          (f/reg-global-interceptor)))))
 
 (f/reg-fx ::stop
-          (fn [{:keys [id]}]
-            (when id
-              (i/clear-global-interceptor id))))
+  (fn [{:keys [id]}]
+    (when id
+      (f/clear-global-interceptor id))))
 
 (f/reg-event-fx ::start
                 ;; Starts the interceptor for the given fsm.
