@@ -6,8 +6,6 @@
       [clojure.core.match :refer [match]])
    [kee-frame.state :as state]
    [kee-frame.spec :as spec]
-   [kee-frame.fsm.alpha :as fsm]
-   [glimt.core :as http]
    [clojure.spec.alpha :as s]
    [expound.alpha :as e]
    [taoensso.timbre :as log]
@@ -20,21 +18,13 @@
 
 (defn validate-and-dispatch! [dispatch]
   (when dispatch
-    (log/debug "Dispatch returned from function " dispatch)
-    (if (map? dispatch)
-      (if (:http-xhrio dispatch)
-        (do
-          (log/debug "Starting HTTP fsm from controller " dispatch)
-          [::http/start dispatch])
-        (do
-          (log/debug "Starting fsm from controller " dispatch)
-          [::fsm/start dispatch]))
-      (do
-        (when-not (s/valid? ::spec/event-vector dispatch)
-          (e/expound ::spec/event-vector dispatch)
-          (throw (ex-info "Invalid dispatch value"
-                          (s/explain-data ::spec/event-vector dispatch))))
-        dispatch))))
+    (log/debug "Dispatch returned from controller function " dispatch)
+    (do
+      (when-not (s/valid? ::spec/event-vector dispatch)
+        (e/expound ::spec/event-vector dispatch)
+        (throw (ex-info "Invalid dispatch value"
+                        (s/explain-data ::spec/event-vector dispatch))))
+      dispatch)))
 
 (defn stop-controller [ctx {:keys [stop] :as controller}]
   (log/debug {:type       :controller-stop
