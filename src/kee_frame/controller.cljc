@@ -19,8 +19,11 @@
 
 (defn validate-and-dispatch! [dispatch]
   (when dispatch
+    (log/debug "Dispatch returned from function " dispatch)
     (if (map? dispatch)
-      [::fsm/start dispatch]
+      (do
+        (log/debug "Starting fsm from controller " dispatch)
+        [::fsm/start dispatch])
       (do
         (when-not (s/valid? ::spec/event-vector dispatch)
           (e/expound ::spec/event-vector dispatch)
@@ -28,14 +31,18 @@
                           (s/explain-data ::spec/event-vector dispatch))))
         dispatch))))
 
-(defn stop-controller [ctx {:keys [id stop]}]
-  (log/debug "Stopping controller: " id)
+(defn stop-controller [ctx {:keys [stop] :as controller}]
+  (log/debug {:type       :controller-stop
+              :controller controller
+              :ctx        ctx})
   (cond
     (vector? stop) stop
     (ifn? stop) (validate-and-dispatch! (stop ctx))))
 
-(defn start-controller [ctx {:keys [id last-params start]}]
-  (log/debug "Starting controller: " id)
+(defn start-controller [ctx {:keys [last-params start] :as controller}]
+  (log/debug {:type       :controller-start
+              :controller controller
+              :ctx        ctx})
   (when start
     (cond
       (vector? start) (conj start last-params)

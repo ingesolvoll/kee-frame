@@ -22,13 +22,16 @@
   there is a valid transition, `nil` otherwise. Event transition
   `:when` clause is optionally applied."
   [transitions event]
-  (when-let [transition (find-transition transitions event)]
+  (if-let [transition (find-transition transitions event)]
     (let [{next-state :to
            dispatch   :dispatch} transition]
       (when dispatch
         (doseq [e dispatch]
           (f/dispatch e)))
-      next-state)))
+      next-state)
+    (log/trace {:type        :fsm-transition-missed
+                :transitions transitions
+                :event       event})))
 
 (defn foreign-event? [fsm-id [event-id _ event-fsm-id]]
   (and (#{::on-enter ::timeout} event-id)
