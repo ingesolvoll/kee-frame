@@ -6,8 +6,8 @@
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/clojurescript "1.10.597"]
-                 [re-frame "1.0.0"]
-                 [re-chain "1.1"]
+                 [re-frame "1.1.1"]
+                 [re-chain "1.2"]
                  [metosin/reitit-core "0.5.6"]
                  [day8.re-frame/http-fx "v0.2.0"]
                  [cljs-ajax "0.8.0"]

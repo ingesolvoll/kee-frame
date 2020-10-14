@@ -37,14 +37,15 @@
 (deftest base-cases
   (chain/configure! router/default-chain-links)
   (testing "using :next and http"
-    (rf-test/run-test-sync
-      (rf/reg-sub :test-prop :test-prop)
-      (kf/reg-chain :test-chain
-                    (fn [_ [one two]] {:dispatch [:chain/next one two]})
-                    (fn [_ _] {:http-xhrio {:uri "vg.no"}})
-                    (fn [_ [& one-two-twice]] {:db {:test-prop one-two-twice}}))
-      (rf/dispatch [:test-chain 1 2])
-      (is (= [1 2 1 2] @(rf/subscribe [:test-prop]))))))
+    (binding [chain/*replace-pointers* true]
+      (rf-test/run-test-sync
+       (rf/reg-sub :test-prop :test-prop)
+       (kf/reg-chain :test-chain
+                     (fn [_ [one two]] {:dispatch [:chain/next one two]})
+                     (fn [_ _] {:http-xhrio {:uri "vg.no"}})
+                     (fn [_ [& one-two-twice]] {:db {:test-prop one-two-twice}}))
+       (rf/dispatch [:test-chain 1 2])
+       (is (= [1 2 1 2] @(rf/subscribe [:test-prop])))))))
 
 (deftest error-cases
   (testing "Nothing left to fill in"
