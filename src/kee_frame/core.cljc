@@ -40,14 +40,14 @@
              :app-db-spec    :spec/my-db-spec})
   ```"
   [options]
+  (log/init! (:log options))
   (when-not (s/valid? ::spec/start-options options)
     (e/expound ::spec/start-options options)
     (throw (ex-info "Invalid options" (s/explain-data ::spec/start-options options))))
   (let [extras (extra-options options)]
     (when (seq extras)
       (throw (ex-info (str "Uknown startup options. Valid keys are " valid-option-key?) extras))))
-  (router/start! options)
-  (log/init! (:log options)))
+  (router/start! options))
 
 (defn reg-controller
   "Put a controller config map into the global controller registry.
