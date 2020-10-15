@@ -49,6 +49,9 @@
       (throw (ex-info (str "Uknown startup options. Valid keys are " valid-option-key?) extras))))
   (router/start! options))
 
+(defn- reg-warn [id]
+  (console :warn (str id  " kee-frame.core/reg-* have been deprecated. Use the corresponding re-frame and re-chain ones instead, and apply the global interceptors you need through kee-frame.core/start! instead.")))
+
 (defn reg-controller
   "Put a controller config map into the global controller registry.
 
@@ -79,14 +82,18 @@
 
   `re-frame.core/trim-v` interceptor is also applied."
   ([id handler] (reg-event-fx id nil handler))
-  ([id interceptors handler] (rf/reg-event-fx id (concat kee-frame-interceptors interceptors) handler)))
+  ([id interceptors handler]
+   (reg-warn id)
+   (rf/reg-event-fx id (concat kee-frame-interceptors interceptors) handler)))
 
 (defn reg-event-db
   "Exactly same signature as `re-frame.core/reg-event-db`. Use this version if you want kee-frame logging and spec validation.
 
   `re-frame.core/trim-v` interceptor is also applied."
   ([id handler] (reg-event-db id nil handler))
-  ([id interceptors handler] (rf/reg-event-db id (concat kee-frame-interceptors interceptors) handler)))
+  ([id interceptors handler]
+   (reg-warn id)
+   (rf/reg-event-db id (concat kee-frame-interceptors interceptors) handler)))
 
 (defn reg-chain-named
   "Same as `reg-chain`, but with manually named event handlers. Useful when you need more meaningful names in your
@@ -109,6 +116,7 @@
       (assoc-in ctx [:db :customers customer-id] customer-data)))
   ```"
   [& handlers]
+  (reg-warn "")
   (apply chain/reg-chain-named* kee-frame-interceptors handlers))
 
 (defn reg-chain
@@ -142,6 +150,7 @@
       (assoc-in ctx [:db :customers customer-id] customer-data)))
   ```"
   [id & handlers]
+  (reg-warn id)
   (apply chain/reg-chain* id kee-frame-interceptors handlers))
 
 (defn path-for
