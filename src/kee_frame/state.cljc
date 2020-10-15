@@ -6,10 +6,6 @@
 
 (def navigator (atom nil))
 
-(def debug? (atom false))
-
-(def debug-config (atom nil))
-
 (def breakpoints-initialized? (atom false))
 
 ;; Test utility
