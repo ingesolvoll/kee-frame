@@ -11,8 +11,7 @@
 
 ## Project status (October 2020)
 
-The API and functionality of kee-frame is stable and proven to work. Current efforts aimed at releasing 1.0.0 based on re-frame 1.0.
-
+The API and functionality of kee-frame is stable and proven to work.
 Pull requests are welcome!
  
 ## Quick walkthrough
