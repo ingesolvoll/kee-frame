@@ -14,7 +14,7 @@
                  [com.taoensso/timbre "4.10.0"]
                  [venantius/accountant "0.2.5"]
                  [org.clojure/core.match "1.0.0"]
-                 [expound "0.8.5"]
+                 [expound "0.8.6"]
                  [day8.re-frame/test "0.1.5"]
                  [breaking-point "0.1.2"]
                  [pez/clerk "1.0.0"]]
