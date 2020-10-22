@@ -102,12 +102,13 @@
     (fn [{:keys [db] :as ctx} [_ route]]
       (when scroll
         (scroll/monitor-requests! route))
-      (let [controller-effects (controller/controller-effects @state/controllers ctx route)]
-        (merge controller-effects
-               {:db             (assoc db :kee-frame/route route)
-                :dispatch-later [(when scroll
-                                   {:ms       50
-                                    :dispatch [::scroll/poll route 0]})]})))))
+      (let [{:keys [update-controllers dispatch-n]} (controller/controller-effects @state/controllers ctx route)]
+        (cond-> {:db             (assoc db :kee-frame/route route)
+                 :dispatch-later [(when scroll
+                                    {:ms       50
+                                     :dispatch [::scroll/poll route 0]})]}
+          dispatch-n (assoc :dispatch-n dispatch-n)
+          update-controllers (assoc :update-controllers update-controllers))))))
 
 (defn deprecations [{:keys [debug? debug-config]}]
   (when (not (nil? debug?))
