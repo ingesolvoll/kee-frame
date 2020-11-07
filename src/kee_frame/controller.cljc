@@ -23,7 +23,7 @@
     (if (map? dispatch)
       (do
         (log/debug "Starting fsm from controller " dispatch)
-        [::fsm/start dispatch])
+        [::fsm/start-new dispatch])
       (do
         (when-not (s/valid? ::spec/event-vector dispatch)
           (e/expound ::spec/event-vector dispatch)
@@ -76,6 +76,7 @@
     ;; Another dispatch to make sure all controller stop commands are processed before the starts
     {:dispatch-n dispatches}))
 
+#trace
 (defn controller-effects [controllers ctx route]
   (let [{:keys [start stop]} (controller-actions controllers route)
         start-dispatches (map #(start-controller ctx %) start)

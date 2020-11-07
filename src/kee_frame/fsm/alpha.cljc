@@ -1,5 +1,7 @@
 (ns kee-frame.fsm.alpha
-  (:require [clojure.spec.alpha :as s]
+  (:require [statecharts.core :as fsm]
+            [statecharts.integrations.re-frame :as fsm.rf]
+            [clojure.spec.alpha :as s]
             [re-frame.core :as f]
             [kee-frame.interop :as interop]
             [taoensso.timbre :as log]
@@ -84,6 +86,10 @@
    (not prev)
    next))
 
+(defn advance-new
+  [fsm timeouts* state->timeouts db event]
+  (log/info "******************** fsm: " fsm))
+
 (defn advance
   "Given a parsed fsm, a db, and an event, advances the fsm. Else,
   no-op."
@@ -103,6 +109,20 @@
       (f/dispatch [::stop fsm]))
     (assoc-in db [id state-attr] (or next-state current-state start))))
 
+(defn path [path] (apply f/path path))
+
+(f/reg-fx ::start-new
+  (fn [{:keys [id] :as fsm}]
+    (let [fsm (assoc fsm  :integrations {:re-frame {:path (f/path :live-fsm)
+                                                    :initialize-event :live-fsm/init
+                                                    :transition-event :live-fsm/fsm-transition}})
+          fsm* (fsm.rf/integrate (fsm/machine fsm))]
+      (fsm/initialize fsm*)
+      (-> (partial advance-new fsm*)
+          f/enrich
+          (assoc :id id)
+          (f/reg-global-interceptor)))))
+
 (f/reg-fx ::start
   (fn [{:keys [id] :as fsm}]
     (let [timeouts*       (atom nil)
@@ -116,6 +136,11 @@
   (fn [{:keys [id]}]
     (when id
       (f/clear-global-interceptor id))))
+
+(f/reg-event-fx ::start-new
+  ;; Starts the interceptor for the given fsm.
+  (fn [_ [_ fsm]]
+    {::start-new fsm}))
 
 (f/reg-event-fx ::start
                 ;; Starts the interceptor for the given fsm.
