@@ -113,15 +113,13 @@
 
 (f/reg-fx ::start-new
   (fn [{:keys [id] :as fsm}]
-    (let [fsm (assoc fsm  :integrations {:re-frame {:path (f/path :live-fsm)
-                                                    :initialize-event :live-fsm/init
-                                                    :transition-event :live-fsm/fsm-transition}})
-          fsm* (fsm.rf/integrate (fsm/machine fsm))]
-      (fsm/initialize fsm*)
-      (-> (partial advance-new fsm*)
-          f/enrich
-          (assoc :id id)
-          (f/reg-global-interceptor)))))
+    (-> fsm
+        (assoc :integrations {:re-frame {:path             (f/path [:live])
+                                         :initialize-event :live/init
+                                         :transition-event :live/fsm-event}})
+        fsm/machine
+        fsm.rf/integrate)
+    (f/dispatch [:live/init])))
 
 (f/reg-fx ::start
   (fn [{:keys [id] :as fsm}]
@@ -154,9 +152,8 @@
     {::stop fsm}))
 
 (f/reg-sub ::state
-  (fn [db [_ {:keys [id state-attr start]
-              :or   {state-attr ::state}}]]
-    (get-in db [id state-attr] start)))
+  (fn [db [_ id]]
+    (get-in db [id :_state])))
 
 (s/def ::binding (s/and vector?
                         (s/cat :fsm-symbol symbol? :fsm any?)))

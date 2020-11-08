@@ -76,7 +76,6 @@
     ;; Another dispatch to make sure all controller stop commands are processed before the starts
     {:dispatch-n dispatches}))
 
-#trace
 (defn controller-effects [controllers ctx route]
   (let [{:keys [start stop]} (controller-actions controllers route)
         start-dispatches (map #(start-controller ctx %) start)
