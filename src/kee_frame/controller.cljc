@@ -23,7 +23,7 @@
     (if (map? dispatch)
       (do
         (log/debug "Starting fsm from controller " dispatch)
-        [::fsm/start-new dispatch])
+        [::fsm/start dispatch])
       (do
         (when-not (s/valid? ::spec/event-vector dispatch)
           (e/expound ::spec/event-vector dispatch)
