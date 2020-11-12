@@ -7,6 +7,7 @@
    [kee-frame.state :as state]
    [kee-frame.spec :as spec]
    [kee-frame.fsm.alpha :as fsm]
+   [kee-frame.fsm.http :as http]
    [clojure.spec.alpha :as s]
    [expound.alpha :as e]
    [taoensso.timbre :as log]
@@ -21,9 +22,13 @@
   (when dispatch
     (log/debug "Dispatch returned from function " dispatch)
     (if (map? dispatch)
-      (do
-        (log/debug "Starting fsm from controller " dispatch)
-        [::fsm/start dispatch])
+      (if (:http-xhrio dispatch)
+        (do
+          (log/debug "Starting HTTP fsm from controller " dispatch)
+          [::http/http-fsm dispatch])
+        (do
+          (log/debug "Starting fsm from controller " dispatch)
+          [::fsm/start dispatch]))
       (do
         (when-not (s/valid? ::spec/event-vector dispatch)
           (e/expound ::spec/event-vector dispatch)

@@ -26,6 +26,10 @@
   (fn [db [_ id]]
     (get-in db [:fsm id :_state])))
 
+(f/reg-sub ::state-full
+  (fn [db [_ id]]
+    (get-in db [:fsm id])))
+
 (defmulti step
   "Materialized view of the current fsm state. A `step` method must
   exist for each state defined in the fsm transition map. States are
