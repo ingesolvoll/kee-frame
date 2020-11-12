@@ -71,6 +71,11 @@
           fsm.rf/integrate)
       (f/dispatch [init-event]))))
 
+(f/reg-event-fx ::restart
+  (fn [_ [_ id]]
+    (let [init-event (ns-key id "init")]
+      {:dispatch [init-event]})))
+
 (f/reg-event-fx ::http-fsm
   ;; Starts the interceptor for the given fsm.
   (fn [_ [_ fsm]]
