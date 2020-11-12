@@ -50,7 +50,7 @@
 (f/reg-event-fx ::on-success
   (fn [_ [_ {:keys [transition-event on-success]} data]]
     {:dispatch-n [[transition-event ::success]
-                  [on-success data]]}))
+                  (conj on-success data)]}))
 
 (f/reg-event-fx ::load
   (fn [_ [_ {:keys [transition-event http-xhrio] :as config}]]
