@@ -11,7 +11,7 @@
                  [metosin/reitit-core "0.5.6"]
                  [day8.re-frame/http-fx "v0.2.0"]
                  [cljs-ajax "0.8.0"]
-                 [com.taoensso/timbre "4.10.0"]
+                 [com.taoensso/timbre "5.1.0"]
                  [venantius/accountant "0.2.5"]
                  [org.clojure/core.match "1.0.0"]
                  [expound "0.8.6"]
