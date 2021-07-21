@@ -1,7 +1,6 @@
 (ns kee-frame.controller-test
-  (:require [clojure.test :refer :all]
-            [kee-frame.controller :as c])
-  (:import (clojure.lang ExceptionInfo)))
+  (:require [clojure.test :refer [deftest testing is]]
+            [kee-frame.controller :as c]))
 
 (deftest compact-syntax
   (testing "Can start and stop"
@@ -38,10 +37,12 @@
 
 (deftest invalid-start-return
   (is (thrown-with-msg?
-       ExceptionInfo #"Invalid dispatch value"
+       #?(:clj  clojure.lang.ExceptionInfo
+          :cljs js/Error)
+       #"Invalid dispatch value"
        (->> (c/controller-effects {:invalid-controller {:params (constantly true)
-                                          :start                (fn [ctx params]
-                                                    "heisann")}}
+                                                        :start  (fn [ctx params]
+                                                                  "heisann")}}
                                   {}
                                   {:handler :some-page})
             :dispatch-n

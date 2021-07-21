@@ -1,9 +1,8 @@
 (ns kee-frame.router-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [deftest testing is]]
             [kee-frame.router :as router]
             [kee-frame.api :as api]
-            [reitit.core :as reitit])
-  (:import (clojure.lang ExceptionInfo)))
+            [reitit.core :as reitit]))
 
 (defn router [routes hash?] (router/->ReititRouter (reitit/router routes) hash? nil))
 
@@ -17,8 +16,9 @@
       (is (= "/#/item/1" (api/data->url r [:item {:id 1}]))))
 
     (testing "Item with missing id throws"
-      (is (thrown? ExceptionInfo
-                   (api/data->url r [:item]))))))
+      (is (thrown?
+           ExceptionInfo
+           (api/data->url r [:item]))))))
 
 (deftest can-parse-hash-urls
   (let [r (router [["/" :root]
