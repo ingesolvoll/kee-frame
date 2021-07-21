@@ -1,4 +1,4 @@
-(defproject kee-frame "1.1.2-SNAPSHOT"
+(defproject kee-frame "1.2.0-SNAPSHOT"
   :description "A micro-framework on top of re-frame"
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
@@ -6,12 +6,12 @@
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/clojurescript "1.10.773"]
-                 [re-frame "1.1.1"]
+                 [re-frame "1.2.0"]
                  [re-chain "1.2"]
                  [metosin/reitit-core "0.5.6"]
                  [day8.re-frame/http-fx "v0.2.0"]
                  [cljs-ajax "0.8.0"]
-                 [clj-statecharts "0.0.1-SNAPSHOT"]
+                 [clj-statecharts "0.1.0"]
                  [com.taoensso/timbre "5.1.0"]
                  [venantius/accountant "0.2.5"]
                  [org.clojure/core.match "1.0.0"]
