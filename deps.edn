@@ -1,0 +1,18 @@
+{:paths   ["src"]
+ :aliases {:cljs {:extra-deps {thheller/shadow-cljs {:mvn/version "2.12.4"}}
+                  :main-opts  ["-m" "shadow.cljs.devtools.cli"]}
+           :test {:extra-paths ["test"]}}
+ :deps    {org.clojure/clojure             {:mvn/version "1.10.1"}
+           re-frame/re-frame               {:mvn/version "1.2.0"}
+           re-chain/re-chain               {:mvn/version "1.2"}
+           metosin/reitit-core             {:mvn/version "0.5.6"}
+           day8.re-frame/http-fx           {:mvn/version "v0.2.0"}
+           cljs-ajax/cljs-ajax             {:mvn/version "0.8.0"}
+           clj-statecharts/clj-statecharts {:mvn/version "0.1.0"}
+           com.taoensso/timbre             {:mvn/version "5.1.0"}
+           venantius/accountant            {:mvn/version "0.2.5"}
+           org.clojure/core.match          {:mvn/version "1.0.0"}
+           expound/expound                 {:mvn/version "0.8.6"}
+           day8.re-frame/test              {:mvn/version "0.1.5"}
+           breaking-point/breaking-point   {:mvn/version "0.1.2"}
+           pez/clerk                       {:mvn/version "1.0.0"}}}

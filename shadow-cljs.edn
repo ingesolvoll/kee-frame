@@ -1,0 +1,7 @@
+{:deps   true
+ :builds {:ci   {:target    :karma
+                 :output-to "resources/js/ci.js"}
+          :test {:target   :browser-test
+                 :test-dir "resources/js/test"
+                 :devtools {:http-port 8021
+                            :http-root "resources/js/test"}}}}
