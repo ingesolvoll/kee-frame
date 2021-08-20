@@ -11,7 +11,7 @@
 [![project chat](https://img.shields.io/badge/slack-join_chat-brightgreen.svg)](https://clojurians.slack.com/archives/CA7EJ0Y2U)
 
 
-## Project status (October 2020)
+## Project status (August 2021)
 
 The API and functionality of kee-frame is stable and proven to work.
 Pull requests are welcome!
