@@ -230,6 +230,8 @@ The controller rules are:
 * When previous parameter was not nil and current is nil, call `stop`.
 * When both previous and current are not nil, but different, call `stop`, then `start`.
 
+All controllers `:params` fns are called every time the route changes. Therefore `:params` should return `nil` for routes on which it should not be started.
+
 ## Event chains
 
 Kee-frame uses [re-chain](https://github.com/ingesolvoll/re-chain) to chain event handlers together for increased readability
