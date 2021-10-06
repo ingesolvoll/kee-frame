@@ -1,5 +1,5 @@
 {:paths   ["src"]
- :aliases {:cljs  {:extra-deps {thheller/shadow-cljs {:mvn/version "2.12.4"}}
+ :aliases {:cljs  {:extra-deps {thheller/shadow-cljs {:mvn/version "2.15.10"}}
                    :main-opts  ["-m" "shadow.cljs.devtools.cli"]}
            :test  {:extra-paths ["test"]}
            :build {:deps       {io.github.seancorfield/build-clj
