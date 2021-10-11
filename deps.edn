@@ -1,6 +1,7 @@
 {:paths   ["src"]
- :aliases {:cljs  {:extra-deps {thheller/shadow-cljs {:mvn/version "2.15.10"}}
-                   :main-opts  ["-m" "shadow.cljs.devtools.cli"]}
+ :aliases {:cljs  {:extra-deps  {thheller/shadow-cljs {:mvn/version "2.15.10"}}
+                   :main-opts   ["-m" "shadow.cljs.devtools.cli"]
+                   :extra-paths ["test"]}
            :test  {:extra-deps {lambdaisland/kaocha {:mvn/version "1.0.887"}}
                    :main-opts  ["-m" "kaocha.runner"]}
            :build {:deps       {io.github.seancorfield/build-clj
