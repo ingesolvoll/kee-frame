@@ -122,7 +122,7 @@ There are 2 simple options for bootstrapping your project:
 ### 1. Manual installation
 Add the following dependency to your `project.clj` file:
 ```clojure
-[kee-frame "0.4.0"]
+[kee-frame "1.2.0"]
 ```
 ### 2. Luminus template
 [Luminus](http://www.luminusweb.net) is a framework that makes it easy to get started with web app development
@@ -299,11 +299,9 @@ It looks pretty much the same, only more concise. But it does help you with a fe
 * If you pass only a function reference to your reagent components (no surrounding []), kee-frame will invoke them with the route as the first parameter.
 * It will give you nice error messages when you make a mistake.
 
-## Finite State Machines (alpha since 0.4.0)
+## Finite State Machines (beta since 1.2.0)
 
-#### FSM API is marked as alpha, as it is more likely to receive breaking changes for the coming months.
-
-Initial source code and design of API by https://github.com/zalky
+#### FSM API is still likely to receive breaking changes.
 
 Most people are not using state machines in their daily programming tasks. Or actually they are, it's just that the state machines are hidden
 inside normal code, incomplete and filled with fresh custom made bugs. A `{:loading true}` here, a missing `:on-failure` there. You may get
@@ -313,57 +311,18 @@ A kee-frame event chain is a kind of state machine. But in the examples, it only
 happy path of successful HTTP requests. It does not have a good answer to error handling, and you have to make custom solutions for displaying
 the state of an ongoing process (retrying, loading, sending, failed etc).
 
-Here's the structure of an FSM in kee-frame:
-
-```clojure
-(require '[kee-frame.fsm.alpha :as fsm])
-
-(def my-http-request-fsm
-   {:id    :my-http-request
-    :start ::loading
-    :stop  ::loaded
-    :fsm   {::loading        {[::fsm/on-enter]      {:dispatch [[:contact-the-server]]}
-                              [:server-responded]   {:to ::loaded}
-                              [:default-on-failure] {:to ::loading-failed}}
-            ::loading-failed {[::fsm/timeout 10000] {:to ::loading}}}})
-```
-
-The `:start` param (required) identifies the initial state of the FSM. 
-If you specify a `:stop` state, the machine will halt when it enters that state.
-
-The `:fsm` param is the interesting part. It's a map from states to available transitions. A transition key/value pair
-consists of a re-frame event and information about what happens to the FSM state when that event is seen.
-The actual event vector will usually contain more items, the FSM considers it a match if the event starts
-with the vector provided in the FSM.
-
-If an event is matched, the right-side map decides what happens next. It can transition into a new state,
-or dispatch re-frame events. Both are optional.
-
-There are 2 special "events" here:
-- `::fsm/timeout` triggers the specified number of ms after entering that state. Will not trigger if state has changed.
-- `::fsm/on-enter` triggers immediately when entering that state.
+Kee-frame integrates with the excellent https://github.com/lucywang000/clj-statecharts. Go read the docs to
+learn how to declare FSMs there.
 
 FSMs can be started and stopped like this:
 
 ```clojure
-(rf/dispatch [::fsm/start my-http-request-fsm])
+(rf/dispatch [::fsm/start statechart])
 
-(rf/dispatch [::fsm/stop my-http-request-fsm])
+(rf/dispatch [::fsm/stop statechart])
 ```
 
-Controllers support returning FSM maps instead of event vectors. Like this:
-
-```clojure      
-(defn league-fsm [id]
-  {:id :league-fsm
-   ....})
-
-(k/reg-controller :league
-                  {:params (fn [route-data] ...)
-                   :start  (fn [ctx id] (league-fsm id)})
-```
-
-This FSM will be started and stopped by the controller start/stop lifecycle. See the demo app for extended examples.
+Controllers are a natural place for starting and stopping FSMs. See the demo app for extended examples.
 
 ### Depending on FSM state
 There are multiple ways you can utilize FSMs in your rendering.
@@ -371,26 +330,13 @@ There are multiple ways you can utilize FSMs in your rendering.
 You can start and stop the FSM manually by dispatching the events above, and roll your own rendering the way you prefer
 it. The main benefit is being able to simply subscribe to the current state of the FSM.
 
-Next level is using the `kee-frame.fsm/with-fsm` macro to automatically control the lifecycle of your FSM, like this:
-
-```clojure
-(fsm/with-fsm [fsm (league-fsm id)]
-  (let [fsm-state (f/subscribe [::fsm/state fsm])]
-    [:div "My fsm state is " @fsm-state]))
-```
-
 For a fully declarative FSM UI, use the `fsm/render` component. It renders a materialized view of the FSM state.
 The `fsm/step` multimethod must be implemented for all possible states of the FSM.
 
 Here's an example:
 
 ```clojure
-(defn light-switch-fsm [city] {:id    (str "switch-for-" city)
-                               :start ::off
-                               :fsm   {::off {[::turn-on]  {:to ::on}}
-                                       ::on  {[::turn-off] {:to ::off}}}})
-
-(defmethod fsm/step ::off
+(defmethod fsm/step ::off ;; Where ::off is a declared FSM state somewhere
   [fsm city]
   [:div "Lights are off in " city])
 
