@@ -3,6 +3,7 @@
 ## Added
 
 ## Fixed
+- #103 Controllers should preserve order.
 
 ## Changed
 
