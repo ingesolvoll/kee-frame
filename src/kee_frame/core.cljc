@@ -2,10 +2,10 @@
   (:require [kee-frame.legacy :as legacy]
             [kee-frame.state :as state]
             [kee-frame.router :as router]
-            [re-chain.core :as chain]
             [re-frame.core :as rf :refer [console]]
             [kee-frame.log :as log]
             [kee-frame.spec :as spec]
+            [re-frame.interop :as interop]
             [clojure.spec.alpha :as s]
             [expound.alpha :as e]))
 
@@ -53,6 +53,16 @@
 (def reg-event-fx legacy/reg-event-fx)
 (def reg-event-db legacy/reg-event-db)
 
+(defn -replace-controller
+  [controllers controller]
+  (reduce
+   (fn [ret existing-controller]
+     (if (= (:id controller)
+            (:id existing-controller))
+       (conj ret controller)
+       (conj ret existing-controller)))
+   interop/empty-queue
+   controllers))
 
 (defn reg-controller
   "Put a controller config map into the global controller registry.
@@ -74,10 +84,17 @@
   current invocation returned nil. If the function does nothing but returning the vector, the surrounding function
   can be omitted."
   [id controller]
-  (when-not (s/valid? ::spec/controller controller)
-    (e/expound ::spec/controller controller)
-    (throw (ex-info "Invalid controller" (s/explain-data ::spec/controller controller))))
-  (swap! state/controllers assoc id controller))
+  (let [controller (assoc controller :id id)]
+    (when-not (s/valid? ::spec/controller controller)
+      (e/expound ::spec/controller controller)
+      (throw (ex-info "Invalid controller" (s/explain-data ::spec/controller controller))))
+    (swap! state/controllers (fn [controllers]
+                               (let [ids (map :id controllers)]
+                                 (if (some #{id} ids)
+                                   ;; If the id already exists we replace it in-place to maintain the ordering of
+                                   ;; controllers esp during hot-code reloading in development.
+                                   (-replace-controller controllers controller)
+                                   (conj controllers controller)))))))
 
 (defn path-for
   "Make a uri from route data. Useful for avoiding hard coded links in your app.

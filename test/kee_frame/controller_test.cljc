@@ -4,9 +4,10 @@
 
 (deftest compact-syntax
   (testing "Can start and stop"
-    (let [controllers      {:my-controller {:params #(-> % :handler (= :some-page) (or nil))
-                                            :start  [:start/event]
-                                            :stop   [:stop/event]}}
+    (let [controllers      [{:id     :my-controller
+                             :params #(-> % :handler (= :some-page) (or nil))
+                             :start  [:start/event]
+                             :stop   [:stop/event]}]
           {:keys [:update-controllers :dispatch-n]} (c/controller-effects controllers {} {:handler :some-page})
           next-controllers (c/update-controllers controllers update-controllers)
           actions-2        (c/controller-effects next-controllers {} {:handler :other-page})]
@@ -16,8 +17,9 @@
 
 
   (testing "Will trigger only once when always on"
-    (let [controllers      {:always-on-controller {:params (constantly true)
-                                                   :start  [:start/event]}}
+    (let [controllers      [{:id     :always-on-controller
+                             :params (constantly true)
+                             :start  [:start/event]}]
           {:keys [:update-controllers :dispatch-n]} (c/controller-effects controllers {} {:handler :some-page})
           next-controllers (c/update-controllers controllers update-controllers)
           actions-2        (c/controller-effects next-controllers {} {:handler :other-page})]
@@ -29,9 +31,10 @@
     (is (= [[:start/event]]
            (:dispatch-n
             (c/controller-effects
-             {:my-controller {:params (constantly true)
-                              :start  (fn [ctx params]
-                                        [:start/event])}}
+             [{:id     :my-controller
+               :params (constantly true)
+               :start  (fn [ctx params]
+                         [:start/event])}]
              {}
              {:handler :some-page}))))))
 
@@ -40,9 +43,10 @@
        #?(:clj  clojure.lang.ExceptionInfo
           :cljs js/Error)
        #"Invalid dispatch value"
-       (->> (c/controller-effects {:invalid-controller {:params (constantly true)
-                                                        :start  (fn [ctx params]
-                                                                  "heisann")}}
+       (->> (c/controller-effects [{:id     :invalid-controller
+                                    :params (constantly true)
+                                    :start  (fn [ctx params]
+                                              "heisann")}]
                                   {}
                                   {:handler :some-page})
             :dispatch-n

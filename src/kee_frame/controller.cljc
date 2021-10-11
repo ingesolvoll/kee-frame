@@ -44,7 +44,7 @@
       (ifn? start) (validate-and-dispatch! (start ctx last-params)))))
 
 (defn controller-actions [controllers route]
-  (reduce (fn [actions [id {:keys [last-params params start stop]}]]
+  (reduce (fn [actions {:keys [id last-params params start stop]}]
             (let [current-params (process-params params route)
                   controller     {:id          id
                                   :start       start
@@ -61,10 +61,14 @@
           controllers))
 
 (defn update-controllers [controllers new-controllers]
-  (reduce (fn [result {:keys [id last-params]}]
-            (assoc-in result [id :last-params] last-params))
-          controllers
-          new-controllers))
+  (let [id->new-controller (->> new-controllers
+                                (map (juxt :id identity))
+                                (into {}))]
+    (map (fn [{:keys [id] :as controller}]
+           (if-let [updated-controller (id->new-controller id)]
+             (assoc controller :last-params (:last-params updated-controller))
+             controller))
+         controllers)))
 
 (rf/reg-event-fx ::start-controllers
   (fn [_ [_ dispatches]]
