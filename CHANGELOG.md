@@ -3,7 +3,7 @@
 ## Added
 
 ## Fixed
-- #103 Controllers should preserve order.
+- https://github.com/ingesolvoll/kee-frame/issues/103
 
 ## Changed
 
