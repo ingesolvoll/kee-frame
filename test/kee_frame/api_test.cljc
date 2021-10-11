@@ -1,11 +1,10 @@
 (ns kee-frame.api-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [deftest testing is]]
             [kee-frame.core :as kf]
             [re-frame.core :as rf]
             [day8.re-frame.test :as rf-test]
             [re-chain.core :as chain]
-            [kee-frame.router :as router])
-  (:import (clojure.lang ExceptionInfo)))
+            [kee-frame.router :as router]))
 
 (rf/reg-fx
   :http-xhrio
@@ -53,5 +52,6 @@
       (kf/reg-chain :test-chain
                     (fn [_ _] {:dispatch [:no-no]})
                     (fn [_ _] nil))
-      (is (thrown? ExceptionInfo
+      (is (thrown? #?(:clj clojure.lang.ExceptionInfo
+                      :cljs js/Error)
                    (rf/dispatch [:test-chain]))))))
