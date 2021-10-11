@@ -17,7 +17,8 @@
 
     (testing "Item with missing id throws"
       (is (thrown?
-           ExceptionInfo
+           #?(:clj clojure.lang.ExceptionInfo
+              :cljs js/Error)
            (api/data->url r [:item]))))))
 
 (deftest can-parse-hash-urls

@@ -15,7 +15,7 @@
                                                    (:path-params %))
                                         :start  [::test-event-2]})
     (rf-test/run-test-sync
-     (rf/reg-sub :test-prop (fn [db] (:test-prop db)))
+     (rf/reg-sub :test-prop (fn [db _] (:test-prop db)))
      (rf/reg-event-fx ::test-event
                       (fn [_ _] {:navigate-to [:some-route {:id 1}]}))
      (rf/reg-event-fx ::test-event-2
