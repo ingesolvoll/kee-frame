@@ -2,8 +2,9 @@
  :aliases {:cljs  {:extra-deps  {thheller/shadow-cljs {:mvn/version "2.15.10"}}
                    :main-opts   ["-m" "shadow.cljs.devtools.cli"]
                    :extra-paths ["test"]}
-           :test  {:extra-deps {lambdaisland/kaocha {:mvn/version "1.0.887"}}
-                   :main-opts  ["-m" "kaocha.runner"]}
+           :test  {:extra-deps  {lambdaisland/kaocha {:mvn/version "1.0.887"}}
+                   :main-opts   ["-m" "kaocha.runner"]
+                   :extra-paths ["test"]}
            :build {:deps       {io.github.seancorfield/build-clj
                                 {:git/tag "v0.5.0" :git/sha "2ceb95a"}}
                    :ns-default build}}
