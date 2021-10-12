@@ -3,6 +3,7 @@
 ## Added
 
 ## Fixed
+- https://github.com/ingesolvoll/kee-frame/issues/103
 
 ## Changed
 
