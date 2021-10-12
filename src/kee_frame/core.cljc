@@ -10,7 +10,7 @@
             [expound.alpha :as e]))
 
 (def valid-option-key? #{:router :hash-routing? :routes :process-route :debug? :debug-config
-                         :chain-links :app-db-spec :root-component :initial-db
+                         :chain-links :app-db-spec :root-component :initial-db :log-spec-error
                          :screen :scroll :route-change-event :not-found :log :global-interceptors})
 
 (defn extra-options

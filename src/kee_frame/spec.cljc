@@ -28,29 +28,30 @@
 (s/def ::chain-links ::chain/links)
 (s/def ::breakpoints vector?)
 (s/def ::debounce-ms number?)
+(s/def ::log-spec-error (s/nilable fn?))
 (s/def ::scroll (s/nilable (s/or :boolean boolean?
                                  :config (s/keys :opt-un [:scroll/timeout]))))
 (s/def ::screen (s/nilable (s/or :boolean boolean?
                                  :config (s/keys :req-un [::breakpoints ::debounce-ms]))))
 
-(s/def ::start-options (s/keys :opt-un [::routes ::router ::hash-routing? ::root-component ::initial-db ::log
+(s/def ::start-options (s/keys :opt-un [::routes ::router ::hash-routing? ::root-component ::initial-db ::log ::log-spec-error
                                         ::app-db-spec ::debug? ::debug-config ::chain-links ::screen ::scroll ::global-interceptors]))
 
-(defn log-spec-error [new-db spec]
+(defn default-log-spec-error [new-db spec]
   (console :group "*** Spec error when updating DB, rolling back ***")
   (e/expound spec new-db)
   (console :groupEnd "*****************************"))
 
-(defn rollback [context new-db db-spec]
-  (do
-    (log-spec-error new-db db-spec)
-    (assoc-effect context :db (get-coeffect context :db))))
+(defn rollback [context new-db db-spec log-spec-error]
+  ((or log-spec-error
+       default-log-spec-error) new-db db-spec)
+  (assoc-effect context :db (get-coeffect context :db)))
 
-(defn spec-interceptor [db-spec]
+(defn spec-interceptor [db-spec log-spec-error]
   (->interceptor
-    :id :spec
-    :after (fn [context]
-             (let [new-db (get-effect context :db)]
-               (if (and new-db (not (s/valid? db-spec new-db)))
-                 (rollback context new-db db-spec)
-                 context)))))
+   :id :spec
+   :after (fn [context]
+            (let [new-db (get-effect context :db)]
+              (if (and new-db (not (s/valid? db-spec new-db)))
+                (rollback context new-db db-spec log-spec-error)
+                context)))))
