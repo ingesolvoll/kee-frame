@@ -37,14 +37,19 @@
         (match? (butlast state) value))))
 
 (defn case-fsm [state & pairs]
-  (when-not (even? (count pairs))
-    (throw (ex-info "case-fsm accepts an even number of args" {:pairs pairs})))
-  (loop [[first-pair & rest-pairs] (partition 2 pairs)]
-    (if first-pair
+  (loop [[first-pair & rest-pairs] (partition-all 2 pairs)]
+    (cond
+
+      (some-> first-pair seq count (= 2))
       (let [[value component] first-pair]
         (if (match? state value)
           component
           (recur rest-pairs)))
+
+      (some-> first-pair seq count (= 1))
+      (first first-pair)
+
+      :else
       (throw (ex-info "Could not find a component to match state."
                       {:state state
                        :pairs pairs})))))
