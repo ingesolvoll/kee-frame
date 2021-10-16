@@ -31,6 +31,24 @@
   (fn [db [_ id]]
     (get-in db [:fsm id])))
 
+(defn match? [state value]
+  (when (seq state)
+    (or (= state value)
+        (match? (butlast state) value))))
+
+(defn case-fsm [state & pairs]
+  (when-not (even? (count pairs))
+    (throw (ex-info "case-fsm accepts an even number of args" {:pairs pairs})))
+  (loop [[first-pair & rest-pairs] (partition 2 pairs)]
+    (if first-pair
+      (let [[value component] first-pair]
+        (if (match? state value)
+          component
+          (recur rest-pairs)))
+      (throw (ex-info "Could not find a component to match state."
+                      {:state state
+                       :pairs pairs})))))
+
 (defmulti step
           "Materialized view of the current fsm state. A `step` method must
           exist for each state defined in the fsm transition map. States are
