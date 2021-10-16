@@ -4,6 +4,7 @@
 
 ## Fixed
 - https://github.com/ingesolvoll/kee-frame/issues/103
+- https://github.com/ingesolvoll/kee-frame/issues/104
 
 ## Changed
 
