@@ -6,9 +6,10 @@
 
 
 (f/reg-fx ::start
-  (fn [{:keys [id] :as fsm}]
+  (fn [{:keys [id transition-event] :as fsm}]
     (let [init-event       (keyword (name id) "init")
-          transition-event (keyword (name id) "transition")]
+          transition-event (or transition-event
+                               (keyword (name id) "transition"))]
       (-> fsm
           (assoc :integrations {:re-frame {:path             (f/path [:fsm id])
                                            :initialize-event init-event
