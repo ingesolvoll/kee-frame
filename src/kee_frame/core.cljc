@@ -109,8 +109,36 @@
   [handler & params]
   (apply router/url handler params))
 
-(defn switch-route
+(defn case-route
   "Reagent component that renders different components for different routes.
+
+  Semantics similar to clojure.core/case
+
+  You can include a single default component at the end that serves as the default view
+
+  Parameters:
+
+  `f`: A function that receives the route data on every route change, and returns the value to dispatch on.
+
+  `pairs`: A pair consists of the dispatch value and the reagent component to dispatch to. An optional single default
+  component can be added at the end.
+
+  Returns the first component with a matching dispatch value.
+
+  Usage:
+  ```
+  [k/switch-route (fn [route] (:handler route))
+    :index [:div \"This is index page\"]
+    :about [:div \"This is the about page\"]
+    [:div \"Probably also the index page\"]]
+  ```"
+  [f & pairs]
+  (apply router/case-route f pairs))
+
+(defn switch-route
+  "DEPRECATED in favor of case-route
+
+  Reagent component that renders different components for different routes.
 
   You might need to include a case for `nil`, since there are no route data before the first navigation.
 

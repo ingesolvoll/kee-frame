@@ -155,11 +155,32 @@
     [component route]
     component))
 
+(defn case-route [f & pairs]
+  (let [route          (rf/subscribe [:kee-frame/route])
+        dispatch-value (f @route)]
+    (loop [[first-pair & rest-pairs] (partition-all 2 pairs)]
+      (cond
+
+        (some-> first-pair seq count (= 2))
+        (let [[value component] first-pair]
+          (if (= value dispatch-value)
+            (make-route-component component @route)
+            (recur rest-pairs)))
+
+        (some-> first-pair seq count (= 1))
+        (make-route-component (first first-pair) @route)
+
+        :else
+        (throw (ex-info "Could not find a component to match route. Did you remember to include a single last default case?"
+                        {:route          @route
+                         :dispatch-value dispatch-value
+                         :pairs          pairs}))))))
+
 (defn switch-route [f & pairs]
   (when-not (even? (count pairs))
     (throw (ex-info "switch-route accepts an even number of args" {:pairs       pairs
                                                                    :pairs-count (count pairs)})))
-  (let [route (rf/subscribe [:kee-frame/route])
+  (let [route          (rf/subscribe [:kee-frame/route])
         dispatch-value (f @route)]
     (loop [[first-pair & rest-pairs] (partition 2 pairs)]
       (if first-pair
