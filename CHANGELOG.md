@@ -2,6 +2,7 @@
 
 ## Added
 - `case-route` as a more idiomatic case-like alternative to `switch-route`
+- `case-fsm` that partially matches FSM states against views
 
 ## Fixed
 - https://github.com/ingesolvoll/kee-frame/issues/103

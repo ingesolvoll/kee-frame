@@ -314,38 +314,19 @@ the state of an ongoing process (retrying, loading, sending, failed etc).
 Kee-frame integrates with the excellent https://github.com/lucywang000/clj-statecharts. Go read the docs to
 learn how to declare FSMs there.
 
-FSMs can be started and stopped like this:
+FSMs can be started like this:
 
 ```clojure
 (rf/dispatch [::fsm/start statechart])
-
-(rf/dispatch [::fsm/stop statechart])
 ```
 
-Controllers are a natural place for starting and stopping FSMs. See the demo app for extended examples.
+Controllers are a natural place for starting FSMs. See the demo app for extended examples.
 
 ### Depending on FSM state
 There are multiple ways you can utilize FSMs in your rendering.
 
-You can start and stop the FSM manually by dispatching the events above, and roll your own rendering the way you prefer
+You can start the FSM manually by dispatching the events above, and roll your own rendering the way you prefer
 it. The main benefit is being able to simply subscribe to the current state of the FSM.
-
-For a fully declarative FSM UI, use the `fsm/render` component. It renders a materialized view of the FSM state.
-The `fsm/step` multimethod must be implemented for all possible states of the FSM.
-
-Here's an example:
-
-```clojure
-(defmethod fsm/step ::off ;; Where ::off is a declared FSM state somewhere
-  [fsm city]
-  [:div "Lights are off in " city])
-
-(defmethod fsm/step ::on
-  [fsm city]
-  [:div "Lights are on in " city])
-
-[fsm/render light-switch-fsm "London"]
-```
 
 ## Logging
 

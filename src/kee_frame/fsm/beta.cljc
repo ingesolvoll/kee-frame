@@ -53,33 +53,3 @@
       (throw (ex-info "Could not find a component to match state."
                       {:state state
                        :pairs pairs})))))
-
-(defmulti step
-          "Materialized view of the current fsm state. A `step` method must
-          exist for each state defined in the fsm transition map. States are
-          globally defined, and namespaced keywords are required. It is a good
-          idea to define the fsm in the same namespace as the steps."
-          (fn [fsm & _]
-            @(f/subscribe [::state fsm])))
-
-(defmethod step :default
-  [fsm & _]
-  [:h2 (str "Undefined step: " @(f/subscribe [::state fsm]))])
-
-#?(:cljs
-   (defn- render*
-     [fsm args]
-     (r/with-let [_ (f/dispatch [::start fsm])]
-       [apply step fsm args]
-       (finally
-        (f/dispatch [::stop fsm])))))
-
-#?(:cljs
-   (defn render
-     "Given an fsm function and arguments, renders a materialized view of
-     the fsm state. A `step` method must exist for each state defined in
-     the fsm transition map. The args passed to `render` must match the
-     args expected by the fsm's `step` methods."
-     [fsm-fn & args]
-     (let [fsm (apply fsm-fn args)]
-       ^{:key (:id fsm)} [render* fsm args])))
