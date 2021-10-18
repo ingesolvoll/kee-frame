@@ -36,7 +36,7 @@
     (or (= state value)
         (match? (butlast state) value))))
 
-(defn case-fsm [state & pairs]
+(defn match-state [state & pairs]
   (loop [[first-pair & rest-pairs] (partition-all 2 pairs)]
     (cond
 

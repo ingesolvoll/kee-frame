@@ -303,6 +303,8 @@ It looks pretty much the same, only more concise. But it does help you with a fe
 
 #### FSM API is still likely to receive breaking changes.
 
+#### The alpha version of the FSM API is still available, but will remove when clj-statecharts integration goes out of beta.
+
 Most people are not using state machines in their daily programming tasks. Or actually they are, it's just that the state machines are hidden
 inside normal code, incomplete and filled with fresh custom made bugs. A `{:loading true}` here, a missing `:on-failure` there. You may get
 it right eventually, but it's hard to read the distributed state logic and it is easy to mess it up later.
@@ -323,10 +325,23 @@ FSMs can be started like this:
 Controllers are a natural place for starting FSMs. See the demo app for extended examples.
 
 ### Depending on FSM state
-There are multiple ways you can utilize FSMs in your rendering.
 
-You can start the FSM manually by dispatching the events above, and roll your own rendering the way you prefer
-it. The main benefit is being able to simply subscribe to the current state of the FSM.
+Currently there's one simple way of rendering views for your FSM:
+
+```clojure
+(let [state (subscribe [::fsm/state :my-fsm])]
+  (fsm/match-state @state
+                   [::my-fsm/running ::my-fsm/loading ::http/error ::http/halted] "[could not connect, try refreshing the page]"
+                   [::my-fsm/running ::my-fsm/loading ::http/error ::http/retrying] "[Disconnected, reconnecting]"
+                   [::my-fsm/running] "[connected]"
+                   "[unknown]"))
+```
+
+The `match-state` function will match your full state vector, or any subset of it starting at the beginning.
+In the example above, you can see that we first try to match on several substates of `::live/running`,
+before trying more and more general states.
+
+You can also include a default view component to show if no state matches, "[unknown]" in this case.
 
 ## Logging
 
