@@ -1,6 +1,7 @@
 # Unreleased
 
 ## Added
+- `case-route` as a more idiomatic case-like alternative to `switch-route`
 
 ## Fixed
 - https://github.com/ingesolvoll/kee-frame/issues/103
