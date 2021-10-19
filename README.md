@@ -316,11 +316,30 @@ the state of an ongoing process (retrying, loading, sending, failed etc).
 Kee-frame integrates with the excellent https://github.com/lucywang000/clj-statecharts. Go read the docs to
 learn how to declare FSMs there.
 
-FSMs can be started like this:
+To get started, we'll require the FSM namespace and make an example FSM:
 
 ```clojure
-(rf/dispatch [::fsm/start statechart])
+(require [kee-frame.fsm.beta as fsm])
+
+(def ping-pong-machine
+  {:id      :ping-pong
+   :initial ::ping
+   :states  {::ping {:after [{:delay  1000
+                              :target ::pong}]}
+             ::pong {:after [{:delay  1000
+                              :target ::ping}]}}})
 ```
+
+
+FSMs can be started and stopped like this:
+
+```clojure
+(rf/dispatch [::fsm/start ping-pong-machine])
+(rf/dispatch [::fsm/stop :ping-pong])
+```
+
+When started, consecutive calls to start will not affect the state. When stopped, all state is deleted. It can then
+be restarted with its initial state.
 
 Controllers are a natural place for starting FSMs. See the demo app for extended examples.
 
@@ -342,6 +361,15 @@ In the example above, you can see that we first try to match on several substate
 before trying more and more general states.
 
 You can also include a default view component to show if no state matches, "[unknown]" in this case.
+
+### Macro for automatically starting and stopping an FSM
+The `kee-frame.fsm.beta/with-fsm` macro implicitly starts and stops the provided FSM when
+the containting react component mounts and unmounts.
+
+```clojure
+(fsm/with-fsm [state ping-pong-machine]
+              [:div "Here's the occational ping or pong: " @state])
+```
 
 ## Logging
 
@@ -447,14 +475,6 @@ The subscriptions available are:
 (rf/subscribe [:breaking-point.core/small-monitor?]) ;; true if window width is >= 992 and < 1200
 (rf/subscribe [:breaking-point.core/large-monitor?]) ;; true if window width is >= 1200
 ```
-## Websockets (removed since 0.4.0)
-
-I believe it was a mistake to introduce websockets into kee-frame. It's not what this library is
-about. The code has been put in a separate repo, and can be used as before. See docs at
-https://github.com/ingesolvoll/kee-frame-sockets
-
-If you are a user of the websocket code and you find that the new lib has bugs, 
-please downgrade to kee-frame 0.3.4 and submit an issue.
 
 ## Error messages
 
