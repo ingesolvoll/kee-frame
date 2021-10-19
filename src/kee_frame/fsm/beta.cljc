@@ -1,22 +1,23 @@
 (ns kee-frame.fsm.beta
-  (:require [statecharts.core :as fsm]
-            [statecharts.integrations.re-frame :as fsm.rf]
+  (:require [glimt.core :as http]
+            [kee-frame.fsm.statecharts :as ks]
             [re-frame.core :as f]
-            #?(:cljs [reagent.core :as r])))
+            #?(:cljs [reagent.core :as r])
+            [statecharts.core :as fsm]))
+
+(defn http [config]
+  (http/embedded-fsm (assoc config :transition-event ::ks/transition
+                                   :init-event ::ks/init)))
 
 
 (f/reg-fx ::start
-  (fn [{:keys [id transition-event] :as fsm}]
-    (let [init-event       (keyword (name id) "init")
-          transition-event (or transition-event
-                               (keyword (name id) "transition"))]
-      (-> fsm
-          (assoc :integrations {:re-frame {:path             (f/path [:fsm id])
-                                           :initialize-event init-event
-                                           :transition-event transition-event}})
-          fsm/machine
-          fsm.rf/integrate)
-      (f/dispatch [init-event]))))
+  (fn [{:keys [id] :as fsm}]
+    (-> fsm
+        (assoc :integrations {:re-frame {:path             (f/path [:fsm id])
+                                         :initialize-event ::ks/init
+                                         :transition-event ::ks/transition}})
+        fsm/machine
+        ks/integrate)))
 
 (f/reg-event-fx ::start
                 ;; Starts the interceptor for the given fsm.
