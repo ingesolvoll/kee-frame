@@ -62,8 +62,11 @@
         fsm/machine
         integrate)))
 
+(f/reg-event-fx ::http
+                (fn [_ [_ config]]
+                  {::http/start config}))
+
 (f/reg-event-fx ::start
-                ;; Starts the interceptor for the given fsm.
                 (fn [_ [_ fsm]]
                   {::start fsm}))
 
