@@ -4,7 +4,7 @@
 
 (def lib 'kee-frame/kee-frame)
 ;; if you want a version of MAJOR.MINOR.COMMITS:
-(def version (format "1.3.0"))
+(def version (format "1.3.1"))
 
 (defn install [opts]
   (-> opts
