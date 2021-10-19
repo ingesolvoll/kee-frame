@@ -1,28 +1,75 @@
 (ns kee-frame.fsm.beta
-  (:require [glimt.core :as http]
-            [kee-frame.fsm.statecharts :as ks]
-            [re-frame.core :as f]
-            #?(:cljs [reagent.core :as r])
-            [statecharts.core :as fsm]))
+  (:require
+   [glimt.core :as http]
+   [re-frame.core :as f]
+   [statecharts.clock :as clock]
+   [statecharts.core :as fsm]
+   [statecharts.core :as fsm]
+   [statecharts.integrations.re-frame :as sc.rf]
+   [statecharts.utils :as u]
+   [taoensso.timbre :as log])
+  (:require-macros kee-frame.fsm.beta))
+
+(defonce epochs (volatile! {}))
+
+(defn new-epoch [id]
+  (get (vswap! epochs update id sc.rf/safe-inc) id))
+
+(f/reg-event-db
+ ::init
+ (fn [db [_ {:keys [id] :as machine} initialize-args]]
+   (when-not (get-in db [:fsm id])
+     (let [new-state (-> (fsm/initialize machine initialize-args)
+                         (assoc :_epoch (new-epoch id)))]
+       (assoc-in db [:fsm id] new-state)))))
+
+
+(defn reg-transition-event [{:keys [epoch? id] :as machine}]
+  (f/reg-event-db
+   [::transition id]
+   (fn [db [_ fsm-event data :as args]]
+     (when (get-in db [:fsm id])
+       (let [fsm-event (u/ensure-event-map fsm-event)
+             more-data (when (> (count args) 3)
+                         (subvec args 2))]
+         (if (and epoch?
+                  (sc.rf/should-discard fsm-event (get-in db [:fsm id :_epoch])))
+           (do
+             (sc.rf/log-discarded-event fsm-event)
+             db)
+           (update-in db [:fsm id] (partial fsm/transition machine) (cond-> (assoc fsm-event :data data)
+                                                                      (some? more-data)
+                                                                      (assoc :more-data more-data)))))))))
+
+(defn integrate
+  ([machine]
+   (integrate machine sc.rf/default-opts))
+  ([{:keys [id] :as machine} {:keys [clock]}]
+   (let [clock   (or clock (clock/wall-clock))
+         machine (assoc machine :scheduler (sc.rf/make-rf-scheduler [::transition id] clock))]
+     (reg-transition-event machine)
+     (f/dispatch [::init machine]))))
+
 
 (defn http [config]
-  (http/embedded-fsm (assoc config :transition-event ::ks/transition
-                                   :init-event ::ks/init)))
+  (http/embedded-fsm (assoc config :transition-event [::transition (:id config)]
+                                   :init-event ::init)))
 
 
 (f/reg-fx ::start
-  (fn [{:keys [id] :as fsm}]
+  (fn [fsm]
     (-> fsm
-        (assoc :integrations {:re-frame {:path             (f/path [:fsm id])
-                                         :initialize-event ::ks/init
-                                         :transition-event ::ks/transition}})
         fsm/machine
-        ks/integrate)))
+        integrate)))
 
 (f/reg-event-fx ::start
                 ;; Starts the interceptor for the given fsm.
                 (fn [_ [_ fsm]]
                   {::start fsm}))
+
+(f/reg-event-fx ::stop
+                (fn [{db :db} [_ id]]
+                  {:db (update db :fsm dissoc id)}))
 
 (f/reg-sub ::state
   (fn [db [_ id]]
@@ -32,18 +79,13 @@
   (fn [db [_ id]]
     (get-in db [:fsm id])))
 
-(defn match? [state value]
-  (when (seq state)
-    (or (= state value)
-        (match? (butlast state) value))))
-
 (defn match-state [state & pairs]
   (loop [[first-pair & rest-pairs] (partition-all 2 pairs)]
     (cond
 
       (some-> first-pair seq count (= 2))
       (let [[value component] first-pair]
-        (if (match? state value)
+        (if (fsm/matches state value)
           component
           (recur rest-pairs)))
 
