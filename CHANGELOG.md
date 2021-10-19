@@ -1,14 +1,24 @@
 # Unreleased
 
 ## Added
+
+## Fixed
+
+## Changed
+
+# 1.3.0 (2021-10-19)
+
+## Added
 - `case-route` as a more idiomatic case-like alternative to `switch-route`
 - `case-fsm` that partially matches FSM states against views
+- `with-fsm` as a convenient component-scoped FSM
 
 ## Fixed
 - https://github.com/ingesolvoll/kee-frame/issues/103
 - https://github.com/ingesolvoll/kee-frame/issues/104
 
 ## Changed
+- Another iteration on FSM APIs, some breaking changes.
 
 # 1.2.0 (2021-10-11 /  4a53132)
 
