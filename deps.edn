@@ -16,7 +16,7 @@
            glimt/glimt                     {:mvn/version "0.2.1"}
            day8.re-frame/http-fx           {:mvn/version "v0.2.0"}
            cljs-ajax/cljs-ajax             {:mvn/version "0.8.0"}
-           clj-statecharts/clj-statecharts {:mvn/version "0.1.0"}
+           clj-statecharts/clj-statecharts {:mvn/version "0.1.1"}
            com.taoensso/timbre             {:mvn/version "5.1.0"}
            venantius/accountant            {:mvn/version "0.2.5"}
            org.clojure/core.match          {:mvn/version "1.0.0"}
