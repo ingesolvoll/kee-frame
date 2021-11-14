@@ -24,7 +24,7 @@
        (assoc-in db [:fsm id] new-state)))))
 
 
-(defn reg-transition-event [{:keys [epoch? id] :as machine}]
+(defn reg-transition-event [{:keys [epoch? id] :as machine} opts]
   (f/reg-event-db
    [::transition id]
    (fn [db [_ fsm-event data :as args]]
@@ -37,17 +37,20 @@
            (do
              (sc.rf/log-discarded-event fsm-event)
              db)
-           (update-in db [:fsm id] (partial fsm/transition machine) (cond-> (assoc fsm-event :data data)
-                                                                      (some? more-data)
-                                                                      (assoc :more-data more-data)))))))))
+           (update-in db [:fsm id]
+                      (partial fsm/transition machine)
+                      (cond-> (assoc fsm-event :data data)
+                        (some? more-data)
+                        (assoc :more-data more-data))
+                      opts)))))))
 
 (defn integrate
   ([machine]
    (integrate machine sc.rf/default-opts))
-  ([{:keys [id] :as machine} {:keys [clock]}]
+  ([{:keys [id] :as machine} {:keys [clock] :as opts}]
    (let [clock   (or clock (clock/wall-clock))
          machine (assoc machine :scheduler (sc.rf/make-rf-scheduler [::transition id] clock))]
-     (reg-transition-event machine)
+     (reg-transition-event machine (:transition-opts opts))
      (f/dispatch [::init machine]))))
 
 
@@ -60,7 +63,7 @@
   (fn [fsm]
     (-> fsm
         fsm/machine
-        integrate)))
+        (integrate {:transition-opts {:ignore-unknown-event? true}}))))
 
 (f/reg-event-fx ::http
                 (fn [_ [_ config]]
