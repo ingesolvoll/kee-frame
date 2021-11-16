@@ -81,9 +81,10 @@
 
 (f/reg-fx ::start
   (fn [fsm]
-    (-> fsm
-        fsm/machine
-        (integrate {:transition-opts {:ignore-unknown-event? true}}))))
+    (let [machine (fsm/machine fsm)]
+      (if-let [opts (meta fsm)]
+        (integrate machine opts)
+        (integrate machine)))))
 
 (f/reg-fx ::stop
   (fn [id]
