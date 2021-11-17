@@ -6,6 +6,20 @@
 
 ## Changed
 
+# 1.3.2 (2021-10-19)
+
+## Changed
+FSM is no longer a concept within kee-frame. We delegate to re-statecharts and glimt (for HTTP FSMs). APIs are the same,
+but they moved out of this project. Kee-frame FSM APIs now show a warning in browser console when used. They will be 
+removed in 1.4.0.
+
+## Added
+Builds on CircleCI. Releasing new versions is as simple as tagging in github.
+
+# 1.3.1 (2021-10-19)
+
+Just a minor release to fix a couple of test failures in previous one.
+
 # 1.3.0 (2021-10-19)
 
 ## Added
