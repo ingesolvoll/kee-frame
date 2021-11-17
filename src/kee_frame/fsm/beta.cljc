@@ -82,7 +82,7 @@
 
 (f/reg-fx ::start
   (fn [fsm]
-    (log/warn "FSM beta is deprecated and will be removed soon, use com.github.ingesolvoll/re-statecharts instead")
+    #?(:cljs (js/console.warn "FSM beta is deprecated and will be removed soon, use com.github.ingesolvoll/re-statecharts instead"))
     (let [machine (fsm/machine fsm)]
       (if-let [opts (meta fsm)]
         (integrate machine opts)
