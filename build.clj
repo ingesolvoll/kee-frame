@@ -1,7 +1,6 @@
 (ns build
   (:require
    [clojure.string :as str]
-   [clojure.tools.build.api :as b]
    [org.corfield.build :as bb]))
 
 (def lib 'kee-frame/kee-frame)

@@ -7,7 +7,7 @@ executors:
       - image: circleci/clojure:openjdk-11-tools-deps-1.10.3.1020-node-browsers
 
 jobs:
-  build:
+  test:
     executor: tools-executor
     steps:
       - checkout
@@ -15,7 +15,7 @@ jobs:
           keys:
           - kee-frame-deps-{{ checksum "deps.edn" }}
           - kee-frame-deps-
-      - run: clojure -T:build jar
+      - run: clojure -M:test
       - save_cache:
           paths:
             - ~/.m2
@@ -38,6 +38,7 @@ jobs:
 workflows:
   build-deploy:
     jobs:
+      - test
       - deploy:
           filters:
             tags:
