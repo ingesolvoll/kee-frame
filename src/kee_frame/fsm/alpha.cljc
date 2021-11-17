@@ -105,6 +105,7 @@
 
 (f/reg-fx ::start
   (fn [{:keys [id] :as fsm}]
+    (log/warn "FSM alpha is deprecated and will be removed soon, use com.github.ingesolvoll/re-statecharts instead")
     (let [timeouts*       (atom nil)
           state->timeouts (compile-timeouts fsm)]
       (-> (partial advance fsm timeouts* state->timeouts)

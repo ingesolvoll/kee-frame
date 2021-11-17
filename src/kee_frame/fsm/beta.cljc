@@ -7,7 +7,8 @@
    [statecharts.core :as fsm]
    [statecharts.delayed :as delayed]
    [statecharts.integrations.re-frame :as sc.rf]
-   [statecharts.utils :as u])
+   [statecharts.utils :as u]
+   [taoensso.timbre :as log])
   (:require-macros kee-frame.fsm.beta))
 
 (defonce epochs (volatile! {}))
@@ -81,6 +82,7 @@
 
 (f/reg-fx ::start
   (fn [fsm]
+    (log/warn "FSM beta is deprecated and will be removed soon, use com.github.ingesolvoll/re-statecharts instead")
     (let [machine (fsm/machine fsm)]
       (if-let [opts (meta fsm)]
         (integrate machine opts)
