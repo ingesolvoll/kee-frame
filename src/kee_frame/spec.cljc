@@ -38,14 +38,14 @@
 (s/def ::start-options (s/keys :opt-un [::routes ::router ::hash-routing? ::root-component ::initial-db ::log ::log-spec-error
                                         ::app-db-spec ::debug? ::debug-config ::chain-links ::screen ::scroll ::global-interceptors]))
 
-(defn default-log-spec-error [new-db spec]
-  (console :group "*** Spec error when updating DB, rolling back ***")
+(defn default-log-spec-error [new-db spec event]
+  (console :group "*** Spec error when updating DB, rolling back event " event " ***")
   (e/expound spec new-db)
   (console :groupEnd "*****************************"))
 
 (defn rollback [context new-db db-spec log-spec-error]
   ((or log-spec-error
-       default-log-spec-error) new-db db-spec)
+       default-log-spec-error) new-db db-spec (get-coeffect context :event))
   (assoc-effect context :db (get-coeffect context :db)))
 
 (defn spec-interceptor [db-spec log-spec-error]
