@@ -299,77 +299,14 @@ It looks pretty much the same, only more concise. But it does help you with a fe
 * If you pass only a function reference to your reagent components (no surrounding []), kee-frame will invoke them with the route as the first parameter.
 * It will give you nice error messages when you make a mistake.
 
-## Finite State Machines (beta since 1.2.0)
+## Finite State Machines
+The last year there has been several experiments in kee-frame for integrating FSMs. I have now reached a conclusion
+on this, and created [re-statecharts](https://github.com/ingesolvoll/re-statecharts). It is available in kee-frame
+through [glimt](https://github.com/ingesolvoll/glimt).
 
-#### FSM API is still likely to receive breaking changes.
-
-#### The alpha version of the FSM API is still available, but will remove when clj-statecharts integration goes out of beta.
-
-Most people are not using state machines in their daily programming tasks. Or actually they are, it's just that the state machines are hidden
-inside normal code, incomplete and filled with fresh custom made bugs. A `{:loading true}` here, a missing `:on-failure` there. You may get
-it right eventually, but it's hard to read the distributed state logic and it is easy to mess it up later.
-
-A kee-frame event chain is a kind of state machine. But in the examples, it only handles the
-happy path of successful HTTP requests. It does not have a good answer to error handling, and you have to make custom solutions for displaying
-the state of an ongoing process (retrying, loading, sending, failed etc).
-
-Kee-frame integrates with the excellent https://github.com/lucywang000/clj-statecharts. Go read the docs to
-learn how to declare FSMs there.
-
-To get started, we'll require the FSM namespace and make an example FSM:
-
-```clojure
-(require [kee-frame.fsm.beta as fsm])
-
-(def ping-pong-machine
-  {:id      :ping-pong
-   :initial ::ping
-   :states  {::ping {:after [{:delay  1000
-                              :target ::pong}]}
-             ::pong {:after [{:delay  1000
-                              :target ::ping}]}}})
-```
-
-
-FSMs can be started and stopped like this:
-
-```clojure
-(rf/dispatch [::fsm/start ping-pong-machine])
-(rf/dispatch [::fsm/stop :ping-pong])
-```
-
-When started, consecutive calls to start will not affect the state. When stopped, all state is deleted. It can then
-be restarted with its initial state.
-
-Controllers are a natural place for starting FSMs. See the demo app for extended examples.
-
-### Depending on FSM state
-
-Currently there's one simple way of rendering views for your FSM:
-
-```clojure
-(let [state (subscribe [::fsm/state :my-fsm])]
-  (fsm/match-state @state
-                   [::my-fsm/running ::my-fsm/loading ::http/error ::http/halted] "[could not connect, try refreshing the page]"
-                   [::my-fsm/running ::my-fsm/loading ::http/error ::http/retrying] "[Disconnected, reconnecting]"
-                   [::my-fsm/running] "[connected]"
-                   "[unknown]"))
-```
-
-The `match-state` function will match your full state vector, or any subset of it starting at the beginning.
-In the example above, you can see that we first try to match on several substates of `::live/running`,
-before trying more and more general states.
-
-You can also include a default view component to show if no state matches, "[unknown]" in this case.
-
-### Macro for automatically starting and stopping an FSM
-The `kee-frame.fsm.beta/with-fsm` macro implicitly starts and stops the provided FSM when
-the containting react component mounts and unmounts.
-
-```clojure
-(fsm/with-fsm [state ping-pong-machine]
-              [:div "Here's the occational ping or pong: " @state])
-```
+If you have been using event chains to do your HTTP requests, glimt is clearly a better option. It handles more than
+just the happy path and gives you with the state of the request along the way. I highly recommend trying out FSMs in 
+your apps!
 
 ## Logging
 
