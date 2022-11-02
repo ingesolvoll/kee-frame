@@ -2,14 +2,13 @@
   (:require [kee-frame.legacy :as legacy]
             [kee-frame.state :as state]
             [kee-frame.router :as router]
-            [re-frame.core :as rf :refer [console]]
             [kee-frame.log :as log]
             [kee-frame.spec :as spec]
             [re-frame.interop :as interop]
             [clojure.spec.alpha :as s]
             [expound.alpha :as e]))
 
-(def valid-option-key? #{:router :hash-routing? :routes :process-route :debug? :debug-config
+(def valid-option-key? #{:router :hash-routing? :base-path :routes :process-route :debug? :debug-config
                          :chain-links :app-db-spec :root-component :initial-db :log-spec-error
                          :screen :scroll :route-change-event :not-found :log :global-interceptors})
 

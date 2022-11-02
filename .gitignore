@@ -13,3 +13,7 @@ pom.xml.asc
 .nrepl-port
 /.idea/*
 *.iml
+/.cpcache/
+/.clj-kondo/.cache/
+/.lsp/.cache/
+/.calva/output-window/

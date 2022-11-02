@@ -1,6 +1,5 @@
 (ns ^:no-doc kee-frame.router
-  (:require [kee-frame.interop :as interop]
-            [re-frame.core :as rf :refer [console]]
+  (:require [re-frame.core :as rf :refer [console]]
             [re-chain.core :as chain]
             [kee-frame.event-logger :as event-logger]
             [kee-frame.api :as api :refer [dispatch-current! navigate! url->data data->url]]
@@ -13,7 +12,6 @@
             [clojure.string :as str]
             [clojure.spec.alpha :as s]
             [expound.alpha :as e]
-            [re-frame.core :as f]
             [clojure.set :as set]))
 
 (def default-chain-links [{:effect-present? (fn [effects] (:http-xhrio effects))
@@ -56,34 +54,44 @@
 (defn valid? [{:keys [path-params required]}]
   (set/subset? required (set (keys path-params))))
 
-(defn match-data [routes route hash?]
+(defn match-data [routes route hash? base-path]
   (let [[_ path-params] route
         {:keys [path] :as match} (apply reitit/match-by-name routes route)]
     (when (valid? match)
-      (str (when hash? "/#") path
+      (str base-path (when hash? "/#") path
            (when-some [q (:query-string path-params)] (str "?" q))
            (when-some [h (:hash path-params)] (str "#" h))))))
 
-(defn match-url [routes url]
-  (let [[path+query fragment] (-> url (str/replace #"^/#/" "/") (str/split #"#" 2))
+(defn- remove-base-path [url base-path]
+  ;; i don't want to think about how to quote the regex
+  ;; also we would pay for compilation on every check
+  (if (str/starts-with? url base-path)
+    (subs url (count base-path))
+    url))
+
+(defn match-url [routes base-path url]
+  (let [[path+query fragment] (-> url
+                                  (remove-base-path base-path)
+                                  (str/replace #"^/#/" "/")
+                                  (str/split #"#" 2))
         [path query] (str/split path+query #"\?" 2)]
     (some-> (reitit/match-by-path routes path)
             (assoc :query-string query :hash fragment))))
 
-(defrecord ReititRouter [routes hash? not-found]
+(defrecord ReititRouter [routes hash? base-path not-found]
   api/Router
   (data->url [_ data]
     (assert-route-data data)
-    (or (match-data routes data hash?)
+    (or (match-data routes data hash? base-path)
         (url-not-found routes data)))
   (url->data [_ url]
-    (or (match-url routes url)
-        (some->> not-found (match-url routes))
+    (or (match-url routes base-path url)
+        (some->> not-found (match-url routes base-path))
         (route-match-not-found routes url))))
 
-(defn bootstrap-routes [{:keys [routes router hash-routing? scroll route-change-event not-found]}]
+(defn bootstrap-routes [{:keys [routes router hash-routing? base-path scroll route-change-event not-found]}]
   (let [initialized? (boolean @state/navigator)
-        router (or router (->ReititRouter (reitit/router routes) hash-routing? not-found))]
+        router (or router (->ReititRouter (reitit/router routes) hash-routing? base-path not-found))]
     (reset! state/router router)
     (rf/reg-fx :navigate-to goto)
 
@@ -118,14 +126,15 @@
     (console :warn "Kee-frame option :debug-config has been removed. Configure timbre logger through :log option instead. Example: {:level :debug :ns-blacklist [\"kee-frame.event-logger\"]}")))
 
 (defn start! [{:keys [routes initial-db router app-db-spec root-component chain-links
-                      screen scroll global-interceptors log-spec-error]
-               :or   {scroll true}
+                      screen scroll global-interceptors log-spec-error base-path]
+               :or   {scroll true base-path ""}
                :as   config}]
   (deprecations config)
   (when app-db-spec
-    (f/reg-global-interceptor (spec/spec-interceptor app-db-spec log-spec-error)))
+    (rf/reg-global-interceptor (spec/spec-interceptor app-db-spec log-spec-error)))
   (doseq [i global-interceptors]
-    (f/reg-global-interceptor i))
+    (rf/reg-global-interceptor i))
+
   (chain/configure! (concat default-chain-links
                             chain-links))
 
@@ -135,7 +144,7 @@
                     {:routes routes
                      :router router})))
   (when (or routes router)
-    (bootstrap-routes config))
+    (bootstrap-routes (assoc config :scroll scroll :base-path base-path)))
 
   (when initial-db
     (rf/dispatch-sync [:init initial-db]))

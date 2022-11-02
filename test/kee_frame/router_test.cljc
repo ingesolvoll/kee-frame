@@ -4,16 +4,17 @@
             [kee-frame.api :as api]
             [reitit.core :as reitit]))
 
-(defn router [routes hash?] (router/->ReititRouter (reitit/router routes) hash? nil))
+(defn router [routes hash? base-path] (router/->ReititRouter (reitit/router routes) hash? base-path nil))
 
-(deftest can-produce-hash-urls
+(defn produce-urls-helper [hash? base-path]
   (let [r (router [["/" :root]
-                   ["/item/:id" :item]] true)]
+                   ["/item/:id" :item]] hash? base-path)
+        hash-path (if hash? "/#" "")]
     (testing "Root"
-      (is (= "/#/" (api/data->url r [:root]))))
+      (is (= (str base-path hash-path "/") (api/data->url r [:root]))))
 
     (testing "Item"
-      (is (= "/#/item/1" (api/data->url r [:item {:id 1}]))))
+      (is (= (str base-path hash-path "/item/1") (api/data->url r [:item {:id 1}]))))
 
     (testing "Item with missing id throws"
       (is (thrown?
@@ -21,17 +22,29 @@
               :cljs js/Error)
            (api/data->url r [:item]))))))
 
-(deftest can-parse-hash-urls
+(defn parse-urls-helper [hash? base-path]
   (let [r (router [["/" :root]
-                   ["/item/:id" :item]] true)]
+                   ["/item/:id" :item]] true base-path)
+        hash-path (if hash? "/#" "")]
 
     (testing "Root"
-      (is (= :root (-> (api/url->data r "/")
+      (is (= :root (-> (api/url->data r (str base-path hash-path "/"))
                        :data
                        :name))))
 
     (testing "Item with path params and query string"
-      (let [{:keys [data path-params query-string]} (api/url->data r "/item/1?query=string")]
+      (let [{:keys [data path-params query-string]} 
+            (api/url->data r (str base-path hash-path "/item/1?query=string"))]
         (is (= "query=string" query-string))
         (is (= :item (:name data)))
         (is (= "1" (:id path-params)))))))
+
+(deftest can-produce-urls
+  (doseq [hash?      [true false]
+          base-path  ["" "/prefix"]]
+    (produce-urls-helper hash? base-path)))
+
+(deftest can-parse-urls
+  (doseq [hash?      [true false]
+          base-path  ["" "/prefix"]]
+    (parse-urls-helper hash? base-path)))
