@@ -103,7 +103,9 @@
       (when scroll
         (scroll/monitor-requests! route))
       (let [{:keys [update-controllers dispatch-n]} (controller/controller-effects @state/controllers ctx route)]
-        (cond-> {:db             (assoc db :kee-frame/route route)
+        (cond-> {:db             (cond-> db
+                                   :always (assoc :kee-frame/route route)
+                                   scroll (assoc-in [:route-counter :route] route))
                  :dispatch-later [(when scroll
                                     {:ms       50
                                      :dispatch [::scroll/poll route 0]})]}
