@@ -5,10 +5,8 @@
             [clerk.core :as clerk]))
 
 (rf/reg-event-db ::connection-balance
-                 (fn [db [_ route inc-or-dec]]
-                   (-> db
-                       (assoc-in [:route-counter :route] route)
-                       (update-in  [:route-counter :balance] inc-or-dec))))
+                 (fn [db [_ inc-or-dec]]
+                   (update db ::route-counter inc-or-dec)))
 
 (defn start! []
   (clerk/initialize!))
@@ -20,10 +18,10 @@
            (conj (filter #(not= "route-interceptor" (:name %)) interceptors)
                  (ajax/to-interceptor {:name     "route-interceptor"
                                        :request  (fn [request]
-                                                   (rf/dispatch [::connection-balance route inc])
+                                                   (rf/dispatch [::connection-balance inc])
                                                    request)
                                        :response (fn [response]
-                                                   (rf/dispatch [::connection-balance route dec])
+                                                   (rf/dispatch [::connection-balance dec])
                                                    response)})))))
 
 (rf/reg-event-fx ::scroll
@@ -33,11 +31,12 @@
 
 (rf/reg-event-fx ::poll
                  (fn [{:keys [db]} [_ active-route counter]]
-                   (let [{:keys [route balance]} (:route-counter db)]
+                   (let [route (:kee-frame/route db)
+                         balance (::route-counter db)]
                      (when (= route active-route)
                        (cond
                          (not (pos? balance)) {:dispatch [::scroll]}
                          (pos? balance) {:dispatch-later [{:ms       50
                                                            :dispatch [::poll active-route (inc counter)]}]}
-                         (< 20 counter) {:db (assoc db :route-counter nil)})))))
+                         (< 20 counter) {:db (assoc db ::route-counter nil)})))))
 
