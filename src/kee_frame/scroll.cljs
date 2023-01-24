@@ -9,10 +9,7 @@
                    (update db ::route-counter inc-or-dec)))
 
 (defn start! []
-  (clerk/initialize!))
-
-(defn monitor-requests! [route]
-  (clerk/navigate-page! (:path route))
+  (clerk/initialize!)
   (swap! ajax/default-interceptors
          (fn [interceptors]
            (conj (filter #(not= "route-interceptor" (:name %)) interceptors)
@@ -23,6 +20,11 @@
                                        :response (fn [response]
                                                    (rf/dispatch [::connection-balance dec])
                                                    response)})))))
+
+(defn monitor-requests! [fx route]
+  (clerk/navigate-page! (:path route))
+  (assoc fx :dispatch-later [{:ms       50
+                              :dispatch [::poll route 0]}]))
 
 (rf/reg-event-fx ::scroll
                  (fn [_ _]

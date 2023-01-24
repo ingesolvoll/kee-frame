@@ -2,4 +2,4 @@
 
 (defn start! [])
 
-(defn monitor-requests! [_])
+(defn monitor-requests! [& _])

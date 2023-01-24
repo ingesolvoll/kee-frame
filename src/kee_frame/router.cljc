@@ -100,13 +100,9 @@
   (rf/reg-event-fx ::route-changed
     [event-logger/interceptor]
     (fn [{:keys [db] :as ctx} [_ route]]
-      (when scroll
-        (scroll/monitor-requests! route))
       (let [{:keys [update-controllers dispatch-n]} (controller/controller-effects @state/controllers ctx route)]
-        (cond-> {:db             (assoc db :kee-frame/route route)
-                 :dispatch-later [(when scroll
-                                    {:ms       50
-                                     :dispatch [::scroll/poll route 0]})]}
+        (cond-> {:db (assoc db :kee-frame/route route)}
+          scroll (scroll/monitor-requests! route)
           dispatch-n (assoc :dispatch-n dispatch-n)
           update-controllers (assoc :update-controllers update-controllers))))))
 
