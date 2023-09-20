@@ -81,7 +81,8 @@
         (some->> not-found (match-url routes))
         (route-match-not-found routes url))))
 
-(defn bootstrap-routes [{:keys [routes router hash-routing? scroll route-change-event not-found]}]
+(defn bootstrap-routes [{:keys [routes router hash-routing? scroll route-change-event not-found]
+                         :or {scroll true}}]
   (let [initialized? (boolean @state/navigator)
         router (or router (->ReititRouter (reitit/router routes) hash-routing? not-found))]
     (reset! state/router router)
