@@ -435,11 +435,13 @@ You can optionally include your own error-handling component function as the fir
 ## Scroll behavior on navigation
 In a traditional static website, the browser handles the scrolling for you nicely. Meaning that when you navigate back
 and forward, the browser "remembers" how far down you scrolled on the last visit. This is convenient for many websites,
-so Kee-frame utilizes a third-party JS lib to get this behavior for a SPA. The only thing you need to do is this in
-your main namespace:
+so Kee-frame utilizes a third-party JS lib to get this behavior for a SPA. This functionality is enabled by default,
+but if you want to disable it just pass the following to `kf/start!`:
 
 ```clojure
-(:require [kee-frame.scroll])
+(k/start!  {:scroll false
+            ;; Other settings here
+            })
 ```
 
 ## Credits

@@ -81,7 +81,8 @@
         (some->> not-found (match-url routes))
         (route-match-not-found routes url))))
 
-(defn bootstrap-routes [{:keys [routes router hash-routing? scroll route-change-event not-found]}]
+(defn bootstrap-routes [{:keys [routes router hash-routing? scroll route-change-event not-found]
+                         :or {scroll true}}]
   (let [initialized? (boolean @state/navigator)
         router (or router (->ReititRouter (reitit/router routes) hash-routing? not-found))]
     (reset! state/router router)
@@ -100,13 +101,9 @@
   (rf/reg-event-fx ::route-changed
     [event-logger/interceptor]
     (fn [{:keys [db] :as ctx} [_ route]]
-      (when scroll
-        (scroll/monitor-requests! route))
       (let [{:keys [update-controllers dispatch-n]} (controller/controller-effects @state/controllers ctx route)]
-        (cond-> {:db             (assoc db :kee-frame/route route)
-                 :dispatch-later [(when scroll
-                                    {:ms       50
-                                     :dispatch [::scroll/poll route 0]})]}
+        (cond-> {:db (assoc db :kee-frame/route route)}
+          scroll (scroll/monitor-requests! route)
           dispatch-n (assoc :dispatch-n dispatch-n)
           update-controllers (assoc :update-controllers update-controllers))))))
 
